@@ -4,7 +4,7 @@ source("D:/Betting/Tennis/hyperparametersfunctions.r")
 library(leaps)
 library(bestglm)
 
-train_modelwithRatings = read.table("D:/Betting/Tennis/Data/train_modelwithRatings.csv"
+train_modelwithRatings = read.table("Data/datasets/train_modelwithRatings.csv"
                          , header = T, sep = ",", quote = "\"", fill = TRUE)
 
 Nt = nrow(train_modelwithRatings)

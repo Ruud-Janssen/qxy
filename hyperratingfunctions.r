@@ -1,11 +1,11 @@
 source("D:/Betting/Tennis/formulas.r")
 
 GetRatings = function(offset, power, constant) {
-  train_rating = read.table("D:/Betting/Tennis/Data/train_rating.csv", header = T, sep = ",", quote = "\"",
+  train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",
                             stringsAsFactors = FALSE, fill = TRUE)
-  train_model = read.table("D:/Betting/Tennis/Data/train_model.csv", header = T, sep = ",", quote = "\"", 
+  train_model = read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"", 
                            stringsAsFactors = FALSE, fill = TRUE)
-  cv = read.table("D:/Betting/Tennis/Data/cv.csv", header = T, sep = ",", quote = "\"", 
+  cv = read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
                   stringsAsFactors = FALSE, fill = TRUE)
   
   train_rating = RemoveWalkOvers(train_rating)

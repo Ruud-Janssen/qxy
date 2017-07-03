@@ -2,13 +2,13 @@ rm(list = ls())
 source("D:/Betting/Tennis/formulas.r")
 library(dplyr)
 
-train_rating = read.table("D:/Betting/Tennis/Data/train_rating.csv", header = T, sep = ",", quote = "\"",
+train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",
                           colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
-train_model = read.table("D:/Betting/Tennis/Data/train_model.csv", header = T, sep = ",", quote = "\"",
+train_model = read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
-cv = read.table("D:/Betting/Tennis/Data/cv.csv", header = T, sep = ",", quote = "\"", 
+cv = read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
                 colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
-test = read.table("D:/Betting/Tennis/Data/test.csv", header = T, sep = ",", quote = "\"",
+test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
                   colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
 
 Nt_r = nrow(train_rating)
@@ -62,10 +62,10 @@ firstindextest = lastindexcv + 1
 lastindextest = lastindexcv + Ntest
 test = allGames[firstindextest: lastindextest, ]
 
-write.csv(file = "D:/Betting/Tennis/Data/train_rating.csv", train_rating, row.names=FALSE)
-write.csv(file = "D:/Betting/Tennis/Data/train_model.csv", train_model, row.names=FALSE)
-write.csv(file = "D:/Betting/Tennis/Data/cv.csv", cv, row.names=FALSE)
-write.csv(file = "D:/Betting/Tennis/Data/test.csv", test, row.names=FALSE)
+write.csv(file = "Data/datasets/train_rating.csv", train_rating, row.names=FALSE)
+write.csv(file = "Data/datasets/train_model.csv", train_model, row.names=FALSE)
+write.csv(file = "Data/datasets/cv.csv", cv, row.names=FALSE)
+write.csv(file = "Data/datasets/test.csv", test, row.names=FALSE)
 
 
 

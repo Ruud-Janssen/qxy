@@ -22,9 +22,9 @@ FinalBrClay =  matrix(0,10, 50)
 FinalBrHard =  matrix(0,10, 50)
 FinalBrGrass =  matrix(0,10, 50)
 
-train_modelwithRatings = read.table("D:/Betting/Tennis/Data/train_modelWithRatings.csv"
+train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
                                     , header = T, sep = ",", quote = "\"", fill = TRUE)
-cv_withRatings = read.table("D:/Betting/Tennis/Data/cvWithRatings.csv"
+cv_withRatings = read.table("Data/datasets/cvWithRatings.csv"
                             , header = T, sep = ",", quote = "\"", fill = TRUE)
 cv_withRatings = cv_withRatings[!is.na(cv_withRatings$Best.of), ]
 
@@ -45,11 +45,11 @@ total = foreach(days = 1 : 10, .combine = rbind) %do%{
 
     power = (p + 90)/ 100
     
-    train_modelwithRatings = read.table("D:/Betting/Tennis/Data/train_modelWithRatings.csv"
+    train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
                                         , header = T, sep = ",", quote = "\"", fill = TRUE)
     train_modelwithRatings = CreateFatigue(data = train_modelwithRatings, days = days, power = power)
     
-    cv_withRatings = read.table("D:/Betting/Tennis/Data/cvWithRatings.csv"
+    cv_withRatings = read.table("Data/datasets/cvWithRatings.csv"
                                 , header = T, sep = ",", quote = "\"", fill = TRUE)
     
     cv_withRatings = CreateFatigue(data = cv_withRatings, days = days, power = power)

@@ -5,14 +5,14 @@
 rm(list = ls())
 source("D:/Betting/Tennis/formulas.r")
 
-allData = read.table("D:/Betting/Tennis/Data/all_unaltered.csv", header = T, sep = ",", 
+allData = read.table("Data/datasets/all_unaltered.csv", header = T, sep = ",", 
                         quote = "\"", fill = TRUE)
 
 
 #######Create Ratings for all players and Start initializing them######
 rating = InitializeRating(allData$Winner, allData$Loser)
 
-train_rating = read.table("D:/Betting/Tennis/Data/train_rating.csv", header = T, sep = ",", 
+train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", 
                           quote = "\"", fill = TRUE)
 train_rating = RemoveWalkOvers(train_rating)
 
@@ -30,19 +30,19 @@ for (i in 1: Nt_r) {
 }
 
 #store ratings in a file
-write.csv(file = "D:/Betting/Tennis/Data/ratingaftertrain.csv", 
+write.csv(file = "Data/datasets/ratingaftertrain.csv", 
           rating, row.names=FALSE)
 
 rm(list = setdiff(ls(), lsf.str()))
 
 
 ######Train Model, store ratings in train_model and create ratings to use for Cross Validation ######
-ratingTrainModel = read.table("D:/Betting/Tennis/Data/ratingaftertrain.csv", header = T, sep = ",", 
+ratingTrainModel = read.table("Data/datasets/ratingaftertrain.csv", header = T, sep = ",", 
            quote = "\"", fill = TRUE)
 
 
 #Store ratings for train_model and after update the rating
-train_model = read.table("D:/Betting/Tennis/Data/train_model.csv", header = T, sep = ",", 
+train_model = read.table("Data/datasets/train_model.csv", header = T, sep = ",", 
                          quote = "\"", fill = TRUE)
 train_model = RemoveWalkOvers(train_model)
 
@@ -120,20 +120,20 @@ for(i in 1: Nt) {
 }
 
 #store ratings in a file for a while here
-write.csv(file = "D:/Betting/Tennis/Data/ratingaftertrain_model.csv", 
+write.csv(file = "Data/datasets/ratingaftertrain_model.csv", 
           ratingTrainModel, row.names=FALSE)
 
-write.csv(file = "D:/Betting/Tennis/Data/train_modelWithRatings.csv", 
+write.csv(file = "Data/datasets/train_modelWithRatings.csv", 
          train_model, row.names=FALSE)
 
 rm(list = setdiff(ls(), lsf.str()))
 
 ######cv, store ratings in CV and create ratings to use for test ######
-ratingcv = read.table("D:/Betting/Tennis/Data/ratingaftertrain_model.csv", header = T, sep = ",", 
+ratingcv = read.table("Data/datasets/ratingaftertrain_model.csv", header = T, sep = ",", 
                     quote = "\"", fill = TRUE)
 
 #Store ratings for train_model and after update the rating
-cv = read.table("D:/Betting/Tennis/Data/cv.csv", header = T, sep = ",", 
+cv = read.table("Data/datasets/cv.csv", header = T, sep = ",", 
                 quote = "\"", fill = TRUE)
 cv = RemoveWalkOvers(cv)
 
@@ -212,20 +212,20 @@ for(i in 1: Nt) {
 }
 
 #store ratings in a file for a while here
-write.csv(file = "D:/Betting/Tennis/Data/ratingaftercv.csv", 
+write.csv(file = "Data/datasets/ratingaftercv.csv", 
           ratingcv, row.names=FALSE)
 
-write.csv(file = "D:/Betting/Tennis/Data/cvWithRatings.csv", 
+write.csv(file = "Data/datasets/cvWithRatings.csv", 
           cv, row.names=FALSE)
 
 rm(list = setdiff(ls(), lsf.str()))
 
 ######Test, store ratings in Test and create finalratings ######
-ratingTest = read.table("D:/Betting/Tennis/Data/ratingaftercv.csv", header = T, sep = ",", 
+ratingTest = read.table("Data/datasets/ratingaftercv.csv", header = T, sep = ",", 
                       quote = "\"", fill = TRUE)
 
 #Store ratings for train_model and after update the rating
-Test = read.table("D:/Betting/Tennis/Data/test.csv", header = T, sep = ",", 
+Test = read.table("Data/datasets/test.csv", header = T, sep = ",", 
                 quote = "\"", fill = TRUE)
 Test = RemoveWalkOvers(Test)
 
@@ -304,9 +304,9 @@ for(i in 1: Nt) {
 }
 
 #store ratings in a file for a while here
-write.csv(file = "D:/Betting/Tennis/Data/ratingafterTest.csv", 
+write.csv(file = "Data/datasets/ratingafterTest.csv", 
           ratingTest, row.names=FALSE)
 
-write.csv(file = "D:/Betting/Tennis/Data/testWithRatings.csv", 
+write.csv(file = "Data/datasets/testWithRatings.csv", 
           Test, row.names=FALSE)
 

@@ -6,9 +6,9 @@ library(leaps)
 library(bestglm)
 library(glmnet)
 
-train_modelwithRatings = read.table("D:/Betting/Tennis/Data/train_modelWithRatings.csv"
+train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
                                     , header = T, sep = ",", quote = "\"", fill = TRUE)
-cv_withRatings = read.table("D:/Betting/Tennis/Data/cvWithRatings.csv"
+cv_withRatings = read.table("Data/datasets/cvWithRatings.csv"
                             , header = T, sep = ",", quote = "\"", fill = TRUE)
 
 Nt = nrow(train_modelwithRatings)

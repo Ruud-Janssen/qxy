@@ -22,10 +22,10 @@ FinalBrClay =  matrix(0,20, 20)
 FinalBrHard =  matrix(0,20, 20)
 FinalBrGrass =  matrix(0,20, 20)
 
-Nt = nrow(read.table("D:/Betting/Tennis/Data/train_modelWithRatings.csv"
+Nt = nrow(read.table("Data/datasets/train_modelWithRatings.csv"
                        , header = T, sep = ",", quote = "\"", fill = TRUE))
 
-cv_withRatings = read.table("D:/Betting/Tennis/Data/cvWithRatings.csv"
+cv_withRatings = read.table("Data/datasets/cvWithRatings.csv"
                             , header = T, sep = ",", quote = "\"", fill = TRUE)
 cv_withRatings = cv_withRatings[!is.na(cv_withRatings$Best.of), ]
 
