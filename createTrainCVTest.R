@@ -15,7 +15,7 @@ data2004<-read.table(paste(dataTrainRatingDir, "2004.csv", sep = ""), header = T
 train_rating = dplyr::bind_rows(data2000, data2001, data2002, data2003, data2004)
 train_rating = train_rating[train_rating$Surface!= "Carpet", ]
 
-write.csv(file = paste(saveDatasetsDir, "train_rating.csv", sep = ""), train_rating)
+write.csv(file = paste(saveDatasetsDir, "train_rating.csv", sep = ""), train_rating, row.names=FALSE)
 
 #Data from 2005 up to 2012
 dataTrainModelDir = "Data/train_model/"
@@ -33,7 +33,7 @@ train_model = dplyr::bind_rows(data2005, data2006, data2007, data2008, data2009,
                                 data2010, data2011, data2012)
 train_model = train_model[train_model$Surface!= "Carpet", ]
 
-write.csv(file = paste(saveDatasetsDir, "train_model.csv", sep = ""), train_model)
+write.csv(file = paste(saveDatasetsDir, "train_model.csv", sep = ""), train_model, row.names=FALSE)
 
 #Data from 2013 up to 2014
 dataCvDir = "Data/cv/"
@@ -43,7 +43,7 @@ data2014<-read.table(paste(dataCvDir, "2014.csv", sep = ""), header = T, sep = "
 
 cv = dplyr::bind_rows(data2013, data2014)
 
-write.csv(file = paste(saveDatasetsDir, "cv.csv", sep = ""), cv)
+write.csv(file = paste(saveDatasetsDir, "cv.csv", sep = ""), cv, row.names=FALSE)
 
 #Data from 2015 up to 2016
 dataTestDir = "Data/test/"
@@ -53,8 +53,8 @@ data2016<-read.table(paste(dataTestDir, "2016.csv", sep = ""), header = T, sep =
 
 test = dplyr::bind_rows(data2015, data2016)
 
-write.csv(file = paste(saveDatasetsDir, "test.csv", sep = ""), test)
+write.csv(file = paste(saveDatasetsDir, "test.csv", sep = ""), test, row.names=FALSE)
 
 #allData
 allData = dplyr::bind_rows(train_rating, train_model, cv, test)
-write.csv(file = paste(saveDatasetsDir, "all_unaltered.csv", sep = ""), allData)
+write.csv(file = paste(saveDatasetsDir, "all_unaltered.csv", sep = ""), allData, row.names=FALSE)
