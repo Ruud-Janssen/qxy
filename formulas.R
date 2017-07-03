@@ -153,16 +153,20 @@ InitializeRating = function(winners, losers){
                            quote = "\"", fill = TRUE)
   
   rating$Nationality = rep(NA, numberOfPlayers)
+  rating$Handed = rep(NA, numberOfPlayers)
   
   for(i in 1 : length(rating$Players)) {
     name = rating$Players[i]
     if(name == ""){
       next()
     }
+    name = gsub("Jr.", "", name)
+    
+    name = unlist(strsplit(as.character(name), '.', fixed = TRUE))[1]
     name = unlist(strsplit(as.character(name), ' (?=[^ ]+$)', perl=TRUE))
     lastName = name[1]
     firstName = name[2]
-    firstName = gsub("Jr.", "", firstName)
+    
 
     indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
     if(sum(!is.na(indexLastName)) > 0) {
@@ -170,17 +174,26 @@ InitializeRating = function(winners, losers){
         playerNumberAtp = indexLastName[j]
         if(startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
           rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
+          rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
         }
       }
     } else {
-      lastName = gsub("-", " ", lastName)
-      lastName = gsub("\'", "", lastName)
-      if(lastName == "Nadal Parera"){
+      if(lastName == "Nadal-Parera"){
         lastName = "Nadal"
       }
       if(lastName == "Hantschek") {
         lastName = "Hantschk"
       }
+      if(lastName =="Roger-Vasselin"){
+        lastName = "Vasselin"
+      }
+      if(lastName ==" Hajek"){
+        lastName = "Hajek"
+      }
+      
+      
+      lastName = gsub("-", " ", lastName)
+      lastName = gsub("\'", "", lastName)
       
       indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
       if(sum(!is.na(indexLastName)) > 0) {
@@ -188,6 +201,7 @@ InitializeRating = function(winners, losers){
           playerNumberAtp = indexLastName[j]
           if(startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
             rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
+            rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
           }
         }
       }
