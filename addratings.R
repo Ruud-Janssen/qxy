@@ -3,7 +3,7 @@
 
 
 rm(list = ls())
-source("D:/Betting/Tennis/formulas.r")
+source("formulas.r")
 
 allData = read.table("Data/datasets/all_unaltered.csv", header = T, sep = ",", 
                         quote = "\"", fill = TRUE)
