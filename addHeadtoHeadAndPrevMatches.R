@@ -1,5 +1,5 @@
 rm(list = ls())
-source("D:/Betting/Tennis/formulas.r")
+source("formulas.r")
 library(dplyr)
 
 train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",

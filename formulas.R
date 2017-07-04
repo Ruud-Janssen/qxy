@@ -129,7 +129,7 @@ InitializeRating = function(winners, losers){
   rating = rbind(winners_all, losers_all)
   rating = unique(rating)
   
-  numberOfPlayers = length(rating[, ])
+  numberOfPlayers = nrow(rating)
   
   
   #Add start rating and number of games
@@ -206,6 +206,20 @@ InitializeRating = function(winners, losers){
         }
       }
     }
+  }
+  
+  #Add country codes and continent, apparantly the files uses IOC
+  countrycodes = read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
+                            quote = "\"", fill = TRUE)
+  
+  rating$CountryCode = rep(NA, numberOfPlayers)
+  rating$Continent = rep(NA, numberOfPlayers)
+  
+  for(i in 1 : length(rating$Players)) {
+    country = rating$Nationality[i]
+    countryCodePlayer = match(country, countrycodes$IOC)
+    rating$CountryCode[i] = countrycodes$ITU[countryCodePlayer]
+    rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
   }
   
   return(rating)
