@@ -34,5 +34,5 @@ test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
 
 allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
 
-cities$name = unique(allGames$Location)
+cities = unique(allGames$Location)
 
