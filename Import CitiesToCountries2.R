@@ -60,7 +60,7 @@ convertCityCountry = function(cityCountry, countryNames)
 dfCountryCities <- mapply(convertCityCountry, names(countriesToCities), countriesToCities, SIMPLIFY = FALSE, USE.NAMES = TRUE)
 dfCountryCities <- rbind.fill(dfCountryCities)
 
-
+dfCountryCities <- unique(dfCountryCities)
 
 
 ###################################################################
@@ -100,9 +100,11 @@ test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
 
 allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
 
-cities = unique(allGames$Location)
+city = unique(allGames$Location)
+city <- as.data.frame(city, stringsAsFactors = FALSE)
 
 
+library(dplyr)
+city2 <- inner_join (city, dfCountryCities, by = c('city' = 'city'))
 
-
-
+#hmmm city names occur in multiple countries...
