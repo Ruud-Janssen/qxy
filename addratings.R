@@ -17,7 +17,7 @@ for(i in 1: Nall) {
   
   allGames = addUncertaintyAndGames(allGames, i, matchDetails)
   allGames = addRatingVariables(allGames, rating, i, matchDetails)
-  #allGames = addHomePlayers(allGames, indexWinner, indexLoser, rating)
+  allGames = addHomePlayers(allGames, rating, i, matchDetails)
 
   rating = UpdateRating(rating, matchDetails)
 }

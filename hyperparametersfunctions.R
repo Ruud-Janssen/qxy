@@ -45,6 +45,8 @@ regressorvariables = function(y, Data) {
   x$HeadtoHeadPercentageWeightedsqN = rep(NA, Nt)
   x$LastHeadtoHead = rep(NA, Nt)
   
+  x$HomeDiff = rep(NA, Nt)
+  
   for (i in 1 : Nt){
     
     #winner's viewpoint
@@ -67,6 +69,7 @@ regressorvariables = function(y, Data) {
         x$HeadtoHeadPercentageWeightedsqN[i] = 0  
       }
       x$LastHeadtoHead[i] = Data$LastHeadtoHead[i]
+      x$HomeDiff[i] = Data$WinnerisHome[i] - Data$LoserisHome[i]
       
       #loser's viewpoint
     } else{
@@ -87,6 +90,7 @@ regressorvariables = function(y, Data) {
         x$HeadtoHeadPercentageWeightedsqN[i] = 0  
       }
       x$LastHeadtoHead[i] = -Data$LastHeadtoHead[i]
+      x$HomeDiff[i] = Data$LoserisHome[i] -  Data$WinnerisHome[i] 
     }
     
     

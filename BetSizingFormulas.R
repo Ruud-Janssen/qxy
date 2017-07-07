@@ -12,7 +12,7 @@ result = function(predictions, x, y) {
   results = list()
   results$Nrbets = 0
   
-  minEdge = 0.05
+  minEdge = 0.03
   maxBrWage = 0.8
   
   for(i in 1 : Npred) {

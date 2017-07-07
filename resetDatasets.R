@@ -1,3 +1,5 @@
+source("Import CitiesToCountries2.r")
+
 source("createTrainCVTest.r")
 
 source("addHeadtoHeadAndPrevMatches.r")

@@ -113,7 +113,7 @@ city = trimws(unique(allGames$Location))
 city <- as.data.frame(city, stringsAsFactors = FALSE)
 city <- filter(city, city$city != "")
 
-uniqueCities <- as.integer(count(distinct(city, city)))
+uniqueCities <- count(distinct(city, city))
 
 
 
@@ -210,11 +210,13 @@ city6 <- rbind(city5, MissingCityCountryReference)
 allMatched <- as.integer(sum(is.na(city6$country)))
 
 checkCityCountStartAndEnd <- ifelse (allMatched > 0,
-                                "Not all countries are found for all cities, NOT GOOD",
-                                ifelse (as.integer(count(city6)) == uniqueCities, 
-                                        "All cities are matched with countries, GOOD", 
-                                        "NOT All cities are matched with countries, NOT GOOD"
+                                     "Not all countries are found for all cities, NOT GOOD",
+                                     ifelse (count(city6$city) == uniqueCities, 
+                                             "All cities are matched with countries, GOOD", 
+                                             "NOT All cities are matched with countries, NOT GOOD"
+                                     )
                                 )
-                            )
 
 checkCityCountStartAndEnd
+
+write.csv(file = "Data/datasets/citycountry.csv", city6, row.names=FALSE)

@@ -68,18 +68,13 @@ yt_mHard = as.factor(yt_mHard)
 xtmHardRel$y = yt_mHard
 
 #
-iPSW = !is.na(xtmHardRel$PSWImpr)
-xtmHardRel = xtmHardRel[iPSW, ]
+
 
 rf = randomForest(y~., data=xtmHardRel, ntree = 2000, nodesize = 1)
 plot(rf)
 
 xcvHardRel = relevantVariables(xcvHard)
 
-iPSW = !is.na(xcvHardRel$PSWImpr)
-xcvHardRel = xcvHardRel[iPSW, ]
-
-ycvHard = ycvHard[iPSW]
 
 p = predict(rf, xcvHardRel, type = "prob")
 
@@ -111,9 +106,6 @@ ytestHard = ytest[indexHardTest]
 xtestHardRel = relevantVariables(xtestHard)
 xtestHardRel$y = ytestHard
 
-iHard = !is.na(xtestHardRel$PSWImpr)
-
-xtestHardRel = xtestHardRel[iHard, ]
 
 p = predict(rf, xtestHardRel, type = "prob")
 LogLoss(p[, 2], xtestHardRel$y)

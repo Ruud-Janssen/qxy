@@ -23,9 +23,9 @@ relevantVariables = function(dataset){
   variables$LastHeadtoHead = dataset$LastHeadtoHead
   
   variables$HeadtoHeadPercentageWeightedsqN = dataset$HeadtoHeadPercentageWeightedsqN
+  variables$HomeDiff = dataset$HomeDiff
   
-  
-  variables$PSWImpr = dataset$PSLthisplayer /(dataset$PSLthisplayer + dataset$PSWthisplayer)
+  #variables$PSWImpr = dataset$PSLthisplayer /(dataset$PSLthisplayer + dataset$PSWthisplayer)
   
   return(variables)
 }

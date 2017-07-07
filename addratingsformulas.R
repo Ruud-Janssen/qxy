@@ -1,3 +1,109 @@
+InitializeRating = function(winners, losers){
+  winners_all = as.data.frame(matrix(nrow = length(winners), ncol = 0))
+  winners_all$Players = winners
+  
+  losers_all = as.data.frame(matrix(nrow = length(losers), ncol = 0))
+  losers_all$Players = losers
+  
+  rating = rbind(winners_all, losers_all)
+  rating = unique(rating)
+  
+  numberOfPlayers = nrow(rating)
+  
+  
+  #Add start rating and number of games
+  rating$Ratings = rep(1500, numberOfPlayers)
+  rating$games = rep(0, numberOfPlayers)
+  
+  #Create Surface Ratings
+  rating$Hard_Ratings = rating$Ratings
+  rating$Hard_games = rating$games
+  
+  rating$Grass_Ratings = rating$Ratings
+  rating$Grass_games = rating$games
+  
+  rating$Clay_Ratings = rating$Ratings
+  rating$Clay_games = rating$games
+  
+  rating$Carpet_Ratings = rating$Ratings
+  rating$Carpet_games = rating$games
+  
+  atp_players = read.table("Data/datasets/atp_players.csv", header = T, sep = ",", 
+                           quote = "\"", fill = TRUE)
+  
+  rating$Nationality = rep(NA, numberOfPlayers)
+  rating$Handed = rep(NA, numberOfPlayers)
+  
+  for(i in 1 : length(rating$Players)) {
+    name = rating$Players[i]
+    if(name == ""){
+      next()
+    }
+    name = gsub("Jr.", "", name)
+    
+    name = unlist(strsplit(as.character(name), '.', fixed = TRUE))[1]
+    name = unlist(strsplit(as.character(name), ' (?=[^ ]+$)', perl=TRUE))
+    lastName = name[1]
+    firstName = name[2]
+    
+    
+    indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
+    if(sum(!is.na(indexLastName)) > 0) {
+      for(j in 1:length(indexLastName)){
+        playerNumberAtp = indexLastName[j]
+        if(startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
+          rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
+          rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
+        }
+      }
+    } else {
+      if(lastName == "Nadal-Parera"){
+        lastName = "Nadal"
+      }
+      if(lastName == "Hantschek") {
+        lastName = "Hantschk"
+      }
+      if(lastName =="Roger-Vasselin"){
+        lastName = "Vasselin"
+      }
+      if(lastName ==" Hajek"){
+        lastName = "Hajek"
+      }
+      
+      
+      lastName = gsub("-", " ", lastName)
+      lastName = gsub("\'", "", lastName)
+      
+      indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
+      if(sum(!is.na(indexLastName)) > 0) {
+        for(j in 1:length(indexLastName)){
+          playerNumberAtp = indexLastName[j]
+          if(startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
+            rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
+            rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
+          }
+        }
+      }
+    }
+  }
+  
+  #Add country codes and continent, apparantly the files uses IOC
+  countrycodes = read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
+                            quote = "\"", fill = TRUE)
+  
+  rating$Country = rep(NA, numberOfPlayers)
+  rating$Continent = rep(NA, numberOfPlayers)
+  
+  for(i in 1 : length(rating$Players)) {
+    country = rating$Nationality[i]
+    countryCodePlayer = match(country, countrycodes$IOC)
+    rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
+    rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
+  }
+  
+  return(rating)
+}
+
 #This functions creates empty lists for locations, ratings and uncertainty
 InitializeRatingVariables = function(dataset){
   
@@ -6,6 +112,8 @@ InitializeRatingVariables = function(dataset){
   dataset$Country = rep(NA, rows)
   dataset$Winner_home = rep(NA, rows)
   dataset$Loser_home = rep(NA, rows)
+  dataset$WinnerisHome = rep(NA, rows)
+  dataset$LoserisHome = rep(NA, rows)
   
   dataset$Winner_games = rep(NA, rows)
   dataset$Loser_games = rep(NA, rows)
@@ -89,6 +197,15 @@ getMatchDetails = function(game, rating){
   matchDetails$Winner_games = rating$games[matchDetails$IndexWinner]
   matchDetails$Loser_games = rating$games[matchDetails$IndexLoser]
   
+  matchDetails$Location = game$Location
+  matchDetails$Winner_country = rating$Country[matchDetails$IndexWinner]
+  matchDetails$Loser_country = rating$Country[matchDetails$IndexLoser]
+  
+  citycountry = read.table("Data/datasets/citycountry.csv",  header = T, sep = ",", quote = "\"",
+             colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+  
+  matchDetails$Country = citycountry$country[match(matchDetails$Location, citycountry$city)]
+  
   return(matchDetails)
 }
 
@@ -106,6 +223,24 @@ addUncertaintyAndGames = function(Games, i, matchDetails){
     Games$Uncertainty2[i] = 2
   } else {
     Games$Uncertainty2[i] = 1 / min(Games$Winner_games[i], Games$Loser_games[i])
+  }
+  
+  return(Games)
+}
+
+addHomePlayers = function(Games, rating, i, matchDetails){
+  Games$Country[i] = matchDetails$Country
+  Games$Winner_country[i] = matchDetails$Winner_country
+  Games$Loser_country[i] = matchDetails$Loser_country
+  Games$WinnerisHome[i] = as.numeric(matchDetails$Winner_country == matchDetails$Country)
+  Games$LoserisHome[i] = as.numeric(matchDetails$Loser_country == matchDetails$Country)
+  
+  if(is.na(Games$WinnerisHome[i])) {
+    Games$WinnerisHome[i] = 0
+  }
+  
+  if(is.na(Games$LoserisHome[i])) {
+    Games$LoserisHome[i] = 0
   }
   
   return(Games)
