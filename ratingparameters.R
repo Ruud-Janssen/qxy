@@ -1,6 +1,6 @@
 rm(list = ls())
-source("D:/Betting/Tennis/hyperparametersfunctions.r")
-source("D:/Betting/Tennis/hyperratingfunctions.r")
+source("hyperparametersfunctions.r")
+source("hyperratingfunctions.r")
 library(leaps)
 library(bestglm)
 

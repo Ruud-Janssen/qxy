@@ -1,7 +1,7 @@
 rm(list = ls())
-source("D:/Betting/Tennis/formulas.r")
-source("D:/Betting/Tennis/hyperparametersfunctions.r")
-source("D:/Betting/Tennis/BetSizingFormulas.r")
+source("formulas.r")
+source("hyperparametersfunctions.r")
+source("BetSizingFormulas.r")
 library(leaps)
 library(bestglm)
 library(glmnet)
@@ -64,6 +64,10 @@ xtestHard = xtest[indexHardtest, ]
 ytestGrass = ytest[indexGrasstest]
 ytestHard = ytest[indexHardtest]
 
+
+xtrainHard$ImpProb = xtrainHard$PSLthisplayer/(xtrainHard$PSLthisplayer + xtrainHard$PSWthisplayer)
+xtrainGrass$ImpProb = xtrainGrass$PSLthisplayer/(xtrainGrass$PSLthisplayer + xtrainGrass$PSWthisplayer)
+
 xtestHard$ImpProb = xtestHard$PSLthisplayer/(xtestHard$PSLthisplayer + xtestHard$PSWthisplayer)
 xtestGrass$ImpProb = xtestGrass$PSLthisplayer/(xtestGrass$PSLthisplayer + xtestGrass$PSWthisplayer)
 
@@ -76,7 +80,8 @@ xtestGrass = xtestGrass[iGrass, ]
 ytestHard = ytestHard[iHard]
 ytestGrass = ytestGrass[iGrass]
 
-regHard = glm(ytrainHard ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff     
+regHard = glm(ytrainHard ~ 0 + ratingdiff + ratingHarddiff +
+                DummyBo5TimesAvgRatingdiff     
                 + RetiredDiff + FatigueDiff #+ HeadtoHeadPercentageWeightedsqN this one even better
               #+ HeadtoHead  #appears to improve the loglikelihood, so maybe interesting, also improve
               #BR a lot but doesn't work for grass
@@ -89,8 +94,7 @@ regGrass = glm(ytrainGrass ~ 0 + ratingdiff + ratingGrassdiff + DummyBo5TimesAvg
 testpredHard = predict(regHard, xtestHard, type = "response")
 testpredGrass = predict(regGrass, xtestGrass, type = "response")
 
-xtestHard$ImpProb = xtestHard$PSLthisplayer/(xtestHard$PSLthisplayer + xtestHard$PSWthisplayer)
-xtestGrass$ImpProb = xtestGrass$PSLthisplayer/(xtestGrass$PSLthisplayer + xtestGrass$PSWthisplayer)
+
 
 #predictionsHard = 0.4314 * testpredHard + 0.5790 * xtestHard$ImpProb
 #predictionsGrass =  0.8582 * testpredGrass + 0.1607 * xtestGrass$ImpProb
@@ -122,7 +126,7 @@ points(betsHard$result, col = "green")
 betsGrass$bet = replace(betsGrass$bet, betsGrass$bet == 0, -500)
 betsGrass$result = replace(betsGrass$result, betsGrass$result == 0, -500)
 
-plot(1 : length(betsGrass$br), betsGrass$br, ylim = c(-30, 300), "l")
+plot(1 : length(betsGrass$br), betsGrass$br, ylim = c(-20, 20), "l")
 points(betsGrass$bet, col = "red")
 points(betsGrass$result, col = "green")
 

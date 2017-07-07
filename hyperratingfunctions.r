@@ -1,4 +1,4 @@
-source("D:/Betting/Tennis/formulas.r")
+source("formulas.r")
 
 GetRatings = function(offset, power, constant) {
   train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",

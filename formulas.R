@@ -1,3 +1,5 @@
+library(dplyr)
+
 CalculateExpectation <- function(rating, surface, winner, loser) {
 
   indexWinner = match(winner, rating$Players)
@@ -35,35 +37,38 @@ CalculateExpectation <- function(rating, surface, winner, loser) {
   return (Expectation(ratingWinner - ratingLoser))
 }
 
-UpdateRating <- function(rating, winner, loser, surface) {
-  
-  indexWinner = match(winner, rating$Players)
-  indexLoser = match(loser, rating$Players)
+UpdateRating <- function(rating, matchDetails) {
   
   #Normal ratings
-  rating$Ratings = UpdateThisRatingType(rating$Ratings, rating$games, indexWinner, indexLoser)
-  rating$games = AddAGame(rating$games, indexWinner, indexLoser)
+  rating$Ratings = UpdateThisRatingType(rating$Ratings, rating$games, 
+                                        matchDetails$IndexWinner, matchDetails$IndexLoser)
+  rating$games = AddAGame(rating$games, matchDetails$IndexWinner, matchDetails$IndexLoser)
   
-  if(is.na(surface)) {
+  if(is.na(matchDetails$Surface)) {
     surface = "Missing"
   }
                                          
   #Surface Ratings
-  if(surface == "Hard") {
-    rating$Hard_Ratings = UpdateThisRatingType(rating$Hard_Ratings, rating$Hard_games, indexWinner, indexLoser)
-    rating$Hard_games = AddAGame(rating$Hard_games, indexWinner, indexLoser)
+  if(matchDetails$Surface == "Hard") {
+    rating$Hard_Ratings = UpdateThisRatingType(rating$Hard_Ratings, rating$Hard_games
+                                               , matchDetails$IndexWinner, matchDetails$IndexLoser)
+    rating$Hard_games = AddAGame(rating$Hard_games, 
+                                 matchDetails$IndexWinner, matchDetails$IndexLoser)
        
-    }else if(surface == "Grass") {
-      rating$Grass_Ratings = UpdateThisRatingType(rating$Grass_Ratings, rating$Grass_games, indexWinner, indexLoser)
-      rating$Grass_games = AddAGame(rating$Grass_games, indexWinner, indexLoser)
+    }else if(matchDetails$Surface == "Grass") {
+      rating$Grass_Ratings = UpdateThisRatingType(rating$Grass_Ratings, rating$Grass_games,
+                                                  matchDetails$IndexWinner, matchDetails$IndexLoser)
+      rating$Grass_games = AddAGame(rating$Grass_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
       
-    } else if(surface == "Clay") {
-      rating$Clay_Ratings = UpdateThisRatingType(rating$Clay_Ratings, rating$Clay_games, indexWinner, indexLoser)
-      rating$Clay_games = AddAGame(rating$Clay_games, indexWinner, indexLoser)
+    } else if(matchDetails$Surface == "Clay") {
+      rating$Clay_Ratings = UpdateThisRatingType(rating$Clay_Ratings, rating$Clay_games, 
+                                                 matchDetails$IndexWinner, matchDetails$IndexLoser)
+      rating$Clay_games = AddAGame(rating$Clay_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
     
-    } else if(surface == "Carpet") {
-      rating$Carpet_Ratings = UpdateThisRatingType(rating$Carpet_Ratings, rating$Carpet_games, indexWinner, indexLoser)
-      rating$Carpet_games = AddAGame(rating$Carpet_games, indexWinner, indexLoser)
+    } else if(matchDetails$Surface == "Carpet") {
+      rating$Carpet_Ratings = UpdateThisRatingType(rating$Carpet_Ratings, rating$Carpet_games, 
+                                                   matchDetails$IndexWinner, matchDetails$IndexLoser)
+      rating$Carpet_games = AddAGame(rating$Carpet_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
     }
 
   return(rating)
@@ -300,4 +305,18 @@ FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatch
   }  
   
   return(nextGame)
+}
+
+getAllGamesWithoutRating = function() {
+  train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",
+                            colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+  train_model = read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
+                           colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+  cv = read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
+                  colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+  test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
+                    colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+
+  allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
+  return(allGames)
 }

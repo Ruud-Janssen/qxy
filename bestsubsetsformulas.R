@@ -16,11 +16,16 @@ relevantVariables = function(dataset){
   variables$RetiredDiff = dataset$RetiredDiff
   variables$WalkoverDiff = dataset$WalkoverDiff
   variables$RetiredOrWalkoverDiff = dataset$RetiredOrWalkoverDiff
+  variables$RetiredOrWalkoverDiff = dataset$RetiredOrWalkoverDiff
   variables$FatigueDiff = dataset$FatigueDiff
   variables$FatigueDiffTimesBo5 = dataset$FatigueDiffTimesBo5
   variables$HeadtoHead = dataset$HeadtoHead
   variables$LastHeadtoHead = dataset$LastHeadtoHead
   
+  variables$HeadtoHeadPercentageWeightedsqN = dataset$HeadtoHeadPercentageWeightedsqN
+  
+  
+  variables$PSWImpr = dataset$PSLthisplayer /(dataset$PSLthisplayer + dataset$PSWthisplayer)
   
   return(variables)
 }

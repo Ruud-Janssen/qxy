@@ -1,7 +1,7 @@
 rm(list = ls())
-source("D:/Betting/Tennis/formulas.r")
-source("D:/Betting/Tennis/hyperparametersfunctions.r")
-source("D:/Betting/Tennis/bestsubsetsformulas.r")
+source("formulas.r")
+source("hyperparametersfunctions.r")
+source("bestsubsetsformulas.r")
 library(leaps)
 library(bestglm)
 library(glmnet)
@@ -37,12 +37,15 @@ resultsSeperate$PercentageRemovedt_m[q] = results$PercentageRemovedt_m[q]
 
 indexGrasst_m = (xt_m$Surface == "Grass")
 indexHardt_m = (xt_m$Surface == "Hard")
+indexClayt_m = (xt_m$Surface == "Clay")
 
 xt_mGrass = xt_m[indexGrasst_m, ]
 xt_mHard = xt_m[indexHardt_m, ]
+xt_mClay = xt_m[indexClayt_m, ]
 
 yt_mGrass = yt_m[indexGrasst_m]
 yt_mHard = yt_m[indexHardt_m]
+yt_mClay = yt_m[indexClayt_m]
 
 index_xcv = (xcv$Uncertainty < quantile)
 xcv = xcv[index_xcv, ]
@@ -50,12 +53,15 @@ ycv = ycv[index_xcv]
 
 indexGrasscv = (xcv$Surface == "Grass")
 indexHardcv = (xcv$Surface == "Hard")
+indexClaycv = (xcv$Surface == "Clay")
 
 xcvGrass = xcv[indexGrasscv, ]
 xcvHard = xcv[indexHardcv, ]
+xcvClay = xcv[indexClaycv, ]
 
 ycvGrass = ycv[indexGrasscv]
 ycvHard = ycv[indexHardcv]
+ycvClay = ycv[indexClaycv]
 
 BestSubsetHardt_m = relevantVariables(xt_mHard)
 xcvHardRel = relevantVariables(xcvHard)
@@ -118,12 +124,18 @@ LogLoss(cvpredINTLamMinTrue, ycvHard)
 #lambda min interaction
 
 regLamMinInter = glm(yt_mHard ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff + RetiredDiff 
-                     + ratingClaydiff:RetiredOrWalkoverDiff + ratingHarddiff:DummyBo5
-                     + ratingGrassdiff:FatigueDiffTimesBo5  + ratingGrassdiff:LastHeadtoHead + DummyBo5TimesAvgRatingdiff:WalkoverDiff
-                     + RetiredDiff:FatigueDiffTimesBo5  + RetiredDiff:LastHeadtoHead +
-                       WalkoverDiff:RetiredOrWalkoverDiff + FatigueDiff:LastHeadtoHead
-                     + HeadtoHead:LastHeadtoHead, data = as.data.frame(BestSubsetHardt_m), family = binomial)
-cvpredLamMin = predict(regLamMinInter, xcvHard, type = "response")
+                     + FatigueDiff  + FatigueDiffTimesBo5 + ratingdiff:ratingClaydiff 
+                     + ratingClaydiff:DummyBo5TimesratingHarddiff + ratingClaydiff:WalkoverDiff 
+                     + ratingHarddiff:DummyBo5TimesratingClaydiff + ratingGrassdiff:RetiredDiff 
+                     + ratingGrassdiff:FatigueDiffTimesBo5 + DummyBo5TimesAvgRatingdiff:WalkoverDiff 
+                     + DummyBo5TimesratingGrassdiff:FatigueDiff + DummyBo5TimesratingClaydiff:LastHeadtoHead 
+                     + RetiredDiff:FatigueDiffTimesBo5 + WalkoverDiff:RetiredOrWalkoverDiff
+                     + WalkoverDiff:HeadtoHead 
+                     , data = as.data.frame(BestSubsetHardt_m), family = binomial)
+
+bestsubxcvHard = relevantVariables(xcvHard)
+
+cvpredLamMin = predict(regLamMinInter, bestsubxcvHard, type = "response")
 LogLoss(cvpredLamMin, ycvHard)
 
 #lambda min
@@ -161,24 +173,6 @@ LogLoss(cvpredLam1se, ycvHard)
 reg = glm(yt_mHard ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff + 
                 DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
               +FatigueDiff, data = BestSubsetHardt_m, family = binomial)
-
-
-
-#GLM multi, best subset selection
-
-glmulti.logistic.out <-
-  glmulti(yt_mHard ~ ratingdiff + ratingClaydiff + ratingHarddiff + ratingGrassdiff + DummyBo5
-          + RetiredDiff + WalkoverDiff + RetiredOrWalkoverDiff + FatigueDiff + HeadtoHead + LastHeadtoHead
-          , data = BestSubsetHardt_m,
-          level = 2,               # No interaction considered
-          method = "h",            # Exhaustive approach
-          intercept = FALSE,
-          crit = "aic",            # AIC as criteria
-          confsetsize = 5,         # Keep 5 best models
-          maxsize = 6,             # Maxsize model is 8
-          plotty = F, report = F,  # No plot or interim reports
-          fitfunction = "glm",     # glm function
-          family = binomial)       # binomial family for logistic regression
 
 BestSubsetHardt_m$y = yt_mHard
 reg = bestglm(Xy = BestSubsetHardt_m, family = binomial, IC = "AIC", intercept = FALSE)
@@ -265,3 +259,65 @@ summary(reg)
 
 cvpred = predict(reg, xcvGrass, type = "response")
 LogLoss(cvpred, ycvGrass)
+
+#################CLAY$##############
+BestSubsetClayt_m = relevantVariables(xt_mClay)
+xcvClayRel = relevantVariables(xcvClay)
+
+#interaction
+f <- as.formula( ~ .^2)
+
+BestSubsetClayt_mInteraction = as.data.frame(model.matrix(f, BestSubsetClayt_m)[, -1])
+xcvClayRelInteraction = as.data.frame(model.matrix(f, xcvClayRel)[, -1])
+
+grid = 10 ^ seq(1, -5, length = 600)
+
+lasso.mod = glmnet(as.matrix(BestSubsetClayt_m), yt_mClay, family = "binomial", alpha = 1, lambda = grid
+                   , intercept = FALSE)
+plot(lasso.mod)
+plot_glmnet(lasso.mod, xvar = "lambda")
+
+#Lambda subset selection
+cv.out = cv.glmnet(as.matrix(BestSubsetClayt_m), yt_mClay, alpha = 1, nfolds = 10, family = "binomial", 
+                   intercept = FALSE)
+plot(cv.out)
+
+##random stackoverflow says the second one is preferred!!!
+##https://stats.stackexchange.com/questions/58531/using-lasso-from-lars-or-glmnet-package-in-r-for-variable-selection
+bestlam = cv.out$lambda.min
+#bestlam = cv.out$lambda.1se
+
+lasso = glmnet(as.matrix(BestSubsetClayt_m), yt_mClay, alpha = 1, lambda = bestlam, family = "binomial",
+               intercept = FALSE)
+lasso.coef = predict(cv.out, type = "coefficients", s = bestlam)
+lasso.coef
+bestlam
+
+cvpredLamMinTrue = predict.cv.glmnet(cv.out, newx = as.matrix(xcvClayRel), type = "response", s = bestlam)
+LogLoss(cvpredLamMinTrue, ycvClay)
+
+lasso.modINT = glmnet(as.matrix(BestSubsetClayt_mInteraction), yt_mClay, family = "binomial", alpha = 1, lambda = grid
+                      , intercept = FALSE)
+
+cv.outINT = cv.glmnet(as.matrix(BestSubsetClayt_mInteraction), yt_mClay, alpha = 1, nfolds = 10, family = "binomial", 
+                      intercept = FALSE)
+plot(cv.outINT)
+
+#lambda min
+regLamMin = glm(yt_mClay ~ 0 + ratingdiff + ratingClaydiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff +
+                  DummyBo5TimesratingClaydiff + WalkoverDiff + RetiredOrWalkoverDiff 
+                + FatigueDiff + HeadtoHead + LastHeadtoHead, data = BestSubsetClayt_m, family = binomial)
+
+#regLamMin2 = glm(yt_mHard ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff + 
+#                   DummyBo5TimesratingHarddiff + RetiredDiff + FatigueDiff, 
+#                 data = BestSubsetHardt_m, family = binomial)
+#
+#regLamMin3 = glm(yt_mHard ~ 0 + ratingdiff + ratingClaydiff + ratingHarddiff + ratingGrassdiff + 
+#                 DummyBo5TimesAvgRatingdiff + DummyBo5TimesratingHarddiff + DummyBo5TimesratingClaydiff +
+#                   RetiredDiff + WalkoverDiff + FatigueDiff, data = BestSubsetHardt_m, family = binomial)
+
+
+summary(regLamMin)
+
+cvpredLamMin = predict(regLamMin, xcvClayRel, type = "response")
+LogLoss(cvpredLamMin, ycvClay)
