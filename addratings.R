@@ -1,7 +1,6 @@
 rm(list = ls())
 source("formulas.r")
 source("addratingsformulas.r")
-library(dplyr)
 
 allGames = getAllGamesWithoutRating()
 

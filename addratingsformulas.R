@@ -25,6 +25,7 @@ InitializeRatingVariables = function(dataset){
   return(dataset)
 }
 
+#Note that we assume here that the walkovers are removed
 saveDatasetsWithRating = function(allGames, rating){
   
   Nt_r = nrow(RemoveWalkOvers(read.table("Data/datasets/train_rating.csv",  header = T, sep = ",", quote = "\"",

@@ -1,22 +1,7 @@
 rm(list = ls())
 source("formulas.r")
-library(dplyr)
 
-train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",
-                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
-train_model = read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
-                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
-cv = read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
-                colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
-test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
-                  colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
-
-Nt_r = nrow(train_rating)
-Nt_m = nrow(train_model)
-Ncv = nrow(cv)
-Ntest = nrow(test)
-
-allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
+allGames = getAllGamesWithoutRating()
 
 Nall = nrow(allGames)
 
@@ -33,7 +18,6 @@ for(i in 1: Nall) {
   #opposite orders(2) or no next game(0)
   nextGame = FindnextGameSamePlayers(winner, loser, allGames$Winner[i + 1 : Nall], 
                                      allGames$Loser[i + 1 : Nall], i)
-
   
   if(nextGame$Order == 1) {
     allGames$HeadtoHead[nextGame$Number] = allGames$HeadtoHead[i] + 1
@@ -46,26 +30,4 @@ for(i in 1: Nall) {
     }
 }
 
-firstindextrain_rating = 1
-lastindextrain_rating = Nt_r
-train_rating = allGames[firstindextrain_rating : lastindextrain_rating, ]
-
-firstindextrain_model = lastindextrain_rating + 1
-lastindextrain_model = lastindextrain_rating + Nt_m
-train_model = allGames[firstindextrain_model : lastindextrain_model, ]
-
-firstindexcv = lastindextrain_model + 1
-lastindexcv = lastindextrain_model + Ncv
-cv = allGames[firstindexcv : lastindexcv, ]
-
-firstindextest = lastindexcv + 1
-lastindextest = lastindexcv + Ntest
-test = allGames[firstindextest: lastindextest, ]
-
-write.csv(file = "Data/datasets/train_rating.csv", train_rating, row.names=FALSE)
-write.csv(file = "Data/datasets/train_model.csv", train_model, row.names=FALSE)
-write.csv(file = "Data/datasets/cv.csv", cv, row.names=FALSE)
-write.csv(file = "Data/datasets/test.csv", test, row.names=FALSE)
-
-
-
+saveDatasetsWithoutRating(allGames)

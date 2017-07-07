@@ -8,9 +8,9 @@ library(glmnet)
 library(boot)
 library(MASS)
 
-train_modelwithRatings = read.table("D:/Betting/Tennis/Data/train_modelWithRatings.csv"
+train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
                                     , header = T, sep = ",", quote = "\"", fill = TRUE)
-cv_withRatings = read.table("D:/Betting/Tennis/Data/testWithRatings.csv"
+cv_withRatings = read.table("Data/datasets/testWithRatings.csv"
                             , header = T, sep = ",", quote = "\"", fill = TRUE)
 
 cv_withRatings = cv_withRatings[!is.na(cv_withRatings$Best.of), ]
@@ -19,7 +19,7 @@ xtrain = rbind(train_modelwithRatings, cv_withRatings)
 
 rm(train_modelwithRatings, cv_withRatings)
 
-test = read.table("D:/Betting/Tennis/Data/testWithRatings.csv"
+test = read.table("Data/datasets/testWithRatings.csv"
                   , header = T, sep = ",", quote = "\"", fill = TRUE)
 
 test = test[!is.na(test$Best.of), ]
