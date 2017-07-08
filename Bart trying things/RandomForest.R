@@ -89,11 +89,10 @@ rf = randomForest(y~., data=xTotalTm, ntree = 2000, nodesize = 1)
 plot(rf)
 
 
-test = read.table("D:/Betting/Tennis/Data/testWithRatings.csv"
+test = read.table("Data/datasets/testWithRatings.csv"
                   , header = T, sep = ",", quote = "\"", fill = TRUE)
 
 test = test[!is.na(test$Best.of), ]
-
 
 ytest = as.numeric(runif(nrow(test), 0, 1) > 0.5)
 xtest = regressorvariables(ytest, test)

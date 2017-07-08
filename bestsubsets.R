@@ -8,6 +8,8 @@ library(glmnet)
 library(plotmo)
 library(glmulti)
 
+threshold = 1e-9
+
 train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
                                     , header = T, sep = ",", quote = "\"", fill = TRUE)
 cv_withRatings = read.table("Data/datasets/cvWithRatings.csv"
@@ -35,8 +37,6 @@ xt_mHard = getXThisSurface(xt_m, "Hard")
 xt_mGrass = getXThisSurface(xt_m, "Grass")
 xt_mClay = getXThisSurface(xt_m, "Clay")
 
-
-
 #quantile = quantile(xcv$Uncertainty, q / 100)
 xcv = removeUncertainMatches(xcv, quantile)
 
@@ -47,17 +47,17 @@ xcvClay = getXThisSurface(xcv, "Clay")
 BestSubsetHardt_m = relevantVariables(xt_mHard)
 xcvHardRel = relevantVariables(xcvHard)
 
-grid = 10 ^ seq(-1, -20, length = 600)
+grid = 10 ^ seq(0, -10, length = 100)
 
 #####RIDGE
-ridge.mod = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, family = "binomial", alpha = 0, lambda = grid
-                   , intercept = FALSE)
+ridge.mod = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, 
+                   family = "binomial", alpha = 0, lambda = grid, intercept = FALSE, thresh = threshold)
 
 plot_glmnet(ridge.mod, xvar = "lambda")
 
-#Lambda subset selection
-ridge.out = cv.glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, alpha = 0, nfolds = 10, family = "binomial", 
-                      intercept = FALSE)
+ridge.out = cv.glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)])
+            , xt_mHard$y, alpha = 0, nfolds = 10, family = "binomial", lambda = grid, 
+            intercept = FALSE , thresh = threshold)
 plot(ridge.out)
 
 ##random stackoverflow says the second one is preferred!!!
@@ -66,27 +66,28 @@ bestridgelam = ridge.out$lambda.min
 #bestlam = ridge.out$lambda.1se
 
 ridge = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, alpha = 0, lambda = bestridgelam, family = "binomial",
-               intercept = FALSE)
+               intercept = FALSE, thresh = threshold)
 ridge.coef = predict(ridge.out, type = "coefficients", s = bestridgelam)
 ridge.coef
 bestridgelam
 
-cvpredRidgeMinTrue = predict.cv.glmnet(ridge.out, newx = as.matrix(xcvHardRel), type = "response", s = bestridgelam)
-LogLoss(cvpredRidgeMinTrue, ycvHard)
+cvpredRidgeMinTrue = predict.cv.glmnet(ridge.out, newx = as.matrix(xcvHardRel[, 1:(length(xcvHardRel)-1)])
+                                       , type = "response", s = bestridgelam, thresh = threshold)
+LogLoss(cvpredRidgeMinTrue, xcvHardRel$y)
 
 #####LASSO
 cvlam.out = cv.glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, alpha = 0, nfolds = 10, family = "binomial", 
-                      intercept = FALSE)
+                      intercept = FALSE, thresh = threshold, lambda = grid)
 plot(cvlam.out)
 
 
 lasso.mod = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, family = "binomial", alpha = 1, lambda = grid
-               , intercept = FALSE)
+               , intercept = FALSE, thresh = threshold)
 plot_glmnet(lasso.mod, xvar = "lambda")
 
 #Lambda subset selection
 cvlas.out = cv.glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, alpha = 1, nfolds = 10, family = "binomial", 
-                   intercept = FALSE)
+                      lambda = grid, intercept = FALSE, thresh = threshold)
 plot(cvlas.out)
 
 ##random stackoverflow says the second one is preferred!!!
@@ -95,7 +96,7 @@ bestlam = cvlas.out$lambda.min
 #bestlam = cvlas.out$lambda.1se
 
 lasso = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, alpha = 1, lambda = bestlam, family = "binomial",
-               intercept = FALSE)
+               intercept = FALSE, thresh = threshold)
 lasso.coef = predict(cvlas.out, type = "coefficients", s = bestlam)
 lasso.coef
 bestlam
@@ -103,33 +104,32 @@ bestlam
 cvpredLamMinTrue = predict.cv.glmnet(cvlas.out, newx = as.matrix(xcvHardRel[ , 1:(length(xcvHardRel)-1)]), type = "response", s = bestlam)
 LogLoss(cvpredLamMinTrue, xcvHard$y)
 
-#interaction
+#################Interaction
 f <- as.formula( ~ .^2)
 
-BestSubsetHardt_mInteraction = as.data.frame(model.matrix(f, BestSubsetHardt_m)[, -1])
-xcvHardRelInteraction = as.data.frame(model.matrix(f, xcvHardRel)[, -1])
+BestSubsetHardt_mInteraction = as.data.frame(model.matrix(f, BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)])[, -1])
+xcvHardRelInteraction = as.data.frame(model.matrix(f, xcvHardRel[ , 1:(length(xcvHardRel)-1)])[, -1])
 
 lasso.modINT = glmnet(as.matrix(BestSubsetHardt_mInteraction), xt_mHard$y, family = "binomial", alpha = 1, lambda = grid
-                      , intercept = FALSE)
+                      , intercept = FALSE, thresh = threshold)
 
 cv.outINT = cv.glmnet(as.matrix(BestSubsetHardt_mInteraction), xt_mHard$y, alpha = 1, nfolds = 10, family = "binomial", 
-                   intercept = FALSE)
+                       intercept = FALSE)
 plot(cv.outINT)
 
 ##random stackoverflow says the second one is preferred!!!
 ##https://stats.stackexchange.com/questions/58531/using-lasso-from-lars-or-glmnet-package-in-r-for-variable-selection
-bestlam = cv.out$lambda.min
-#bestlam = cv.out$lambda.1se
+bestlam = cv.outINT$lambda.min
+#bestlam = cv.outINT$lambda.1se
 
 lasso = glmnet(as.matrix(BestSubsetHardt_mInteraction), xt_mHard$y, alpha = 1, lambda = bestlam, family = "binomial",
-               intercept = FALSE)
+               intercept = FALSE, thresh = threshold)
 lasso.coef = predict(cv.outINT, type = "coefficients", s = bestlam)
 lasso.coef
 bestlam
 
 cvpredINTLamMinTrue = predict.cv.glmnet(cv.outINT, newx = as.matrix(xcvHardRelInteraction), type = "response", s = bestlam)
-LogLoss(cvpredINTLamMinTrue, ycvHard)
-
+LogLoss(cvpredINTLamMinTrue, xcvHardRel$y)
 
 
 #lambda min interaction

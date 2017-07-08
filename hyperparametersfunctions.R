@@ -4,6 +4,7 @@ library(plyr)
 addRegressorVariableRow = function(row){
   x = data.frame(matrix(nrow = 1))
   
+  #winner's viewpoint
   if(row$y == 1){
     x$PSWthisplayer = row$PSW
     x$PSLthisplayer = row$PSL
@@ -25,6 +26,12 @@ addRegressorVariableRow = function(row){
     x$LastHeadtoHead = row$LastHeadtoHead
     x$HomeDiff = row$WinnerisHome - row$LoserisHome
     
+    if(row$Best.of == 3){
+      x$ThisBoxSkillDiff = row$Winner_skillBo3 - row$Loser_skillBo3
+    } else {
+      x$ThisBoxSkillDiff = row$Winner_skillBo5 - row$Loser_skillBo5
+    }
+    
     #loser's viewpoint
   } else{
     x$PSWthisplayer = row$PSL
@@ -45,6 +52,12 @@ addRegressorVariableRow = function(row){
     }
     x$LastHeadtoHead = -row$LastHeadtoHead
     x$HomeDiff = row$LoserisHome -  row$WinnerisHome 
+    
+    if(row$Best.of == 3){
+      x$ThisBoxSkillDiff =  row$Loser_skillBo3 - row$Winner_skillBo3
+    } else {
+      x$ThisBoxSkillDiff =  row$Loser_skillBo5 - row$Winner_skillBo5 
+    }
   }
   
   

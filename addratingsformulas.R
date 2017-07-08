@@ -28,6 +28,12 @@ InitializeRating = function(winners, losers){
   rating$Carpet_Ratings = rating$Ratings
   rating$Carpet_games = rating$games
   
+  rating$Bo5Played = rep(0, numberOfPlayers)
+  rating$Bo5Won = rep(0, numberOfPlayers)
+  
+  rating$Bo3Played = rep(0, numberOfPlayers)
+  rating$Bo3Won = rep(0, numberOfPlayers)
+  
   atp_players = read.table("Data/datasets/atp_players.csv", header = T, sep = ",", 
                            quote = "\"", fill = TRUE)
   
@@ -130,6 +136,11 @@ InitializeRatingVariables = function(dataset){
   dataset$Loser_ratingHard = rep(NA, rows)
   dataset$Loser_ratingGrass = rep(NA, rows)
   
+  dataset$Winner_skillBo5 = rep(NA, rows)
+  dataset$Winner_skillBo3 = rep(NA, rows)
+  dataset$Loser_skillBo5 = rep(NA, rows)
+  dataset$Loser_skillBo3 = rep(NA, rows)
+  
   return(dataset)
 }
 
@@ -190,6 +201,7 @@ getMatchDetails = function(game, rating){
   matchDetails$Winner = game$Winner
   matchDetails$Loser = game$Loser
   matchDetails$Surface = game$Surface
+  matchDetails$Best.of = game$Best.of
   
   matchDetails$IndexWinner = match(matchDetails$Winner, rating$Players)
   matchDetails$IndexLoser = match(matchDetails$Loser, rating$Players)
@@ -205,6 +217,7 @@ getMatchDetails = function(game, rating){
              colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
   
   matchDetails$Country = citycountry$country[match(matchDetails$Location, citycountry$city)]
+  
   
   return(matchDetails)
 }
@@ -244,4 +257,30 @@ addHomePlayers = function(Games, rating, i, matchDetails){
   }
   
   return(Games)
+}
+
+addSkillsBoX = function(Games, rating, i, matchDetails){
+  winnerBo5Skill = getBo5Skill(rating, matchDetails$IndexWinner)
+  loserBo5Skill = getBo5Skill(rating, matchDetails$IndexLoser)
+  
+  winnerBo3Skill = 1 / winnerBo5Skill
+  loserBo3Skill = 1 / loserBo5Skill
+  
+  Games$Winner_skillBo5[i] = winnerBo5Skill
+  Games$Winner_skillBo3[i] = winnerBo3Skill
+  Games$Loser_skillBo5[i] = loserBo5Skill
+  Games$Loser_skillBo3[i] = loserBo3Skill
+  
+  return(Games)
+}
+
+getBo5Skill = function(rating, indexPlayer){
+  if(rating$Bo5Played[indexPlayer] == 0 | rating$Bo3Played[indexPlayer] == 0){
+    return(1)
+  }
+  percentageWinsBo5 = rating$Bo5Won[indexPlayer] / rating$Bo5Played[indexPlayer]
+  percentageWinsBo3 = rating$Bo3Won[indexPlayer] / rating$Bo3Played[indexPlayer]
+  Bo5Skill = percentageWinsBo5 / percentageWinsBo3
+  
+  return(Bo5Skill)
 }

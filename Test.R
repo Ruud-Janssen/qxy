@@ -63,7 +63,7 @@ xtestGrass = xtestGrass[iGrass, ]
 
 regHard = glm(y ~ 0 + ratingdiff + ratingHarddiff +
                 DummyBo5TimesAvgRatingdiff     
-                + RetiredDiff + FatigueDiff #+ HeadtoHeadPercentageWeightedsqN this one even better
+                + RetiredDiff + FatigueDiff#+ HeadtoHeadPercentageWeightedsqN #this one even better
               #+ HeadtoHead  #appears to improve the loglikelihood, so maybe interesting, also improve
               #BR a lot but doesn't work for grass
                 , data = xtrainHard, family = binomial)
@@ -90,8 +90,8 @@ testpredGrass = predict(regGrass, xtestGrass, type = "response")
 predictionsHard = 0.2 * testpredHard + 0.8 * xtestHard$ImpProb
 predictionsGrass = 0.2 *testpredGrass + 0.8 * xtestGrass$ImpProb
 
-combinedResultsHard = result(predictionsHard, xtestHard, ytestHard)
-combinedResultsGrass = result(predictionsGrass, xtestGrass, ytestGrass)
+combinedResultsHard = result(predictionsHard, xtestHard, xtestHard$y)
+combinedResultsGrass = result(predictionsGrass, xtestGrass, xtestGrass$y)
 
 resultsHard = combinedResultsHard$results
 resultsGrass = combinedResultsGrass$results

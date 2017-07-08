@@ -70,6 +70,22 @@ UpdateRating <- function(rating, matchDetails) {
                                                    matchDetails$IndexWinner, matchDetails$IndexLoser)
       rating$Carpet_games = AddAGame(rating$Carpet_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
     }
+  
+  if(is.na(matchDetails$Best.of)) {
+    matchDetails$Best.of = 0
+  }
+  
+  if(matchDetails$Best.of == 3){
+    rating$Bo3Played[matchDetails$IndexWinner] = rating$Bo3Played[matchDetails$IndexWinner] + 1
+    rating$Bo3Played[matchDetails$IndexLoser] = rating$Bo3Played[matchDetails$IndexLoser] + 1
+    
+    rating$Bo3Won[matchDetails$IndexWinner] = rating$Bo3Played[matchDetails$IndexWinner] + 1
+  } else if(matchDetails$Best.of == 5) {
+    rating$Bo5Played[matchDetails$IndexWinner] = rating$Bo5Played[matchDetails$IndexWinner] + 1
+    rating$Bo5Played[matchDetails$IndexLoser] = rating$Bo5Played[matchDetails$IndexLoser] + 1
+    
+    rating$Bo5Won[matchDetails$IndexWinner] = rating$Bo5Played[matchDetails$IndexWinner] + 1
+  }
 
   return(rating)
 }
@@ -213,6 +229,20 @@ getAllGamesWithoutRating = function() {
   test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
                     colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
 
+  allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
+  return(allGames)
+}
+
+getAllGamesWithRating = function() {
+  train_rating = read.table("Data/datasets/train_ratingWithRatings.csv", header = T, sep = ",", quote = "\"",
+                            colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+  train_model = read.table("Data/datasets/train_modelWithRatings.csv", header = T, sep = ",", quote = "\"",
+                           colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+  cv = read.table("Data/datasets/cvWithRatings.csv", header = T, sep = ",", quote = "\"", 
+                  colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+  test = read.table("Data/datasets/testWithRatings.csv", header = T, sep = ",", quote = "\"",
+                    colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+  
   allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
   return(allGames)
 }
