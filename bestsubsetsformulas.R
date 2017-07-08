@@ -25,9 +25,21 @@ relevantVariables = function(dataset){
   variables$HeadtoHeadPercentageWeightedsqN = dataset$HeadtoHeadPercentageWeightedsqN
   variables$HomeDiff = dataset$HomeDiff
   
+  variables$y = dataset$y
   #variables$PSWImpr = dataset$PSLthisplayer /(dataset$PSLthisplayer + dataset$PSWthisplayer)
   
   return(variables)
 }
   
+removeUncertainMatches = function(x, edge){
+  index_keep = (x$Uncertainty < edge)
+  x = x[index_keep, ]
+  return(x)
+}
+
+getXThisSurface = function(x, surface){
+  indexSurface = (x$Surface == surface)
+  x = x[indexSurface, ]
+  return(x)
+}
   

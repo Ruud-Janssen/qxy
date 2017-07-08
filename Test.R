@@ -2,6 +2,7 @@ rm(list = ls())
 source("formulas.r")
 source("hyperparametersfunctions.r")
 source("BetSizingFormulas.r")
+source("bestsubsetsformulas.r")
 library(leaps)
 library(bestglm)
 library(glmnet)
@@ -38,32 +39,15 @@ q = 27
 
 quantile = quantile(xtrain$Uncertainty, q / 100)
 
-index_xtrain = (xtrain$Uncertainty < quantile)
-xtrain = xtrain[index_xtrain, ]
-ytrain = ytrain[index_xtrain]
+xtrain = removeUncertainMatches(xtrain, quantile)
 
-indexGrasstrain = (xtrain$Surface == "Grass")
-indexHardtrain = (xtrain$Surface == "Hard")
+xtrainHard = getXThisSurface(xtrain, "Hard")
+xtrainGrass = getXThisSurface(xtrain, "Grass")
 
-xtrainGrass = xtrain[indexGrasstrain, ]
-xtrainHard = xtrain[indexHardtrain, ]
+xtest = removeUncertainMatches(xtest, quantile)
 
-ytrainGrass = ytrain[indexGrasstrain]
-ytrainHard = ytrain[indexHardtrain]
-
-index_xtest = (xtest$Uncertainty < quantile)
-xtest = xtest[index_xtest, ]
-ytest = ytest[index_xtest]
-
-indexGrasstest = (xtest$Surface == "Grass")
-indexHardtest = (xtest$Surface == "Hard")
-
-xtestGrass = xtest[indexGrasstest, ]
-xtestHard = xtest[indexHardtest, ]
-
-ytestGrass = ytest[indexGrasstest]
-ytestHard = ytest[indexHardtest]
-
+xtestHard = getXThisSurface(xtest, "Hard")
+xtestGrass = getXThisSurface(xtest, "Grass")
 
 xtrainHard$ImpProb = xtrainHard$PSLthisplayer/(xtrainHard$PSLthisplayer + xtrainHard$PSWthisplayer)
 xtrainGrass$ImpProb = xtrainGrass$PSLthisplayer/(xtrainGrass$PSLthisplayer + xtrainGrass$PSWthisplayer)
@@ -77,21 +61,20 @@ iGrass = !is.na(xtestGrass$ImpProb)
 xtestHard = xtestHard[iHard, ]
 xtestGrass = xtestGrass[iGrass, ]
 
-ytestHard = ytestHard[iHard]
-ytestGrass = ytestGrass[iGrass]
-
-regHard = glm(ytrainHard ~ 0 + ratingdiff + ratingHarddiff +
+regHard = glm(y ~ 0 + ratingdiff + ratingHarddiff +
                 DummyBo5TimesAvgRatingdiff     
                 + RetiredDiff + FatigueDiff #+ HeadtoHeadPercentageWeightedsqN this one even better
               #+ HeadtoHead  #appears to improve the loglikelihood, so maybe interesting, also improve
               #BR a lot but doesn't work for grass
                 , data = xtrainHard, family = binomial)
 
-regGrass = glm(ytrainGrass ~ 0 + ratingdiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff 
+regGrass = glm(y ~ 0 + ratingdiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff 
                +FatigueDiff 
                  , data = xtrainGrass, family = binomial)
 
 testpredHard = predict(regHard, xtestHard, type = "response")
+LogLoss(testpredHard, xtestHard$y)
+
 testpredGrass = predict(regGrass, xtestGrass, type = "response")
 
 
