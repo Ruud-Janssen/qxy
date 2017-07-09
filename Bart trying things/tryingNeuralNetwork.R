@@ -47,7 +47,7 @@ xcvHardScaled$y = xcvHardScaled$y / 2
 n <- names(xtmHardScaled)
 f <- as.formula(paste("y ~", paste(n[!n %in% "y"], collapse = " + ")))
 
-nn = neuralnet(f,data=xtmHardScaled,hidden=c(1, 1), act.fct = 'logistic' ,linear.output=F, lifesign = 'full'
+nn = neuralnet(f,data=xtmHardScaled,hidden=c(1), act.fct = 'logistic' ,linear.output=F, lifesign = 'full'
                , stepmax = 5000000)
 
 

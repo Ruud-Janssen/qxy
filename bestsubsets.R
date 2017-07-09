@@ -76,17 +76,17 @@ cvpredRidgeMinTrue = predict.cv.glmnet(ridge.out, newx = as.matrix(xcvHardRel[, 
 LogLoss(cvpredRidgeMinTrue, xcvHardRel$y)
 
 #####LASSO
-cvlam.out = cv.glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, alpha = 0, nfolds = 10, family = "binomial", 
+cvlam.out = cv.glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), BestSubsetHardt_m$y, alpha = 0, nfolds = 10, family = "binomial", 
                       intercept = FALSE, thresh = threshold, lambda = grid)
 plot(cvlam.out)
 
 
-lasso.mod = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, family = "binomial", alpha = 1, lambda = grid
+lasso.mod = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), BestSubsetHardt_m$y, family = "binomial", alpha = 1, lambda = grid
                , intercept = FALSE, thresh = threshold)
 plot_glmnet(lasso.mod, xvar = "lambda")
 
 #Lambda subset selection
-cvlas.out = cv.glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, alpha = 1, nfolds = 10, family = "binomial", 
+cvlas.out = cv.glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), BestSubsetHardt_m$y, alpha = 1, nfolds = 10, family = "binomial", 
                       lambda = grid, intercept = FALSE, thresh = threshold)
 plot(cvlas.out)
 
@@ -95,7 +95,7 @@ plot(cvlas.out)
 bestlam = cvlas.out$lambda.min
 #bestlam = cvlas.out$lambda.1se
 
-lasso = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, alpha = 1, lambda = bestlam, family = "binomial",
+lasso = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), BestSubsetHardt_m$y, alpha = 1, lambda = bestlam, family = "binomial",
                intercept = FALSE, thresh = threshold)
 lasso.coef = predict(cvlas.out, type = "coefficients", s = bestlam)
 lasso.coef
@@ -106,10 +106,32 @@ LogLoss(cvpredLamMinTrue, xcvHard$y)
 
 #################Interaction
 f <- as.formula( ~ .^2)
-
 BestSubsetHardt_mInteraction = as.data.frame(model.matrix(f, BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)])[, -1])
 xcvHardRelInteraction = as.data.frame(model.matrix(f, xcvHardRel[ , 1:(length(xcvHardRel)-1)])[, -1])
 
+#################Ridge
+lasso.modINT = glmnet(as.matrix(BestSubsetHardt_mInteraction), xt_mHard$y, family = "binomial", alpha = 0, lambda = grid
+                      , intercept = FALSE, thresh = threshold)
+
+cv.outINT = cv.glmnet(as.matrix(BestSubsetHardt_mInteraction), xt_mHard$y, alpha = 0, nfolds = 10, family = "binomial", 
+                      intercept = FALSE)
+plot(cv.outINT)
+
+##random stackoverflow says the second one is preferred!!!
+##https://stats.stackexchange.com/questions/58531/using-lasso-from-lars-or-glmnet-package-in-r-for-variable-selection
+bestlam = cv.outINT$lambda.min
+#bestlam = cv.outINT$lambda.1se
+
+lasso = glmnet(as.matrix(BestSubsetHardt_mInteraction), xt_mHard$y, alpha = 0, lambda = bestlam, family = "binomial",
+               intercept = FALSE, thresh = threshold)
+lasso.coef = predict(cv.outINT, type = "coefficients", s = bestlam)
+lasso.coef
+bestlam
+
+cvpredINTLamMinTrue = predict.cv.glmnet(cv.outINT, newx = as.matrix(xcvHardRelInteraction), type = "response", s = bestlam)
+LogLoss(cvpredINTLamMinTrue, xcvHardRel$y)
+
+################Lasso
 lasso.modINT = glmnet(as.matrix(BestSubsetHardt_mInteraction), xt_mHard$y, family = "binomial", alpha = 1, lambda = grid
                       , intercept = FALSE, thresh = threshold)
 
@@ -153,6 +175,12 @@ LogLoss(cvpredLamMin, ycvHard)
 regLamMin = glm(y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff + RetiredDiff
           + FatigueDiff, data = BestSubsetHardt_m, family = binomial)
 
+summary(regLamMin)
+
+cvpredLamMin = predict(regLamMin, xcvHardRel, type = "response")
+LogLoss(cvpredLamMin, xcvHardRel$y)
+
+
 #regLamMin2 = glm(xt_mHard$y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff + 
 #                   DummyBo5TimesratingHarddiff + RetiredDiff + FatigueDiff, 
 #                 data = BestSubsetHardt_m, family = binomial)
@@ -162,10 +190,6 @@ regLamMin = glm(y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff
 #                   RetiredDiff + WalkoverDiff + FatigueDiff, data = BestSubsetHardt_m, family = binomial)
 
 
-summary(regLamMin)
-
-cvpredLamMin = predict(regLamMin, xcvHardRel, type = "response")
-LogLoss(cvpredLamMin, xcvHardRel$y)
 
 #cvpredLamMin2 = predict(regLamMin2, xcvHardRel, type = "response")
 #LogLoss(cvpredLamMin2, ycvHard)

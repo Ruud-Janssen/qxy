@@ -28,6 +28,9 @@ InitializeRating = function(winners, losers){
   rating$Carpet_Ratings = rating$Ratings
   rating$Carpet_games = rating$games
   
+  rating$NotHard_Ratings = rating$Ratings
+  rating$NotHard_games =  rating$games
+  
   rating$Bo5Played = rep(0, numberOfPlayers)
   rating$Bo5Won = rep(0, numberOfPlayers)
   rating$Bo5PlusScore = rep(0, numberOfPlayers)
@@ -198,11 +201,13 @@ addRatingVariables = function(Games, rating, i, matchDetails){
   Games$Winner_ratingClay[i] = rating$Clay_Ratings[matchDetails$IndexWinner]
   Games$Winner_ratingHard[i] = rating$Hard_Ratings[matchDetails$IndexWinner]
   Games$Winner_ratingGrass[i] = rating$Grass_Ratings[matchDetails$IndexWinner]
+  Games$Winner_ratingNotHard[i] = rating$NotHard_Ratings[matchDetails$IndexWinner]
   
   Games$Loser_rating[i] = rating$Ratings[matchDetails$IndexLoser]
   Games$Loser_ratingClay[i] = rating$Clay_Ratings[matchDetails$IndexLoser]
   Games$Loser_ratingHard[i] = rating$Hard_Ratings[matchDetails$IndexLoser]
   Games$Loser_ratingGrass[i] = rating$Grass_Ratings[matchDetails$IndexLoser]
+  Games$Loser_ratingNotHard[i] = rating$NotHard_Ratings[matchDetails$IndexLoser]
   
   Games$Winner_expectationBasedOnRating[i] = 1 - 1 / (1 + 10 ^ ((rating$Ratings[matchDetails$IndexWinner] 
                                                               - rating$Ratings[matchDetails$IndexLoser])/ 400))

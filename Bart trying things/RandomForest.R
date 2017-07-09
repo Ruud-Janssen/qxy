@@ -30,8 +30,6 @@ quantile = quantile(xt_m$Uncertainty, q / 100)
 index_xt_m = (xt_m$Uncertainty < quantile)
 xt_m = xt_m[index_xt_m, ]
 yt_m = yt_m[index_xt_m]
-results$PercentageRemovedt_m[q] = 1 - length(yt_m) / length(yt_m)
-resultsSeperate$PercentageRemovedt_m[q] = results$PercentageRemovedt_m[q]
 
 indexGrasst_m = (xt_m$Surface == "Grass")
 indexHardt_m = (xt_m$Surface == "Hard")
@@ -70,8 +68,9 @@ xtmHardRel$y = yt_mHard
 #
 
 
-rf = randomForest(y~., data=xtmHardRel, ntree = 2000, nodesize = 1)
+rf = randomForest(y~., data=xtmHardRel, ntree = 3000, nodesize = 10)
 plot(rf)
+rf$importance
 
 xcvHardRel = relevantVariables(xcvHard)
 

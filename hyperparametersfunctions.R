@@ -13,6 +13,8 @@ addRegressorVariableRow = function(row){
     x$ratingClaydiff = row$Winner_ratingClay - row$Loser_ratingClay
     x$ratingHarddiff = row$Winner_ratingHard - row$Loser_ratingHard
     x$ratingGrassdiff = row$Winner_ratingGrass - row$Loser_ratingGrass
+    x$ratingNotHarddiff = row$Winner_ratingNotHard - row$Loser_ratingNotHard
+    
     x$RetiredDiff = row$Winner_retired_last_game - row$Loser_retired_last_game
     x$WalkoverDiff = row$Winner_walkover_last_game - row$Loser_walkover_last_game
     x$RetiredOrWalkoverDiff = x$RetiredDiff + x$WalkoverDiff
@@ -42,6 +44,8 @@ addRegressorVariableRow = function(row){
     x$ratingClaydiff = -(row$Winner_ratingClay - row$Loser_ratingClay)
     x$ratingHarddiff = -(row$Winner_ratingHard - row$Loser_ratingHard)
     x$ratingGrassdiff = -(row$Winner_ratingGrass - row$Loser_ratingGrass)
+    x$ratingNotHarddiff = -(row$Winner_ratingNotHard - row$Loser_ratingNotHard)
+    
     x$RetiredDiff = row$Loser_retired_last_game - row$Winner_retired_last_game
     x$WalkoverDiff = row$Loser_walkover_last_game - row$Winner_walkover_last_game 
     x$RetiredOrWalkoverDiff = x$RetiredDiff + x$WalkoverDiff
@@ -80,13 +84,13 @@ addRegressorVariableRow = function(row){
     
     x$DummyBo5TimesAvgRatingdiff = 0.5 * (x$ratingdiff + x$ratingdiffCurrentSurface)
     
-    if(x$ratingdiff > 0) {
+    #if(x$ratingdiff > 0) {
       x$DummyBo5 = 1
-    } else if(x$ratingdiff < 0) {
-      x$DummyBo5 = -1
-    } else {
-      x$DummyBo5 = 0
-    }
+    #} else if(x$ratingdiff < 0) {
+    #  x$DummyBo5 = -1
+    #} else {
+    #  x$DummyBo5 = 0
+    #}
     
     
   } else {

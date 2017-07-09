@@ -55,8 +55,13 @@ UpdateRating <- function(rating, matchDetails, expectationWinner) {
                                                , matchDetails$IndexWinner, matchDetails$IndexLoser)
     rating$Hard_games = AddAGame(rating$Hard_games, 
                                  matchDetails$IndexWinner, matchDetails$IndexLoser)
-       
-    }else if(matchDetails$Surface == "Grass") {
+  } else{
+    rating$NotHard_Ratings = UpdateThisRatingType(rating$NotHard_Ratings, rating$NotHard_games
+                                               , matchDetails$IndexWinner, matchDetails$IndexLoser)
+    rating$NotHard_games = AddAGame(rating$NotHard_games, 
+                                 matchDetails$IndexWinner, matchDetails$IndexLoser)
+  }
+  if(matchDetails$Surface == "Grass") {
       rating$Grass_Ratings = UpdateThisRatingType(rating$Grass_Ratings, rating$Grass_games,
                                                   matchDetails$IndexWinner, matchDetails$IndexLoser)
       rating$Grass_games = AddAGame(rating$Grass_games, matchDetails$IndexWinner, matchDetails$IndexLoser)

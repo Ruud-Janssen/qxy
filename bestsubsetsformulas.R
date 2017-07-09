@@ -5,6 +5,7 @@ relevantVariables = function(dataset){
   variables$ratingClaydiff = dataset$ratingClaydiff
   variables$ratingHarddiff = dataset$ratingHarddiff
   variables$ratingGrassdiff = dataset$ratingGrassdiff
+  variables$ratingNotHarddiff = dataset$ratingNotHarddiff
   
   variables$DummyBo5 = dataset$DummyBo5
   variables$DummyBo5TimesAvgRatingdiff = dataset$DummyBo5TimesAvgRatingdiff
@@ -12,11 +13,14 @@ relevantVariables = function(dataset){
   variables$DummyBo5TimesratingHarddiff = dataset$DummyBo5 * dataset$ratingHarddiff
   variables$DummyBo5TimesratingGrassdiff = dataset$DummyBo5 * dataset$ratingGrassdiff
   variables$DummyBo5TimesratingClaydiff = dataset$DummyBo5 * dataset$ratingClaydiff
+  variables$DummyBo5TimesratingNotHarddiff = dataset$DummyBo5 * dataset$ratingNotHarddiff
+  variables$DummyBo5TimesAvgRatingdiff2 = dataset$DummyBo5 * 1/2 * (dataset$ratingHarddiff + 
+                                                                   dataset$ratingNotHarddiff )
     
   variables$RetiredDiff = dataset$RetiredDiff
   variables$WalkoverDiff = dataset$WalkoverDiff
   variables$RetiredOrWalkoverDiff = dataset$RetiredOrWalkoverDiff
-  variables$RetiredOrWalkoverDiff = dataset$RetiredOrWalkoverDiff
+
   variables$FatigueDiff = dataset$FatigueDiff
   variables$FatigueDiffTimesBo5 = dataset$FatigueDiffTimesBo5
   variables$HeadtoHead = dataset$HeadtoHead
