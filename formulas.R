@@ -37,7 +37,8 @@ CalculateExpectation <- function(rating, surface, winner, loser) {
   return (Expectation(ratingWinner - ratingLoser))
 }
 
-UpdateRating <- function(rating, matchDetails) {
+UpdateRating <- function(rating, matchDetails, expectationWinner) {
+  expectationLoser = 1 - expectationWinner
   
   #Normal ratings
   rating$Ratings = UpdateThisRatingType(rating$Ratings, rating$games, 
@@ -79,12 +80,25 @@ UpdateRating <- function(rating, matchDetails) {
     rating$Bo3Played[matchDetails$IndexWinner] = rating$Bo3Played[matchDetails$IndexWinner] + 1
     rating$Bo3Played[matchDetails$IndexLoser] = rating$Bo3Played[matchDetails$IndexLoser] + 1
     
-    rating$Bo3Won[matchDetails$IndexWinner] = rating$Bo3Played[matchDetails$IndexWinner] + 1
+    rating$Bo3Won[matchDetails$IndexWinner] = rating$Bo3Won[matchDetails$IndexWinner] + 1
+    
+    rating$Bo3PlusScore[matchDetails$IndexWinner] = rating$Bo3PlusScore[matchDetails$IndexWinner] +
+      (1 - expectationWinner)
+    
+    rating$Bo3PlusScore[matchDetails$IndexLoser] = rating$Bo3PlusScore[matchDetails$IndexLoser] +
+      (1 - expectationLoser) 
+    
   } else if(matchDetails$Best.of == 5) {
     rating$Bo5Played[matchDetails$IndexWinner] = rating$Bo5Played[matchDetails$IndexWinner] + 1
     rating$Bo5Played[matchDetails$IndexLoser] = rating$Bo5Played[matchDetails$IndexLoser] + 1
     
-    rating$Bo5Won[matchDetails$IndexWinner] = rating$Bo5Played[matchDetails$IndexWinner] + 1
+    rating$Bo5Won[matchDetails$IndexWinner] = rating$Bo5Won[matchDetails$IndexWinner] + 1
+    
+    rating$Bo5PlusScore[matchDetails$IndexWinner] = rating$Bo5PlusScore[matchDetails$IndexWinner] +
+      (1 - expectationWinner)
+    
+    rating$Bo5PlusScore[matchDetails$IndexLoser] = rating$Bo5PlusScore[matchDetails$IndexLoser] +
+      (1 - expectationLoser) 
   }
 
   return(rating)

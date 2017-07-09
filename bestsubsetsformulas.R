@@ -26,6 +26,7 @@ relevantVariables = function(dataset){
   variables$HomeDiff = dataset$HomeDiff
   
   variables$ThisBoxSkillDiff = dataset$ThisBoxSkillDiff
+  variables$ThisBoxSkillDiffPlusScores = dataset$ThisBoxSkillDiffPlusScores
   
   variables$y = dataset$y
   #variables$PSWImpr = dataset$PSLthisplayer /(dataset$PSLthisplayer + dataset$PSWthisplayer)

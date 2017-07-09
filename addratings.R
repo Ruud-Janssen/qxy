@@ -20,7 +20,7 @@ for(i in 1: Nall) {
   allGames = addHomePlayers(allGames, rating, i, matchDetails)
   allGames = addSkillsBoX(allGames, rating, i, matchDetails)
   
-  rating = UpdateRating(rating, matchDetails)
+  rating = UpdateRating(rating, matchDetails, allGames$Winner_expectationBasedOnRating[i])
 }
 
 saveDatasetsWithRating(allGames, rating)

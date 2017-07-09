@@ -28,8 +28,10 @@ addRegressorVariableRow = function(row){
     
     if(row$Best.of == 3){
       x$ThisBoxSkillDiff = row$Winner_skillBo3 - row$Loser_skillBo3
-    } else {
+      x$ThisBoxSkillDiffPlusScores = row$Winner_skillBo3PlusScores - row$Loser_skillBo3PlusScores
+          } else {
       x$ThisBoxSkillDiff = row$Winner_skillBo5 - row$Loser_skillBo5
+      x$ThisBoxSkillDiffPlusScores = row$Winner_skillBo5PlusScores - row$Loser_skillBo5PlusScores
     }
     
     #loser's viewpoint
@@ -55,8 +57,10 @@ addRegressorVariableRow = function(row){
     
     if(row$Best.of == 3){
       x$ThisBoxSkillDiff =  row$Loser_skillBo3 - row$Winner_skillBo3
+      x$ThisBoxSkillDiffPlusScores = row$Loser_skillBo3PlusScores - row$Winner_skillBo3PlusScores
     } else {
       x$ThisBoxSkillDiff =  row$Loser_skillBo5 - row$Winner_skillBo5 
+      x$ThisBoxSkillDiffPlusScores = row$Loser_skillBo5PlusScores - row$Winner_skillBo5PlusScores 
     }
   }
   
