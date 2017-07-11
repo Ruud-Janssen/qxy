@@ -1,5 +1,17 @@
 library(plyr)
 
+removeUncertainMatches = function(x, edge){
+  index_keep = (x$Uncertainty < edge)
+  x = x[index_keep, ]
+  return(x)
+}
+
+getXThisSurface = function(x, surface){
+  indexSurface = (x$Surface == surface)
+  x = x[indexSurface, ]
+  return(x)
+}
+
 
 addRegressorVariableRow = function(row){
   x = data.frame(matrix(nrow = 1))
@@ -14,6 +26,9 @@ addRegressorVariableRow = function(row){
     x$ratingHarddiff = row$Winner_ratingHard - row$Loser_ratingHard
     x$ratingGrassdiff = row$Winner_ratingGrass - row$Loser_ratingGrass
     x$ratingNotHarddiff = row$Winner_ratingNotHard - row$Loser_ratingNotHard
+    x$ratingBo3diff = row$Winner_ratingBo3 - row$Loser_ratingBo3
+    x$ratingBo5diff = row$Winner_ratingBo5 - row$Loser_ratingBo5
+  
     
     x$RetiredDiff = row$Winner_retired_last_game - row$Loser_retired_last_game
     x$WalkoverDiff = row$Winner_walkover_last_game - row$Loser_walkover_last_game
@@ -31,9 +46,15 @@ addRegressorVariableRow = function(row){
     if(row$Best.of == 3){
       x$ThisBoxSkillDiff = row$Winner_skillBo3 - row$Loser_skillBo3
       x$ThisBoxSkillDiffPlusScores = row$Winner_skillBo3PlusScores - row$Loser_skillBo3PlusScores
+      
+      x$ThisBoxSkillRatingMethod = (row$Winner_ratingBo5 - row$Winner_ratingBo3) - 
+        (row$Loser_ratingBo5 - row$Loser_ratingBo3)
           } else {
       x$ThisBoxSkillDiff = row$Winner_skillBo5 - row$Loser_skillBo5
       x$ThisBoxSkillDiffPlusScores = row$Winner_skillBo5PlusScores - row$Loser_skillBo5PlusScores
+      
+      x$ThisBoxSkillRatingMethod = (row$Winner_ratingBo3 - row$Winner_ratingBo5) - 
+        (row$Loser_ratingBo3 - row$Loser_ratingBo5)
     }
     
     #loser's viewpoint
@@ -45,6 +66,8 @@ addRegressorVariableRow = function(row){
     x$ratingHarddiff = -(row$Winner_ratingHard - row$Loser_ratingHard)
     x$ratingGrassdiff = -(row$Winner_ratingGrass - row$Loser_ratingGrass)
     x$ratingNotHarddiff = -(row$Winner_ratingNotHard - row$Loser_ratingNotHard)
+    x$ratingBo3diff = -(row$Winner_ratingBo3 - row$Loser_ratingBo3)
+    x$ratingBo5diff = -(row$Winner_ratingBo5 - row$Loser_ratingBo5)
     
     x$RetiredDiff = row$Loser_retired_last_game - row$Winner_retired_last_game
     x$WalkoverDiff = row$Loser_walkover_last_game - row$Winner_walkover_last_game 
@@ -62,10 +85,17 @@ addRegressorVariableRow = function(row){
     if(row$Best.of == 3){
       x$ThisBoxSkillDiff =  row$Loser_skillBo3 - row$Winner_skillBo3
       x$ThisBoxSkillDiffPlusScores = row$Loser_skillBo3PlusScores - row$Winner_skillBo3PlusScores
+      
+      x$ThisBoxSkillRatingMethod = -((row$Winner_ratingBo5 - row$Winner_ratingBo3) - 
+        (row$Loser_ratingBo5 - row$Loser_ratingBo3))
     } else {
       x$ThisBoxSkillDiff =  row$Loser_skillBo5 - row$Winner_skillBo5 
       x$ThisBoxSkillDiffPlusScores = row$Loser_skillBo5PlusScores - row$Winner_skillBo5PlusScores 
+      
+      x$ThisBoxSkillRatingMethod = -((row$Winner_ratingBo3 - row$Winner_ratingBo5) - 
+        (row$Loser_ratingBo3 - row$Loser_ratingBo5))
     }
+    
   }
   
   
@@ -151,7 +181,7 @@ cvpredictions = function(results, Reg, xcv, ycv, q) {
   
   Npred = length(cvpred)
   
-  bets = as.row.frame(matrix(nrow = Npred, ncol = 0))
+  bets = as.data.frame(matrix(nrow = Npred, ncol = 0))
   bets$result = rep(0, Npred)
   bets$bet = rep(0, Npred)
   bets$br = rep(1, Npred)

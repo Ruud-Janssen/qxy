@@ -1,3 +1,5 @@
+library(plyr)
+
 CreateRetiredWalkoverAndFatigue = function(dataset){
   
   retired = which(dataset$Comment %in% c("Retired", "Retied", "retired"))
@@ -45,77 +47,92 @@ CreateRetiredWalkoverAndFatigue = function(dataset){
   dataset$NrGames = rep(0, nrow(dataset))
   
   #Create variable NrGames for all matches
-  for(i in 1 : nrow(dataset)) {
-    
-    NrGames = 0 
-    
-    games = as.numeric(c(dataset$W1[i], dataset$L1[i], dataset$W2[i], dataset$L2[i], dataset$W3[i], 
-              dataset$L3[i], dataset$W4[i], dataset$L4[i], dataset$W5[i], dataset$L5[i]))
-    for(game in games){
-      #if(j == 0) {
-      #  next
-      #}
-      if(!is.na(game) & game < 8 & game >=0){
-        NrGames = NrGames + game
-      }
-    }
-    
-    dataset$NrGames[i] = NrGames
-  }
+  dataset = adply(dataset, 1, SetNrGamesRow)
   
   #HyperParameters
   maxdays = 5
   base = 0.86
+  gamesBarier = 0
   
-  dataset$Winner_fatigue = rep(0, nrow(dataset))
-  dataset$Loser_fatigue = rep(0, nrow(dataset))
+  #Create Fatigue
+  dataset = CreateFatigue(dataset, maxdays, base, gamesBarier)
   
-  for(i in 1 : (nrow(dataset) - 1)){
-    winner = dataset$Winner[i]
-    loser = dataset$Loser[i]
-    dataset = setFatigueMatchPlayer(name = winner, dataset, matchnumber = i, maxdays = maxdays, base = base)
-    dataset = setFatigueMatchPlayer(name = loser, dataset, matchnumber = i, maxdays = maxdays, base = base)
+  return(dataset)
+}
+
+SetNrGamesRow = function(row){
+  row$NrGames = CalculateNrGames(row)
+  return(row)
+}
+
+CalculateNrGames = function(row){
+  NrGames = 0 
+  
+  games = as.numeric(c(row$W1, row$L1, row$W2, row$L2, row$W3, 
+                       row$L3, row$W4, row$L4, row$W5, row$L5))
+  for(game in games){
+    if(!is.na(game)){
+      if(game >= 100){
+        NrGames = NrGames + 100
+      } else {
+      NrGames = NrGames + game
+      }
+    }
+  }
+  return(NrGames)
+}
+
+CreateFatigue = function(dataset, maxdays, base, gamesBarier){
+  
+  Nt = nrow(dataset)
+  
+  dataset$Winner_fatigue = rep(0, Nt)
+  dataset$Loser_fatigue = rep(0, Nt)
+  
+  for(i in 1 : (Nt - 1)){
+    dataset = setFatigueMatchPlayer(dataset$Winner[i], dataset,i, maxdays, base, gamesBarier)
+    dataset = setFatigueMatchPlayer(dataset$Loser[i], dataset, i, maxdays, base, gamesBarier)
   }
   
   return(dataset)
 }
 
-#Sets the fatigue for the next matches created by this match for this player
-setFatigueMatchPlayer = function(name, dataset, matchnumber, maxdays, base) {
-  Ndata = nrow(dataset)
+setFatigueMatchPlayerPartWinsOrLosses = function(dataset, NextGamesIndexes, MatchDate, maxdays, base,
+                                                 GamesOverBarier, df, winnerDummy){
+  
+  nextGamesDaysafter = abs(MatchDate - as.Date(as.character(dataset$Date[NextGamesIndexes]), format = df ))
+  
+  for(i in 1:length(NextGamesIndexes)) {
+    if(nextGamesDaysafter[i] <= maxdays) {
+      fatigue = base ^ as.numeric(nextGamesDaysafter[i]) * GamesOverBarier
+      if(winnerDummy == 1){
+        dataset$Winner_fatigue[NextGamesIndexes[i]] = dataset$Winner_fatigue[NextGamesIndexes[i]] + fatigue
+      } else {
+        dataset$Loser_fatigue[NextGamesIndexes[i]] = dataset$Loser_fatigue[NextGamesIndexes[i]] + fatigue
+      }
+    }
+  }
+  
+  return(dataset)
+}
+
+setFatigueMatchPlayer = function(name, dataset, matchnumber, maxdays, base, gamesBarier) {
   df = "%m/%d/%Y"
-  gamesPlayed = dataset$NrGames[matchnumber]
+  Ndata = nrow(dataset)
+  MatchDate = as.Date(as.character(dataset$Date[matchnumber]), format = df )
+  GamesOverBarier = max(dataset$NrGames[matchnumber] - gamesBarier, 0)
   
-  nextWinningGames = list()
-  nextWinningGames$index = which(dataset$Winner[(matchnumber + 1) : Ndata] %in% name) + matchnumber
-  nextWinningGames$daysafter = abs(as.Date(as.character(dataset$Date[matchnumber]), format = df ) - 
-    as.Date(as.character(dataset$Date[nextWinningGames$index]), format = df ))
-  
-  if(length(nextWinningGames$index) > 0){
-    for(i in 1:length(nextWinningGames$index)) {
-      if(nextWinningGames$daysafter[i] <= maxdays) {
-        fatigue = base ^ as.numeric(nextWinningGames$daysafter[i]) * gamesPlayed
-        dataset$Winner_fatigue[nextWinningGames$index[i]] = dataset$Winner_fatigue[nextWinningGames$index[i]] + 
-          fatigue
-      }
-    }
+  WinningGamesIndex = which(dataset$Winner[(matchnumber + 1) : Ndata] %in% name) + matchnumber
+  if(length(WinningGamesIndex) > 0) {
+    dataset = setFatigueMatchPlayerPartWinsOrLosses(dataset, WinningGamesIndex, MatchDate, maxdays, base, 
+                                                    GamesOverBarier, df, 1)
   }
   
-  nextLosingGames = list()
-  nextLosingGames$index = which(dataset$Loser[(matchnumber + 1) : Ndata] %in% name) + matchnumber
-  nextLosingGames$daysafter = abs(as.Date(as.character(dataset$Date[matchnumber]), format = df ) - 
-    as.Date(as.character(dataset$Date[nextLosingGames$index]), format = df ))
-  
-  relevantLosingGames = nextLosingGames$index[(nextLosingGames$daysafter < maxdays) ]
-  
-  if(length(nextLosingGames$index) > 0){
-    for(i in 1:length(nextLosingGames$index)) {
-      if(nextLosingGames$daysafter[i] <= maxdays) {
-        fatigue = base ^ as.numeric(nextLosingGames$daysafter[i]) * gamesPlayed
-        dataset$Loser_fatigue[nextLosingGames$index[i]] = dataset$Loser_fatigue[nextLosingGames$index[i]] + 
-          fatigue
-      }
-    }
+  LosingGamesIndex = which(dataset$Loser[(matchnumber + 1) : Ndata] %in% name) + matchnumber
+  if(length(LosingGamesIndex) > 0) {
+    dataset = setFatigueMatchPlayerPartWinsOrLosses(dataset, LosingGamesIndex, MatchDate, maxdays, base, 
+                                                    GamesOverBarier, df, 0)
   }
+  
   return(dataset)
 }

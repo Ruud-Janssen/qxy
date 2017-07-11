@@ -47,8 +47,31 @@ xcvClay = getXThisSurface(xcv, "Clay")
 BestSubsetHardt_m = relevantVariables(xt_mHard)
 xcvHardRel = relevantVariables(xcvHard)
 
-grid = 10 ^ seq(0, -10, length = 100)
 
+#Normalization
+sdtrain <- apply(BestSubsetHardt_m[, 1:(length(BestSubsetHardt_m) - 1)] , 2, sd) 
+#meantrain <- apply(BestSubsetHardt_m[, 1:(length(BestSubsetHardt_m) - 1)] , 2, mean) 
+#BestSubsetHardt_m[, 1:(length(BestSubsetHardt_m) - 1)] = BestSubsetHardt_m[, 1:(length(BestSubsetHardt_m) - 1)] - meantrain
+#xcvHardRel[, 1:(length(xcvHardRel) - 1)] = xcvHardRel[, 1:(length(xcvHardRel) - 1)] - meantrain
+
+BestSubsetHardt_m[, 1:(length(BestSubsetHardt_m) - 1)] = 
+  as.data.frame(scale(BestSubsetHardt_m[, 1:(length(BestSubsetHardt_m) - 1)], center = FALSE,scale = sdtrain))
+xcvHardRel[, 1:(length(xcvHardRel) - 1)] = 
+  as.data.frame(scale(xcvHardRel[, 1:(length(xcvHardRel) - 1)], center = FALSE,scale = sdtrain))
+  
+
+#Modelling
+regLamMin = glm(y ~ 0 + ratingNotHarddiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff2 + RetiredDiff
+                + FatigueDiff
+                 , data = BestSubsetHardt_m, family = binomial)
+
+summary(regLamMin)
+
+cvpredLamMin = predict(regLamMin, xcvHardRel, type = "response")
+LogLoss(cvpredLamMin, xcvHardRel$y)
+
+
+grid = 10 ^ seq(0, -10, length = 100)
 #####RIDGE
 ridge.mod = glmnet(as.matrix(BestSubsetHardt_m[ , 1:(length(BestSubsetHardt_m)-1)]), xt_mHard$y, 
                    family = "binomial", alpha = 0, lambda = grid, intercept = FALSE, thresh = threshold)
@@ -262,14 +285,14 @@ summary(regLamMin)
 #adding fatigue diff does improve the validation logloss and remove ratingHarddiff too, since it is so
 #insignificant
 
-regLamImprove = glm(yt_mGrass ~ 0 + ratingdiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff + FatigueDiff
+regLamImprove = glm(y ~ 0 + ratingdiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff + FatigueDiff
                     , data = BestSubsetGrasst_m, family = binomial)
 summary(regLamImprove)
 #adding fatigue or not is a difficult decision, since it is still not significant at all,
 #yet when you add the cv data it becomes closer so I guess I am just gonna add it
 
 cvpredLamMin = predict(regLamMin, xcvGrassRel, type = "response")
-LogLoss(cvpredLamMin, ycvGrass)
+LogLoss(cvpredLamMin, xcvGrassRel$y)
 
 cvpredLamImprove = predict(regLamImprove, xcvGrassRel, type = "response")
 LogLoss(cvpredLamImprove, ycvGrass)
@@ -339,7 +362,7 @@ cv.outINT = cv.glmnet(as.matrix(BestSubsetClayt_mInteraction), yt_mClay, alpha =
 plot(cv.outINT)
 
 #lambda min
-regLamMin = glm(yt_mClay ~ 0 + ratingdiff + ratingClaydiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff +
+regLamMin = glm(y ~ 0 + ratingdiff + ratingClaydiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff +
                   DummyBo5TimesratingClaydiff + WalkoverDiff + RetiredOrWalkoverDiff 
                 + FatigueDiff + HeadtoHead + LastHeadtoHead, data = BestSubsetClayt_m, family = binomial)
 
@@ -355,4 +378,4 @@ regLamMin = glm(yt_mClay ~ 0 + ratingdiff + ratingClaydiff + ratingGrassdiff + D
 summary(regLamMin)
 
 cvpredLamMin = predict(regLamMin, xcvClayRel, type = "response")
-LogLoss(cvpredLamMin, ycvClay)
+LogLoss(cvpredLamMin, xcvClayRel$y)

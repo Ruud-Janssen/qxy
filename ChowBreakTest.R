@@ -51,34 +51,37 @@ xcvHard = relevantVariables(xcvHard)
 TotalX = rbind(xt_mHard, xcvHard)
 #time for a good old chowbreaktest
 #CONCLUSIONS PROBABLY SUCK BECAUSE CHOW BREAK TEST IS FOR LINEAR REGRESSION YO
-split = 8/10
+split = 3/4
 
 dataHardFirst = TotalX[1 : floor(split  * nrow(TotalX)), ]
 dataHardLast = TotalX[( 1 + floor(split * nrow(TotalX))):nrow(TotalX), ]
 
 regTotal =  glm(y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff +    
-                  RetiredDiff + FatigueDiff + HomeDiff
+                  RetiredDiff + FatigueDiff + ThisBoxSkillDiffPlusScores 
                 , data = TotalX, family = binomial)
 
 regHardFirst = glm(y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff +    
-                     RetiredDiff + FatigueDiff + HomeDiff
+                     RetiredDiff + FatigueDiff + ThisBoxSkillDiffPlusScores 
                    , data = dataHardFirst, family = binomial)
 regHardLast = glm(y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff +    
-                    RetiredDiff + FatigueDiff + HomeDiff
+                    RetiredDiff + FatigueDiff + ThisBoxSkillDiffPlusScores
                   , data = dataHardLast, family = binomial)
 
-#Sc = RSS(regTotal)
-#S1 = RSS(regHardFirst)
-#S2 = RSS(regHardLast)
+#Chow
+Sc = RSS(regTotal)
+S1 = RSS(regHardFirst)
+S2 = RSS(regHardLast)
 
-#k = regTotal$rank
+k = regTotal$rank
 
-#N1 = nrow(dataHardFirst)
-#N2 = nrow(dataHardLast)
+N1 = nrow(dataHardFirst)
+N2 = nrow(dataHardLast)
 
-#CB = (Sc - (S1 + S2)) / k /((S1+ S2)/(N1 + N2 - 2 * k))
-#print(CB)
-#qf(0.95, k, N1 + N2 - 2*k)
+CB = (Sc - (S1 + S2)) / k /((S1+ S2)/(N1 + N2 - 2 * k))
+print(CB)
+qf(0.95, k, N1 + N2 - 2*k)
+
+#Wald
 diffB = (regHardFirst$coefficients-regHardLast$coefficients)
 diffBHomeDiff = c(0,0,0,0,0,diffB[6])
  
