@@ -34,15 +34,10 @@ total = foreach(gb = 1 : 10) %do%{
       source("addRetiredandFatigueformulas.r")
   
       power = (3 * p + 60)/ 100
-      
-      library(tictoc)
-      tic()
+
       train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
                                           , header = T, sep = ",", quote = "\"", fill = TRUE)
       train_modelwithRatings = CreateFatigue(train_modelwithRatings, days, power, gamesBarier)
-      toc()
-      
-      train_modelwithRatings$Winner_fatigue[500:600]
   
       xt_m = regressorvariables(yt_m, train_modelwithRatings)
       set.seed(42)
@@ -61,8 +56,8 @@ total = foreach(gb = 1 : 10) %do%{
         xTrainCurrent = removeUncertainMatches(xTrain, quantile)
         xValidationCurrent = removeUncertainMatches(xValidation, quantile)
   
-        xTrainCurrentHard = getXThisSurface(xTrainCurrent,"Hard")
-        xValidationCurrentHard = getXThisSurface(xValidationCurrent,"Hard")
+        xTrainCurrentHard = getXThisSurface(xTrainCurrent, "Hard")
+        xValidationCurrentHard = getXThisSurface(xValidationCurrent, "Hard")
   
         RegHard = glm(y ~ 0 + ratingdiff + ratingHarddiff +DummyBo5TimesAvgRatingdiff     
                       + RetiredDiff + FatigueDiff, data = xTrainCurrentHard, family = binomial)
@@ -72,9 +67,7 @@ total = foreach(gb = 1 : 10) %do%{
       }
       
       return(mean(resultsHard$LogLossOutOfSample))
-  
     })
-    
   })
 }
 end.time <- Sys.time()

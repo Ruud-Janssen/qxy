@@ -91,7 +91,6 @@ CreateFatigue = function(dataset, maxdays, base, gamesBarier){
     dataset = setFatigueMatchPlayer(dataset$Winner[i], dataset,i, maxdays, base, gamesBarier)
     dataset = setFatigueMatchPlayer(dataset$Loser[i], dataset, i, maxdays, base, gamesBarier)
   }
-  
   return(dataset)
 }
 
@@ -110,7 +109,6 @@ setFatigueMatchPlayerPartWinsOrLosses = function(dataset, NextGamesIndexes, Matc
       }
     }
   }
-  
   return(dataset)
 }
 
@@ -131,6 +129,5 @@ setFatigueMatchPlayer = function(name, dataset, matchnumber, maxdays, base, game
     dataset = setFatigueMatchPlayerPartWinsOrLosses(dataset, LosingGamesIndex, MatchDate, maxdays, base, 
                                                     GamesOverBarier, df, 0)
   }
-  
   return(dataset)
 }

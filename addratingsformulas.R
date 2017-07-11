@@ -1,4 +1,11 @@
 InitializeRating = function(winners, losers){
+  rating = SetUniquePlayers(winners, losers)
+  rating = InitializeRatingVariables(rating)
+  rating = SetContinentsAndNationalities(rating)
+  return(rating)
+}
+
+SetUniquePlayers = function(winners, losers){
   winners_all = as.data.frame(matrix(nrow = length(winners), ncol = 0))
   winners_all$Players = winners
   
@@ -7,15 +14,17 @@ InitializeRating = function(winners, losers){
   
   rating = rbind(winners_all, losers_all)
   rating = unique(rating)
-  
+  return(rating)
+}
+
+InitializeRatingVariables = function(rating){
   numberOfPlayers = nrow(rating)
-  
   
   #Add start rating and number of games
   rating$Ratings = rep(1500, numberOfPlayers)
   rating$games = rep(0, numberOfPlayers)
   
-  #Create Surface Ratings
+  #Create Speciality Ratings
   rating$Hard_Ratings = rating$Ratings
   rating$Hard_games = rating$games
   
@@ -44,7 +53,13 @@ InitializeRating = function(winners, losers){
   rating$Bo3Played = rep(0, numberOfPlayers)
   rating$Bo3Won = rep(0, numberOfPlayers)
   rating$Bo3PlusScore = rep(0, numberOfPlayers)
- 
+  
+  return(rating)
+}
+
+SetContinentsAndNationalities = function(rating){
+  numberOfPlayers = nrow(rating)
+  
   atp_players = read.table("Data/datasets/atp_players.csv", header = T, sep = ",", 
                            quote = "\"", fill = TRUE)
   
@@ -87,7 +102,6 @@ InitializeRating = function(winners, losers){
         lastName = "Hajek"
       }
       
-      
       lastName = gsub("-", " ", lastName)
       lastName = gsub("\'", "", lastName)
       
@@ -117,12 +131,11 @@ InitializeRating = function(winners, losers){
     rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
     rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
   }
-  
   return(rating)
 }
 
 #This functions creates empty lists for locations, ratings and uncertainty
-InitializeRatingVariables = function(dataset){
+InitializeRatingVariablesForGames = function(dataset){
   
   rows = nrow(dataset)
   
@@ -252,7 +265,6 @@ getMatchDetails = function(game, rating){
   
   matchDetails$Country = citycountry$country[match(matchDetails$Location, citycountry$city)]
   
-  
   return(matchDetails)
 }
 
@@ -310,7 +322,6 @@ addSkillsBoX = function(Games, rating, i, matchDetails){
   
   Games$Loser_skillBo5PlusScores[i] = getBo5SkillBasedOnRating(rating, matchDetails$IndexLoser)
   Games$Loser_skillBo3PlusScores[i] = -Games$Loser_skillBo5PlusScores[i]
-
     
   return(Games)
 }

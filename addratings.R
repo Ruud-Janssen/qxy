@@ -8,7 +8,7 @@ allGames = getAllGamesWithoutRating()
 rating = InitializeRating(allGames$Winner, allGames$Loser)
 
 allGames = RemoveWalkOvers(allGames)
-allGames = InitializeRatingVariables(allGames)
+allGames = InitializeRatingVariablesForGames(allGames)
 
 Nall = nrow(allGames)
 

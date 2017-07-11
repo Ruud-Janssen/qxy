@@ -175,17 +175,14 @@ regressorvariables = function(y, Data) {
 }
 
 cvpredictions = function(results, Reg, xcv, ycv, q) {
-  
-  
+
   cvpred = predict(Reg, xcv, type = "response")
-  
   Npred = length(cvpred)
   
   bets = as.data.frame(matrix(nrow = Npred, ncol = 0))
   bets$result = rep(0, Npred)
   bets$bet = rep(0, Npred)
   bets$br = rep(1, Npred)
-  
   #Unfortunately, there appears to be a big upset in the beginning of the rowset, causing bad ROI results
   for(i in 1 : Npred) {
     winexpectation = cvpred[i]
@@ -203,7 +200,6 @@ cvpredictions = function(results, Reg, xcv, ycv, q) {
         } else {
           bets$result[i] = -bets$bet[i]
         }
-        
       } else if(lossexpectation * xcv$PSLthisplayer[i] - 1 > 0.05) {
         results$Nrbets[q] = results$Nrbets[q] + 1
         bets$bet[i] = (lossexpectation * xcv$PSLthisplayer[i] - 1) / (xcv$PSLthisplayer[i] - 1)
@@ -216,7 +212,6 @@ cvpredictions = function(results, Reg, xcv, ycv, q) {
           bets$result[i] = -bets$bet[i]
         } 
       }
-      
     }
     if( i > 1) {
       bets$br[i] = bets$br[i - 1] + bets$result[i]
@@ -224,7 +219,6 @@ cvpredictions = function(results, Reg, xcv, ycv, q) {
       bets$br[i] = 1 + bets$result[i]
     }
   }
-  
   results$LogLossOutOfSample[q] = LogLoss(cvpred, ycv)
   
   results$Br[q] = bets$br[Npred]
@@ -244,7 +238,6 @@ cvpredictions = function(results, Reg, xcv, ycv, q) {
     results$BrGrass[q] = bets$br[Npred]
     results$LogLossOutOfSampleGrass[q] = LogLoss(cvpred[grass], ycv[grass])
   }
-  
   
   hard = (xcv$Surface == "Hard")
   if(sum(hard) > 0) {
