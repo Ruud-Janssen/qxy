@@ -1,17 +1,28 @@
 library(plyr)
 
-CreateRetiredWalkoverAndFatigue = function(dataset){
+CreateRetiredWalkoverAndFatigue = function(dataset, maxdays, base, gamesBarier){
+  #Create Retired and Walkover
+  dataset = SetRetired(dataset)
+  datset = SetWalkover(dataset)
   
-  retired = which(dataset$Comment %in% c("Retired", "Retied", "retired"))
-  Nret = length(retired)
+  #Create variable NrGames for all matches
+  dataset = adply(dataset, 1, SetNrGamesRow)
+  
+  #Create Fatigue
+  dataset = CreateFatigue(dataset, maxdays, base, gamesBarier)
+  
+  return(dataset)
+}
+
+SetRetired = function(dataset){
+  retiredIndexes = which(dataset$Comment %in% c("Retired", "Retied", "retired"))
   
   dataset$Winner_retired_last_game = rep(0, nrow(dataset))
   dataset$Loser_retired_last_game = rep(0, nrow(dataset))
   
   Nt = length(dataset$Winner)
   
-  for(i in 1 : Nret){
-    currentIndex = retired[i]
+  for(currentIndex in retiredIndexes){
     retiredPlayer = dataset$Loser[currentIndex]
     nextGame = FindNextGame(retiredPlayer, dataset$Winner[currentIndex + 1 : Nt], 
                             dataset$Loser[currentIndex + 1 : Nt], currentIndex)
@@ -22,17 +33,18 @@ CreateRetiredWalkoverAndFatigue = function(dataset){
       dataset$Loser_retired_last_game[nextGame$number] = 1 
     }
   }
-  
-  walkover = which(dataset$Comment %in% c("Walkover", "Walover"))
-  Nwalkover = length(walkover)
+  return(dataset)
+}
+
+SetWalkover = function(dataset){
+  walkoverIndexes = which(dataset$Comment %in% c("Walkover", "Walover"))
   
   dataset$Winner_walkover_last_game = rep(0, nrow(dataset))
   dataset$Loser_walkover_last_game = rep(0, nrow(dataset))
   
   Nt = length(dataset$Winner)
   
-  for(i in 1 : Nwalkover){
-    currentIndex = walkover[i]
+  for(currentIndex in walkoverIndexes){
     walkoverPlayer = dataset$Loser[currentIndex]
     nextGame = FindNextGame(walkoverPlayer, dataset$Winner[currentIndex + 1 : Nt], 
                             dataset$Loser[currentIndex + 1 : Nt], currentIndex)
@@ -43,20 +55,6 @@ CreateRetiredWalkoverAndFatigue = function(dataset){
       dataset$Loser_walkover_last_game[nextGame$number] = 1 
     }
   }
-  
-  dataset$NrGames = rep(0, nrow(dataset))
-  
-  #Create variable NrGames for all matches
-  dataset = adply(dataset, 1, SetNrGamesRow)
-  
-  #HyperParameters
-  maxdays = 5
-  base = 0.86
-  gamesBarier = 0
-  
-  #Create Fatigue
-  dataset = CreateFatigue(dataset, maxdays, base, gamesBarier)
-  
   return(dataset)
 }
 
