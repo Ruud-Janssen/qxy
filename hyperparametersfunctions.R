@@ -57,6 +57,8 @@ addRegressorVariableRow = function(row){
         (row$Loser_ratingBo3 - row$Loser_ratingBo5)
     }
     
+    x$recentGamesDiff = row$Winner_recentGames - row$Loser_recentGames
+    
     #loser's viewpoint
   } else{
     x$PSWthisplayer = row$PSL
@@ -96,6 +98,7 @@ addRegressorVariableRow = function(row){
         (row$Loser_ratingBo3 - row$Loser_ratingBo5))
     }
     
+    -(x$recentGamesDiff = row$Winner_recentGames - row$Loser_recentGames)
   }
   
   

@@ -9,20 +9,13 @@ train_modelwithRatings = read.table("D:/Betting/Tennis/Data/train_modelWithRatin
 cv_withRatings = read.table("D:/Betting/Tennis/Data/cvWithRatings.csv"
                                       , header = T, sep = ",", quote = "\"", fill = TRUE)
 
-#train_modelwithRatings = train_modelwithRatings[(train_modelwithRatings$Surface == "Grass" | 
-#                                                   train_modelwithRatings$Surface == "Hard" ), ]
-#cv_withRatings = cv_withRatings[(cv_withRatings$Surface == "Grass"| 
-#                                  cv_withRatings$Surface == "Hard" ), ]
-
-
 Nt = nrow(train_modelwithRatings)
 cv_withRatings = cv_withRatings[!is.na(cv_withRatings$Best.of), ]
-Ncv =nrow(cv_withRatings)
+Ncv = nrow(cv_withRatings)
 
 set.seed(42)
 yt_m = as.numeric(runif(Nt, 0, 1) > 0.5)
 ycv = as.numeric(runif(Ncv, 0, 1) > 0.5)
-
 
 xt_m = regressorvariables(yt_m, train_modelwithRatings)
 
@@ -48,81 +41,56 @@ results$Br = rep(1, 99)
 
 resultsSeperate = results
 
-
 for(q in 1:99) {
   quantile = quantile(xt_m$Uncertainty, q / 100)
   
-  index_xt_m = (xt_m$Uncertainty < quantile)
-  xt_mcurrent = xt_m[index_xt_m, ]
-  yt_mcurrent = yt_m[index_xt_m]
+  xt_mcurrent = removeUncertainMatches(xt_m, quantile)
+
   results$PercentageRemovedt_m[q] = 1 - length(yt_mcurrent) / length(yt_m)
   resultsSeperate$PercentageRemovedt_m[q] = results$PercentageRemovedt_m[q]
   
-  indexGrasst_m = (xt_mcurrent$Surface == "Grass")
-  indexHardt_m = (xt_mcurrent$Surface == "Hard")
-  indexClayt_m = (xt_mcurrent$Surface == "Clay")
+  xt_mcurrentGrass = getXThisSurface(xt_mcurrent, "Grass")
+  xt_mcurrentHard = getXThisSurface(xt_mcurrent, "Hard")
+  xt_mcurrentClay = getXThisSurface(xt_mcurrent, "Clay")
   
-  xt_mcurrentGrass = xt_mcurrent[indexGrasst_m, ]
-  xt_mcurrentHard = xt_mcurrent[indexHardt_m, ]
-  xt_mcurrentClay = xt_mcurrent[indexClayt_m, ]
+  xcvcurrent = removeUncertainMatches(xcv, quantile)
   
-  yt_mcurrentGrass = yt_mcurrent[indexGrasst_m]
-  yt_mcurrentHard = yt_mcurrent[indexHardt_m]
-  yt_mcurrentClay = yt_mcurrent[indexClayt_m]
-  
-  index_xcv = (xcv$Uncertainty < quantile)
-  xcvcurrent = xcv[index_xcv, ]
-  ycvcurrent = ycv[index_xcv]
-  
-  indexGrasscv = (xcvcurrent$Surface == "Grass")
-  indexHardcv = (xcvcurrent$Surface == "Hard")
-  indexClaycv = (xcvcurrent$Surface == "Clay")
-  
-  xcvcurrentGrass = xcvcurrent[indexGrasscv, ]
-  xcvcurrentHard = xcvcurrent[indexHardcv, ]
-  xcvcurrentClay = xcvcurrent[indexClaycv, ]
-  
-  ycvcurrentGrass = ycvcurrent[indexGrasscv]
-  ycvcurrentHard = ycvcurrent[indexHardcv]
-  ycvcurrentClay = ycvcurrent[indexClaycv]
+  xcvcurrentGrass = getXThisSurface(xcvcurrent, "Grass")
+  xcvcurrentHard = getXThisSurface(xcvcurrent, "Hard")
+  xcvcurrentClay = getXThisSurface(xcvcurrent, "Clay")
   
   results$PercentageRemovedcv[q] = 1 - length(ycvcurrent) / length(ycv)
   
-  Reg = glm(yt_mcurrent ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
+  Reg = glm(y ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
             +FatigueDiff + HeadtoHead, data = xt_mcurrent, family = binomial)
   
-  #RegGrass = glm(yt_mcurrentGrass ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
+  #RegGrass = glm(y ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
   #               +FatigueDiff + HeadtoHead, data = xt_mcurrentGrass, family = binomial)
-  #RegHard = glm(yt_mcurrentHard ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
+  #RegHard = glm(y ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
   #              +FatigueDiff + HeadtoHead, data = xt_mcurrentHard, family = binomial)
-  #RegClay = glm(yt_mcurrentClay ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
+  #RegClay = glm(y ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
   #              +FatigueDiff + HeadtoHead, data = xt_mcurrentClay, family = binomial)
   
   #Good model individually chosen:
-  RegGrass = glm(yt_mcurrentGrass ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff 
+  RegGrass = glm(y ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff 
                  + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
                  , data = xt_mcurrentGrass, family = binomial)
-  RegHard = glm(yt_mcurrentHard ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff + 
+  RegHard = glm(y ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff + 
                   DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
                 +FatigueDiff, data = xt_mcurrentHard, family = binomial)
   
-  RegClay = glm(yt_mcurrentClay ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff +
+  RegClay = glm(y ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff +
                   DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
                 +FatigueDiff, data = xt_mcurrentClay, family = binomial)
   
-  
-  #print(q)
-  #print(summary(Reg))
-  #LogLoss(Reg$fitted.values, yt_mcurrent)
-  
   results$LogLossInSample[q] = LogLoss(Reg$fitted.values, yt_mcurrent)
   
-  results = cvpredictions(results, Reg, xcvcurrent, ycvcurrent, q)
-  resultsSeperate = cvpredictions(resultsSeperate, RegGrass, xcvcurrentGrass, ycvcurrentGrass, q)
+  results = cvpredictions(results, Reg, xcvcurrent, xcvcurrent$y, q)
+  resultsSeperate = cvpredictions(resultsSeperate, RegGrass, xcvcurrentGrass, xcvcurrentGrass$y, q)
   resultsSeperate$ROIGrass[q] = resultsSeperate$ROI[q]
-  resultsSeperate = cvpredictions(resultsSeperate, RegHard, xcvcurrentHard, ycvcurrentHard, q)
+  resultsSeperate = cvpredictions(resultsSeperate, RegHard, xcvcurrentHard, xcvcurrentHard$y, q)
   resultsSeperate$ROIHard[q] = resultsSeperate$ROI[q]
-  resultsSeperate = cvpredictions(resultsSeperate, RegClay, xcvcurrentClay, ycvcurrentClay, q)
+  resultsSeperate = cvpredictions(resultsSeperate, RegClay, xcvcurrentClay, xcvcurrentClay$y, q)
   resultsSeperate$ROIClay[q] = resultsSeperate$ROI[q]
 }
 

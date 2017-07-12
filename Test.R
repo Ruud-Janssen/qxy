@@ -33,10 +33,8 @@ ytrain = as.numeric(runif(Ntrain, 0, 1) > 0.5)
 ytest = as.numeric(runif(Ntest, 0, 1) > 0.5)
 
 xtrain = regressorvariables(ytrain, xtrain)
-xtest = regressorvariables(ytest, test)
 
 q = 27
-
 quantile = quantile(xtrain$Uncertainty, q / 100)
 
 xtrain = removeUncertainMatches(xtrain, quantile)
@@ -44,22 +42,8 @@ xtrain = removeUncertainMatches(xtrain, quantile)
 xtrainHard = getXThisSurface(xtrain, "Hard")
 xtrainGrass = getXThisSurface(xtrain, "Grass")
 
-xtest = removeUncertainMatches(xtest, quantile)
-
-xtestHard = getXThisSurface(xtest, "Hard")
-xtestGrass = getXThisSurface(xtest, "Grass")
-
 xtrainHard$ImpProb = xtrainHard$PSLthisplayer/(xtrainHard$PSLthisplayer + xtrainHard$PSWthisplayer)
 xtrainGrass$ImpProb = xtrainGrass$PSLthisplayer/(xtrainGrass$PSLthisplayer + xtrainGrass$PSWthisplayer)
-
-xtestHard$ImpProb = xtestHard$PSLthisplayer/(xtestHard$PSLthisplayer + xtestHard$PSWthisplayer)
-xtestGrass$ImpProb = xtestGrass$PSLthisplayer/(xtestGrass$PSLthisplayer + xtestGrass$PSWthisplayer)
-
-iHard = !is.na(xtestHard$ImpProb)
-iGrass = !is.na(xtestGrass$ImpProb)
-
-xtestHard = xtestHard[iHard, ]
-xtestGrass = xtestGrass[iGrass, ]
 
 regHard = glm(y ~ 0 + ratingdiff + ratingHarddiff +
                 DummyBo5TimesAvgRatingdiff     
@@ -71,6 +55,21 @@ regHard = glm(y ~ 0 + ratingdiff + ratingHarddiff +
 regGrass = glm(y ~ 0 + ratingdiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff 
                +FatigueDiff 
                  , data = xtrainGrass, family = binomial)
+
+xtest = regressorvariables(ytest, test)
+xtest = removeUncertainMatches(xtest, quantile)
+
+xtestHard = getXThisSurface(xtest, "Hard")
+xtestGrass = getXThisSurface(xtest, "Grass")
+
+xtestHard$ImpProb = xtestHard$PSLthisplayer/(xtestHard$PSLthisplayer + xtestHard$PSWthisplayer)
+xtestGrass$ImpProb = xtestGrass$PSLthisplayer/(xtestGrass$PSLthisplayer + xtestGrass$PSWthisplayer)
+
+iHard = !is.na(xtestHard$ImpProb)
+iGrass = !is.na(xtestGrass$ImpProb)
+
+xtestHard = xtestHard[iHard, ]
+xtestGrass = xtestGrass[iGrass, ]
 
 testpredHard = predict(regHard, xtestHard, type = "response")
 LogLoss(testpredHard, xtestHard$y)

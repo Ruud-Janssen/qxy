@@ -3,10 +3,10 @@ source("formulas.r")
 source("addRetiredandFatigueformulas.r")
 
 #HyperParameters
-maxdays = 5
-base = 0.86
-gamesBarier = 0
+maxdays = 2
+base = 0.63
+gamesBarier = 24
 
 allGames = getAllGamesWithoutRating()
-allGames = CreateRetiredWalkoverAndFatigue(allGames)
+allGames = CreateRetiredWalkoverAndFatigue(allGames, maxdays, base, gamesBarier)
 saveDatasetsWithoutRating(allGames)

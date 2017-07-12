@@ -119,7 +119,7 @@ total = foreach(o = 1 : 1, .combine = rbind) %do% {
       
       #results = cvpredictions(results, Reg, xcvcurrent, ycvcurrent, q)
       #resultsSeperate = cvpredictions(resultsSeperate, RegGrass, xcvcurrentGrass, ycvcurrentGrass, q)
-      resultsSeperate = cvpredictions(resultsSeperate, RegHard, xcvcurrentHard, ycvcurrentHard, q)
+      resultsSeperate = cvpredictions(resultsSeperate, RegHard, xcvcurrentHard, xcvcurrentHard$y, q)
       #resultsSeperate = cvpredictions(resultsSeperate, RegClay, xcvcurrentClay, ycvcurrentClay, q)
     }
     

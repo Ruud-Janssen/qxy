@@ -3,6 +3,7 @@ source("formulas.r")
 source("hyperparametersfunctions.r")
 library(leaps)
 library(bestglm)
+library(tictoc)
 
 #Parallel
 library(parallel)
@@ -22,7 +23,7 @@ Nt = nrow(train_modelwithRatings)
 set.seed(42)
 yt_m = as.numeric(runif(Nt, 0, 1) > 0.5)
 
-start.time <- Sys.time()
+tic()
 
 total = foreach(gb = 1 : 10) %do%{
   gamesBarier = 4 * (gb - 1)
@@ -37,7 +38,7 @@ total = foreach(gb = 1 : 10) %do%{
 
       train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
                                           , header = T, sep = ",", quote = "\"", fill = TRUE)
-      train_modelwithRatings = CreateFatigue(train_modelwithRatings, days, power, gamesBarier)
+      train_modelwithRatings = CreateFatigueAndRecentGames(train_modelwithRatings, days, power, gamesBarier)
   
       xt_m = regressorvariables(yt_m, train_modelwithRatings)
       set.seed(42)
@@ -70,8 +71,7 @@ total = foreach(gb = 1 : 10) %do%{
     })
   })
 }
-end.time <- Sys.time()
-time.taken <- end.time - start.time
-time.taken
+toc()
 
 stopCluster(cl)
+write.csv(file = "FatigueParametersResults2.csv", total, row.names=FALSE)

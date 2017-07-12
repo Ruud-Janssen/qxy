@@ -55,6 +55,4 @@ result = function(predictions, x, y) {
   results$ROI = sum(bets$result) / sum(bets$bet)
   
   combined = list("results" = results, "bets" = bets)
-  
-  return(combined)
 }

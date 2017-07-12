@@ -1,42 +1,5 @@
 library(dplyr)
 
-CalculateExpectation <- function(rating, surface, winner, loser) {
-
-  indexWinner = match(winner, rating$Players)
-  indexLoser = match(loser, rating$Players)
-  
-  ratingWinner = rating$Ratings[indexWinner]
-  ratingLoser = rating$Ratings[indexLoser]
-  
-  weight_rating = 0.71
-  weight_surfacerating = 0.29
-  
-  ##All surfaces if more than 10 games
-  #if(rating$ [indexWinner] > 10 & ratingSurface$games[indexLoser]){
-
-  if(surface == "Clay" & rating$Clay_games[indexWinner] > 10 & rating$Clay_games[indexLoser]){
-      avgRatingWinner = weight_rating * ratingWinner + weight_surfacerating * rating$Clay_Ratings[indexWinner]
-      avgRatingLoser = weight_rating * ratingLoser + weight_surfacerating * rating$Clay_Ratings[indexLoser]
-      return (Expectation(avgRatingWinner - avgRatingLoser))
-  } else if(surface == "Hard"& rating$Hard_games[indexWinner] > 10 & rating$Hard_games[indexLoser]){
-    avgRatingWinner = weight_rating * ratingWinner + weight_surfacerating * rating$Hard_Ratings[indexWinner]
-    avgRatingLoser = weight_rating * ratingLoser + weight_surfacerating * rating$Hard_Ratings[indexLoser]
-    return (Expectation(avgRatingWinner - avgRatingLoser))
-  } else if(surface == "Grass"& rating$Grass_games[indexWinner] > 10 & rating$Grass_games[indexLoser]){
-    avgRatingWinner = weight_rating * ratingWinner + weight_surfacerating * rating$Grass_Ratings[indexWinner]
-    avgRatingLoser = weight_rating * ratingLoser + weight_surfacerating * rating$Grass_Ratings[indexLoser]
-    return (Expectation(avgRatingWinner - avgRatingLoser))
-  }
-    #} else {
-    #  avgRatingWinner = ratingWinner
-    #  avgRatingLoser = ratingLoser
-    #}
-    
-    
-  
-  return (Expectation(ratingWinner - ratingLoser))
-}
-
 UpdateRating <- function(rating, matchDetails, expectationWinner) {
   expectationLoser = 1 - expectationWinner
 
@@ -116,7 +79,7 @@ UpdateRating <- function(rating, matchDetails, expectationWinner) {
         expectationLoser
   }
 
-  return(rating)
+  rating
 }
 
 UpdateThisRatingType <- function(Ratings, games, indexWinner, indexLoser) {
@@ -132,28 +95,28 @@ UpdateThisRatingType <- function(Ratings, games, indexWinner, indexLoser) {
   Ratings[indexWinner] = NewRating(ratingWinner, Kwinner, expectationWinner, 1)
   Ratings[indexLoser] = NewRating(ratingLoser, Kloser, expectationLoser, 0)
 
-  return(Ratings)
+  Ratings
 }
 
 AddAGame <- function(games, indexWinner, indexLoser) {
   games[indexWinner] = games[indexWinner] + 1
   games[indexLoser] = games[indexLoser] + 1
   
-  return(games)
+  games
 }
 
 NewRating <- function(ratingPlayer, KPlayer, expectationPlayer, result) {
-  return(ratingPlayer + KPlayer * (result - expectationPlayer))
+  ratingPlayer + KPlayer * (result - expectationPlayer)
 }  
 
 K <- function(numberOfGames) {
   #Got changed after found out that constant 20.6 is better when you remove a lot of the games
   #return (250 / (numberOfGames + 12) ^ 0.44)
-  return(20.6)
+  20.6
 }
 
 Expectation <- function(diff) {
-  return (1 - 1 / (1 + 10 ^ (diff / 400)))
+  1 - 1 / (1 + 10 ^ (diff / 400))
 }
 
 
@@ -165,11 +128,7 @@ LogLoss = function(pred, actual){
 RemoveWalkOvers = function(Data){
   Data = Data[Data$Comment != "Walkover", ]
   Data = Data[Data$Comment != "Walover", ]
-  
-  return(Data)
 }
-
-
 
 #returns a vector containing the next game if available and 
 #an index indicating whether it's the winner (1), loser (2)
@@ -210,7 +169,7 @@ FindDaysDiff = function(dates){
   date1 = as.Date(as.character(dates[1]), format = "%m/%d/%Y" )
   date2 = as.Date(as.character(dates[2]), format = "%m/%d/%Y" )
   
-  return(abs(as.numeric(date2-date1)))
+  abs(as.numeric(date2-date1))
 }
 FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatches) {
   winner_innext_winner = previousMatches + which(winners %in% winner) 
@@ -245,7 +204,7 @@ FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatch
     nextGame$Order = 0
   }  
   
-  return(nextGame)
+  nextGame
 }
 
 getAllGamesWithoutRating = function() {
@@ -259,7 +218,6 @@ getAllGamesWithoutRating = function() {
                     colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
 
   allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
-  return(allGames)
 }
 
 getAllGamesWithRating = function() {
@@ -273,7 +231,6 @@ getAllGamesWithRating = function() {
                     colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
   
   allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
-  return(allGames)
 }
 
 saveDatasetsWithoutRating = function(allGames){

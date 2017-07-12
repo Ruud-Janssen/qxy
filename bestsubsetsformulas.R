@@ -19,8 +19,6 @@ relevantVariables = function(dataset){
   variables$DummyBo5TimesratingNotHarddiff = dataset$DummyBo5 * dataset$ratingNotHarddiff
   variables$DummyBo5TimesAvgRatingdiff2 = dataset$DummyBo5 * 1/2 * (dataset$ratingHarddiff + 
                                                                    dataset$ratingNotHarddiff )
-
-  
    
   variables$ratingThisBoxdiff = variables$DummyBo5 * dataset$ratingBo5diff + 
     variables$DummyBo3 * dataset$ratingBo3diff
@@ -43,6 +41,8 @@ relevantVariables = function(dataset){
   variables$ThisBoxSkillDiff = dataset$ThisBoxSkillDiff
   variables$ThisBoxSkillDiffPlusScores = dataset$ThisBoxSkillDiffPlusScores
   variables$ThisBoxSkillRatingMethod = dataset$ThisBoxSkillRatingMethod
+  
+  variables$recentGamesDiff = dataset$recentGamesDiff
   
   variables$y = dataset$y
   #variables$PSWImpr = dataset$PSLthisplayer /(dataset$PSLthisplayer + dataset$PSWthisplayer)

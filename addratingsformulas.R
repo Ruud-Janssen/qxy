@@ -2,7 +2,6 @@ InitializeRating = function(winners, losers){
   rating = SetUniquePlayers(winners, losers)
   rating = InitializeRatingVariables(rating)
   rating = SetContinentsAndNationalities(rating)
-  return(rating)
 }
 
 SetUniquePlayers = function(winners, losers){
@@ -14,7 +13,6 @@ SetUniquePlayers = function(winners, losers){
   
   rating = rbind(winners_all, losers_all)
   rating = unique(rating)
-  return(rating)
 }
 
 InitializeRatingVariables = function(rating){
@@ -66,9 +64,9 @@ SetContinentsAndNationalities = function(rating){
   rating$Nationality = rep(NA, numberOfPlayers)
   rating$Handed = rep(NA, numberOfPlayers)
   
-  for(i in 1 : length(rating$Players)) {
+  for (i in 1 : length(rating$Players)) {
     name = rating$Players[i]
-    if(name == ""){
+    if (name == "") {
       next()
     }
     name = gsub("Jr.", "", name)
@@ -80,25 +78,25 @@ SetContinentsAndNationalities = function(rating){
     
     
     indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
-    if(sum(!is.na(indexLastName)) > 0) {
-      for(j in 1:length(indexLastName)){
+    if (sum(!is.na(indexLastName)) > 0) {
+      for (j in 1:length(indexLastName)) {
         playerNumberAtp = indexLastName[j]
-        if(startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
+        if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
           rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
           rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
         }
       }
     } else {
-      if(lastName == "Nadal-Parera"){
+      if (lastName == "Nadal-Parera"){
         lastName = "Nadal"
       }
-      if(lastName == "Hantschek") {
+      if (lastName == "Hantschek") {
         lastName = "Hantschk"
       }
-      if(lastName =="Roger-Vasselin"){
+      if (lastName =="Roger-Vasselin"){
         lastName = "Vasselin"
       }
-      if(lastName ==" Hajek"){
+      if (lastName ==" Hajek"){
         lastName = "Hajek"
       }
       
@@ -106,10 +104,10 @@ SetContinentsAndNationalities = function(rating){
       lastName = gsub("\'", "", lastName)
       
       indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
-      if(sum(!is.na(indexLastName)) > 0) {
-        for(j in 1:length(indexLastName)){
+      if (sum(!is.na(indexLastName)) > 0) {
+        for (j in 1:length(indexLastName)) {
           playerNumberAtp = indexLastName[j]
-          if(startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
+          if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
             rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
             rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
           }
@@ -125,7 +123,7 @@ SetContinentsAndNationalities = function(rating){
   rating$Country = rep(NA, numberOfPlayers)
   rating$Continent = rep(NA, numberOfPlayers)
   
-  for(i in 1 : length(rating$Players)) {
+  for (i in 1 : length(rating$Players)) {
     country = rating$Nationality[i]
     countryCodePlayer = match(country, countrycodes$IOC)
     rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
@@ -238,7 +236,7 @@ addRatingVariables = function(Games, rating, i, matchDetails){
   Games$Winner_expectationBasedOnRating[i] = 1 - 1 / (1 + 10 ^ ((rating$Ratings[matchDetails$IndexWinner] 
                                                               - rating$Ratings[matchDetails$IndexLoser])/ 400))
   Games$Loser_expectationBasedOnRating[i] = 1 - Games$Winner_expectationBasedOnRating[i]
-  
+
   return(Games)
 }
 
@@ -264,27 +262,25 @@ getMatchDetails = function(game, rating){
              colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
   
   matchDetails$Country = citycountry$country[match(matchDetails$Location, citycountry$city)]
-  
-  return(matchDetails)
+  matchDetails
 }
 
 addUncertaintyAndGames = function(Games, i, matchDetails){
   Games$Winner_games[i] = matchDetails$Winner_games
   Games$Loser_games[i] = matchDetails$Loser_games
   
-  if(Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
+  if (Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
     Games$Uncertainty[i] = 2
   } else {
     Games$Uncertainty[i] = 1 / (Games$Winner_games[i] * Games$Loser_games[i])
   }
   
-  if(Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
+  if (Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
     Games$Uncertainty2[i] = 2
   } else {
     Games$Uncertainty2[i] = 1 / min(Games$Winner_games[i], Games$Loser_games[i])
   }
-  
-  return(Games)
+  Games
 }
 
 addHomePlayers = function(Games, rating, i, matchDetails){
@@ -294,15 +290,14 @@ addHomePlayers = function(Games, rating, i, matchDetails){
   Games$WinnerisHome[i] = as.numeric(matchDetails$Winner_country == matchDetails$Country)
   Games$LoserisHome[i] = as.numeric(matchDetails$Loser_country == matchDetails$Country)
   
-  if(is.na(Games$WinnerisHome[i])) {
+  if (is.na(Games$WinnerisHome[i])) {
     Games$WinnerisHome[i] = 0
   }
   
-  if(is.na(Games$LoserisHome[i])) {
+  if (is.na(Games$LoserisHome[i])) {
     Games$LoserisHome[i] = 0
   }
-  
-  return(Games)
+  Games
 }
 
 addSkillsBoX = function(Games, rating, i, matchDetails){
@@ -323,32 +318,28 @@ addSkillsBoX = function(Games, rating, i, matchDetails){
   Games$Loser_skillBo5PlusScores[i] = getBo5SkillBasedOnRating(rating, matchDetails$IndexLoser)
   Games$Loser_skillBo3PlusScores[i] = -Games$Loser_skillBo5PlusScores[i]
     
-  return(Games)
+  Games
 }
 
 #if no games in bo5 or bo3 the skill will be 0
 getBo5Skill = function(rating, indexPlayer){
   minGamesRequired = 10
-  if(rating$Bo5Played[indexPlayer] < minGamesRequired | rating$Bo3Played[indexPlayer] < minGamesRequired){
+  if (rating$Bo5Played[indexPlayer] < minGamesRequired | rating$Bo3Played[indexPlayer] < minGamesRequired) {
     return(0)
   }
   
   percentageWinsBo5 = rating$Bo5Won[indexPlayer] / rating$Bo5Played[indexPlayer]
   percentageWinsBo3 = rating$Bo3Won[indexPlayer] / rating$Bo3Played[indexPlayer]
   Bo5Skill = percentageWinsBo5 - percentageWinsBo3
-  
-  return(Bo5Skill)
 }
 
 getBo5SkillBasedOnRating = function(rating, indexPlayer){
   minGamesRequired = 10
-  if(rating$Bo5Played[indexPlayer] < minGamesRequired | rating$Bo3Played[indexPlayer] < minGamesRequired){
+  if (rating$Bo5Played[indexPlayer] < minGamesRequired | rating$Bo3Played[indexPlayer] < minGamesRequired) {
     return(0)
   }
   
   meanBo5PlusScore = rating$Bo5PlusScore[indexPlayer] / rating$Bo5Played[indexPlayer]
   meanBo3PlusScore = rating$Bo3PlusScore[indexPlayer] / rating$Bo3Played[indexPlayer]
   Bo5Skill = meanBo5PlusScore - meanBo3PlusScore
-  
-  return(Bo5Skill)
 }
