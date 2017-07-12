@@ -240,7 +240,7 @@ addRatingVariables = function(Games, rating, i, matchDetails){
   return(Games)
 }
 
-getMatchDetails = function(game, rating){
+getMatchDetailsRating = function(game, rating){
   matchDetails = list()
   
   matchDetails$Winner = game$Winner
@@ -262,7 +262,7 @@ getMatchDetails = function(game, rating){
              colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
   
   matchDetails$Country = citycountry$country[match(matchDetails$Location, citycountry$city)]
-  matchDetails
+  return(matchDetails)
 }
 
 addUncertaintyAndGames = function(Games, i, matchDetails){
@@ -280,7 +280,7 @@ addUncertaintyAndGames = function(Games, i, matchDetails){
   } else {
     Games$Uncertainty2[i] = 1 / min(Games$Winner_games[i], Games$Loser_games[i])
   }
-  Games
+  return(Games)
 }
 
 addHomePlayers = function(Games, rating, i, matchDetails){
@@ -297,7 +297,7 @@ addHomePlayers = function(Games, rating, i, matchDetails){
   if (is.na(Games$LoserisHome[i])) {
     Games$LoserisHome[i] = 0
   }
-  Games
+  return(Games)
 }
 
 addSkillsBoX = function(Games, rating, i, matchDetails){
@@ -318,7 +318,7 @@ addSkillsBoX = function(Games, rating, i, matchDetails){
   Games$Loser_skillBo5PlusScores[i] = getBo5SkillBasedOnRating(rating, matchDetails$IndexLoser)
   Games$Loser_skillBo3PlusScores[i] = -Games$Loser_skillBo5PlusScores[i]
     
-  Games
+  return(Games)
 }
 
 #if no games in bo5 or bo3 the skill will be 0

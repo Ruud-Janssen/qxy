@@ -9,7 +9,7 @@ CreateRetiredWalkoverAndFatigue = function(dataset, maxdays, base, gamesBarier){
   dataset = adply(dataset, 1, SetNrGamesRow)
   
   #Create Fatigue
-  dataset = CreateFatigueAndRecentGames(dataset, maxdays, base, gamesBarier)
+  CreateFatigueAndRecentGames(dataset, maxdays, base, gamesBarier)
 }
 
 SetRetired = function(dataset){
@@ -31,7 +31,7 @@ SetRetired = function(dataset){
       dataset$Loser_retired_last_game[nextGame$number] = 1 
     }
   }
-  dataset
+  return(dataset)
 }
 
 SetWalkover = function(dataset){
@@ -53,19 +53,27 @@ SetWalkover = function(dataset){
       dataset$Loser_walkover_last_game[nextGame$number] = 1 
     }
   }
-  dataset
+  return(dataset)
 }
 
 SetNrGamesRow = function(row){
-  row$NrGames = CalculateNrGames(row)
+  row$Winner_Games = calculatePlayerGames(row, 1)
+  row$Loser_Games  = calculatePlayerGames(row, 0)
+  row$NrGames      = row$Winner_Games + row$Loser_Games
   return(row)
 }
 
-CalculateNrGames = function(row){
-  NrGames = 0 
-  
-  games = as.numeric(c(row$W1, row$L1, row$W2, row$L2, row$W3, 
-                       row$L3, row$W4, row$L4, row$W5, row$L5))
+calculatePlayerGames = function(row, winner) {
+  if (winner == 1) {
+    games = as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5))
+  } else {
+    games = as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5))
+  }
+  calculateNrGames(games)
+}
+
+calculateNrGames = function(games){
+  NrGames = 0
   for(game in games){
     if(!is.na(game)){
       if(game >= 100){
@@ -75,7 +83,7 @@ CalculateNrGames = function(row){
       }
     }
   }
-  NrGames
+  return(NrGames)
 }
 
 CreateFatigueAndRecentGames = function(dataset, maxdays, base, gamesBarier){
@@ -92,7 +100,7 @@ CreateFatigueAndRecentGames = function(dataset, maxdays, base, gamesBarier){
     dataset = setFatigueMatchPlayer(dataset$Winner[i], dataset, i, maxdays, base, gamesBarier)
     dataset = setFatigueMatchPlayer(dataset$Loser[i], dataset, i, maxdays, base, gamesBarier)
   }
-  dataset
+  return(dataset)
 }
 
 setFatigueMatchPlayerPartWinsOrLosses = function(dataset, NextGamesIndexes, MatchDate, maxdays, base,
@@ -114,7 +122,7 @@ setFatigueMatchPlayerPartWinsOrLosses = function(dataset, NextGamesIndexes, Matc
       }
     }
   }
-  dataset
+  return(dataset)
 }
 
 setFatigueMatchPlayer = function(name, dataset, matchnumber, maxdays, base, gamesBarier) {
@@ -134,5 +142,5 @@ setFatigueMatchPlayer = function(name, dataset, matchnumber, maxdays, base, game
     dataset = setFatigueMatchPlayerPartWinsOrLosses(dataset, LosingGamesIndex, MatchDate, maxdays, base, 
                                                     GamesOverBarier, df, 0)
   }
-  dataset
+  return(dataset)
 }

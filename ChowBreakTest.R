@@ -51,7 +51,7 @@ xcvHard = relevantVariables(xcvHard)
 TotalX = rbind(xt_mHard, xcvHard)
 #time for a good old chowbreaktest
 #CONCLUSIONS PROBABLY SUCK BECAUSE CHOW BREAK TEST IS FOR LINEAR REGRESSION YO
-split = 3/4
+split = 1/2
 
 dataHardFirst = TotalX[1 : floor(split  * nrow(TotalX)), ]
 dataHardLast = TotalX[( 1 + floor(split * nrow(TotalX))):nrow(TotalX), ]
@@ -89,6 +89,5 @@ diffBHomeDiff = c(0,0,0,0,0,diffB[6])
 inversesumvar = ginv(vcov(regHardFirst) + vcov(regHardLast)) 
 WaldT = t(diffBHomeDiff) %*% inversesumvar %*% diffBHomeDiff
 WaldT
-print(WaldT)
 qchisq(0.95, df=1)
 

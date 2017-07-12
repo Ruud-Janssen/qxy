@@ -98,7 +98,7 @@ addRegressorVariableRow = function(row){
         (row$Loser_ratingBo3 - row$Loser_ratingBo5))
     }
     
-    -(x$recentGamesDiff = row$Winner_recentGames - row$Loser_recentGames)
+    x$recentGamesDiff = -(row$Winner_recentGames - row$Loser_recentGames)
   }
   
   
@@ -162,15 +162,15 @@ addRegressorVariableRow = function(row){
   return(x)
 }
 
-regressorvariables = function(y, Data) {
+regressorvariables = function(y, data) {
 
-  Data$y = y
-  x = adply(Data, 1, addRegressorVariableRow)
+  data$y = y
+  x = adply(data, 1, addRegressorVariableRow)
   
-  x$Uncertainty = Data$Uncertainty
-  x$Uncertainty2 = Data$Uncertainty2
-  x$Surface = Data$Surface
-  x$Court = Data$Court
+  x$Uncertainty = data$Uncertainty
+  x$Uncertainty2 = data$Uncertainty2
+  x$Surface = data$Surface
+  x$Court = data$Court
   
   x$y = y
   

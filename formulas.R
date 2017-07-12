@@ -6,7 +6,7 @@ UpdateRating <- function(rating, matchDetails, expectationWinner) {
   #Normal ratings
   rating$Ratings = UpdateThisRatingType(rating$Ratings, rating$games, 
                                         matchDetails$IndexWinner, matchDetails$IndexLoser)
-  rating$games = AddAGame(rating$games, matchDetails$IndexWinner, matchDetails$IndexLoser)
+  rating$games = addAGame(rating$games, matchDetails$IndexWinner, matchDetails$IndexLoser)
   
   if(is.na(matchDetails$Surface)) {
     surface = "Missing"
@@ -16,28 +16,28 @@ UpdateRating <- function(rating, matchDetails, expectationWinner) {
   if(matchDetails$Surface == "Hard") {
     rating$Hard_Ratings = UpdateThisRatingType(rating$Hard_Ratings, rating$Hard_games
                                                , matchDetails$IndexWinner, matchDetails$IndexLoser)
-    rating$Hard_games = AddAGame(rating$Hard_games, 
+    rating$Hard_games = addAGame(rating$Hard_games, 
                                  matchDetails$IndexWinner, matchDetails$IndexLoser)
   } else{
     rating$NotHard_Ratings = UpdateThisRatingType(rating$NotHard_Ratings, rating$NotHard_games
                                                , matchDetails$IndexWinner, matchDetails$IndexLoser)
-    rating$NotHard_games = AddAGame(rating$NotHard_games, 
+    rating$NotHard_games = addAGame(rating$NotHard_games, 
                                  matchDetails$IndexWinner, matchDetails$IndexLoser)
   }
   if(matchDetails$Surface == "Grass") {
       rating$Grass_Ratings = UpdateThisRatingType(rating$Grass_Ratings, rating$Grass_games,
                                                   matchDetails$IndexWinner, matchDetails$IndexLoser)
-      rating$Grass_games = AddAGame(rating$Grass_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
+      rating$Grass_games = addAGame(rating$Grass_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
       
     } else if(matchDetails$Surface == "Clay") {
       rating$Clay_Ratings = UpdateThisRatingType(rating$Clay_Ratings, rating$Clay_games, 
                                                  matchDetails$IndexWinner, matchDetails$IndexLoser)
-      rating$Clay_games = AddAGame(rating$Clay_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
+      rating$Clay_games = addAGame(rating$Clay_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
     
     } else if(matchDetails$Surface == "Carpet") {
       rating$Carpet_Ratings = UpdateThisRatingType(rating$Carpet_Ratings, rating$Carpet_games, 
                                                    matchDetails$IndexWinner, matchDetails$IndexLoser)
-      rating$Carpet_games = AddAGame(rating$Carpet_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
+      rating$Carpet_games = addAGame(rating$Carpet_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
     }
   
   if(is.na(matchDetails$Best.of)) {
@@ -47,7 +47,7 @@ UpdateRating <- function(rating, matchDetails, expectationWinner) {
   if(matchDetails$Best.of == 3){
     rating$Bo3_Ratings = UpdateThisRatingType(rating$Bo3_Ratings, rating$Bo3_games
                                                , matchDetails$IndexWinner, matchDetails$IndexLoser)
-    rating$Bo3_games = AddAGame(rating$Bo3_games, 
+    rating$Bo3_games = addAGame(rating$Bo3_games, 
                                  matchDetails$IndexWinner, matchDetails$IndexLoser)
     
     rating$Bo3Played[matchDetails$IndexWinner] = rating$Bo3Played[matchDetails$IndexWinner] + 1
@@ -64,7 +64,7 @@ UpdateRating <- function(rating, matchDetails, expectationWinner) {
   } else if(matchDetails$Best.of == 5) {
     rating$Bo5_Ratings = UpdateThisRatingType(rating$Bo5_Ratings, rating$Bo5_games
                                               , matchDetails$IndexWinner, matchDetails$IndexLoser)
-    rating$Bo5_games = AddAGame(rating$Bo5_games, 
+    rating$Bo5_games = addAGame(rating$Bo5_games, 
                                 matchDetails$IndexWinner, matchDetails$IndexLoser)
     
     rating$Bo5Played[matchDetails$IndexWinner] = rating$Bo5Played[matchDetails$IndexWinner] + 1
@@ -79,7 +79,7 @@ UpdateRating <- function(rating, matchDetails, expectationWinner) {
         expectationLoser
   }
 
-  rating
+  return(rating)
 }
 
 UpdateThisRatingType <- function(Ratings, games, indexWinner, indexLoser) {
@@ -95,14 +95,14 @@ UpdateThisRatingType <- function(Ratings, games, indexWinner, indexLoser) {
   Ratings[indexWinner] = NewRating(ratingWinner, Kwinner, expectationWinner, 1)
   Ratings[indexLoser] = NewRating(ratingLoser, Kloser, expectationLoser, 0)
 
-  Ratings
+  return(Ratings)
 }
 
-AddAGame <- function(games, indexWinner, indexLoser) {
+addAGame <- function(games, indexWinner, indexLoser) {
   games[indexWinner] = games[indexWinner] + 1
   games[indexLoser] = games[indexLoser] + 1
   
-  games
+  return(games)
 }
 
 NewRating <- function(ratingPlayer, KPlayer, expectationPlayer, result) {
@@ -128,6 +128,36 @@ LogLoss = function(pred, actual){
 RemoveWalkOvers = function(Data){
   Data = Data[Data$Comment != "Walkover", ]
   Data = Data[Data$Comment != "Walover", ]
+}
+
+getMatchDetails = function(game){
+  matchDetails = list()
+  
+  matchDetails$Winner = game$Winner
+  matchDetails$Loser = game$Loser
+  matchDetails$Surface = game$Surface
+  matchDetails$Best.of = game$Best.of
+  matchDetails$Date = game$Date
+  
+  return(matchDetails)
+}
+
+addUncertaintyAndGames = function(Games, i, matchDetails){
+  Games$Winner_games[i] = matchDetails$Winner_games
+  Games$Loser_games[i] = matchDetails$Loser_games
+  
+  if (Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
+    Games$Uncertainty[i] = 2
+  } else {
+    Games$Uncertainty[i] = 1 / (Games$Winner_games[i] * Games$Loser_games[i])
+  }
+  
+  if (Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
+    Games$Uncertainty2[i] = 2
+  } else {
+    Games$Uncertainty2[i] = 1 / min(Games$Winner_games[i], Games$Loser_games[i])
+  }
+  return(Games)
 }
 
 #returns a vector containing the next game if available and 
@@ -204,7 +234,7 @@ FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatch
     nextGame$Order = 0
   }  
   
-  nextGame
+  return(nextGame)
 }
 
 getAllGamesWithoutRating = function() {
@@ -222,15 +252,15 @@ getAllGamesWithoutRating = function() {
 
 getAllGamesWithRating = function() {
   train_rating = read.table("Data/datasets/train_ratingWithRatings.csv", header = T, sep = ",", quote = "\"",
-                            colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+                            colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
   train_model = read.table("Data/datasets/train_modelWithRatings.csv", header = T, sep = ",", quote = "\"",
-                           colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+                           colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
   cv = read.table("Data/datasets/cvWithRatings.csv", header = T, sep = ",", quote = "\"", 
-                  colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+                  colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
   test = read.table("Data/datasets/testWithRatings.csv", header = T, sep = ",", quote = "\"",
-                    colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+                    colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
   
-  allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
+  dplyr::bind_rows(train_rating, train_model, cv, test)
 }
 
 saveDatasetsWithoutRating = function(allGames){

@@ -48,9 +48,6 @@ result = function(predictions, x, y) {
     }
     bets$br[i + 1] = bets$br[i] + bets$result[i]
   }
-  
-  
-  
   results$Br = bets$br[Npred + 1]
   results$ROI = sum(bets$result) / sum(bets$bet)
   

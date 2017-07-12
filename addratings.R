@@ -12,8 +12,8 @@ allGames = InitializeRatingVariablesForGames(allGames)
 
 Nall = nrow(allGames)
 
-for(i in 1: Nall) {
-  matchDetails = getMatchDetails(allGames[i, ], rating)
+for (i in 1: Nall) {
+  matchDetails = getMatchDetailsRating(allGames[i, ], rating)
   
   allGames = addUncertaintyAndGames(allGames, i, matchDetails)
   allGames = addRatingVariables(allGames, rating, i, matchDetails)
