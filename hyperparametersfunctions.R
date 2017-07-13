@@ -1,7 +1,13 @@
 library(plyr)
 
-removeUncertainMatches = function(x, edge){
-  index_keep = (x$Uncertainty < edge)
+removeUncertainMatches = function(x, edge, uncertaintyParameter){
+  if(uncertaintyParameter == "COSurface") {
+    index_keep = (x$UncertaintyCOSurface < edge)
+  } else if(uncertaintyParameter == "Surface"){
+    index_keep = (x$UncertaintySurface < edge)
+  } else {
+    index_keep = (x$Uncertainty < edge)
+  }
   x = x[index_keep, ]
   return(x)
 }
@@ -12,167 +18,132 @@ getXThisSurface = function(x, surface){
   return(x)
 }
 
+regressorvariables = function(y, data) {
+  
+  data$y = y
+  returnData = adply(data, 1, addRegressorVariableRow)
+  
+  returnData$Uncertainty = data$Uncertainty
+  returnData$Uncertainty2 = data$Uncertainty2
+  returnData$Surface = data$Surface
+  returnData$Court = data$Court
+  
+  returnData$y = y
+  
+  return(returnData)
+}
 
 addRegressorVariableRow = function(row){
   x = data.frame(matrix(nrow = 1))
-  
-  #winner's viewpoint
+  x = setPointOfViewVariables(x, row)
+  x = setOtherVariables(x, row)
+}
+
+setPointOfViewVariables = function(x, row) {
   if(row$y == 1){
-    x$PSWthisplayer = row$PSW
-    x$PSLthisplayer = row$PSL
-    
-    x$ratingdiff = row$Winner_rating - row$Loser_rating
-    x$ratingClaydiff = row$Winner_ratingClay - row$Loser_ratingClay
-    x$ratingHarddiff = row$Winner_ratingHard - row$Loser_ratingHard
-    x$ratingGrassdiff = row$Winner_ratingGrass - row$Loser_ratingGrass
-    x$ratingNotHarddiff = row$Winner_ratingNotHard - row$Loser_ratingNotHard
-    x$ratingBo3diff = row$Winner_ratingBo3 - row$Loser_ratingBo3
-    x$ratingBo5diff = row$Winner_ratingBo5 - row$Loser_ratingBo5
-  
-    
-    x$RetiredDiff = row$Winner_retired_last_game - row$Loser_retired_last_game
-    x$WalkoverDiff = row$Winner_walkover_last_game - row$Loser_walkover_last_game
-    x$RetiredOrWalkoverDiff = x$RetiredDiff + x$WalkoverDiff
-    x$FatigueDiff = row$Winner_fatigue - row$Loser_fatigue
-    x$HeadtoHead = row$HeadtoHead
-    if(row$HeadtoHeadMatches != 0) {
-      x$HeadtoHeadPercentageWeightedsqN = ((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / (row$HeadtoHeadMatches) - 0.5) * row$HeadtoHeadMatches ^ 0.5   
-    } else {
-      x$HeadtoHeadPercentageWeightedsqN = 0  
-    }
-    x$LastHeadtoHead = row$LastHeadtoHead
-    x$HomeDiff = row$WinnerisHome - row$LoserisHome
-    
-    if(row$Best.of == 3){
-      x$ThisBoxSkillDiff = row$Winner_skillBo3 - row$Loser_skillBo3
-      x$ThisBoxSkillDiffPlusScores = row$Winner_skillBo3PlusScores - row$Loser_skillBo3PlusScores
-      
-      x$ThisBoxSkillRatingMethod = (row$Winner_ratingBo5 - row$Winner_ratingBo3) - 
-        (row$Loser_ratingBo5 - row$Loser_ratingBo3)
-          } else {
-      x$ThisBoxSkillDiff = row$Winner_skillBo5 - row$Loser_skillBo5
-      x$ThisBoxSkillDiffPlusScores = row$Winner_skillBo5PlusScores - row$Loser_skillBo5PlusScores
-      
-      x$ThisBoxSkillRatingMethod = (row$Winner_ratingBo3 - row$Winner_ratingBo5) - 
-        (row$Loser_ratingBo3 - row$Loser_ratingBo5)
-    }
-    
-    x$recentGamesDiff = row$Winner_recentGames - row$Loser_recentGames
-    
-    #loser's viewpoint
-  } else{
-    x$PSWthisplayer = row$PSL
-    x$PSLthisplayer = row$PSW
-    x$ratingdiff = -(row$Winner_rating - row$Loser_rating)
-    x$ratingClaydiff = -(row$Winner_ratingClay - row$Loser_ratingClay)
-    x$ratingHarddiff = -(row$Winner_ratingHard - row$Loser_ratingHard)
-    x$ratingGrassdiff = -(row$Winner_ratingGrass - row$Loser_ratingGrass)
-    x$ratingNotHarddiff = -(row$Winner_ratingNotHard - row$Loser_ratingNotHard)
-    x$ratingBo3diff = -(row$Winner_ratingBo3 - row$Loser_ratingBo3)
-    x$ratingBo5diff = -(row$Winner_ratingBo5 - row$Loser_ratingBo5)
-    
-    x$RetiredDiff = row$Loser_retired_last_game - row$Winner_retired_last_game
-    x$WalkoverDiff = row$Loser_walkover_last_game - row$Winner_walkover_last_game 
-    x$RetiredOrWalkoverDiff = x$RetiredDiff + x$WalkoverDiff
-    x$FatigueDiff = row$Loser_fatigue - row$Winner_fatigue
-    x$HeadtoHead = -row$HeadtoHead
-    if(row$HeadtoHeadMatches != 0) {
-      x$HeadtoHeadPercentageWeightedsqN = -(((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / (row$HeadtoHeadMatches) - 0.5) * row$HeadtoHeadMatches ^ 0.5)   
-    } else {
-      x$HeadtoHeadPercentageWeightedsqN = 0  
-    }
-    x$LastHeadtoHead = -row$LastHeadtoHead
-    x$HomeDiff = row$LoserisHome -  row$WinnerisHome 
-    
-    if(row$Best.of == 3){
-      x$ThisBoxSkillDiff =  row$Loser_skillBo3 - row$Winner_skillBo3
-      x$ThisBoxSkillDiffPlusScores = row$Loser_skillBo3PlusScores - row$Winner_skillBo3PlusScores
-      
-      x$ThisBoxSkillRatingMethod = -((row$Winner_ratingBo5 - row$Winner_ratingBo3) - 
-        (row$Loser_ratingBo5 - row$Loser_ratingBo3))
-    } else {
-      x$ThisBoxSkillDiff =  row$Loser_skillBo5 - row$Winner_skillBo5 
-      x$ThisBoxSkillDiffPlusScores = row$Loser_skillBo5PlusScores - row$Winner_skillBo5PlusScores 
-      
-      x$ThisBoxSkillRatingMethod = -((row$Winner_ratingBo3 - row$Winner_ratingBo5) - 
-        (row$Loser_ratingBo3 - row$Loser_ratingBo5))
-    }
-    
-    x$recentGamesDiff = -(row$Winner_recentGames - row$Loser_recentGames)
+    mp = 1
+  } else {
+    mp = -1
   }
   
+  x$PSWthisplayer = row$y * row$PSW + (1 - row$y) * row$PSL
+  x$PSLthisplayer = row$y * row$PSL + (1 - row$y) * row$PSW
   
-  surface = row$Surface
+  x$ratingdiff        = mp * (row$Winner_rating - row$Loser_rating)
+  x$ratingClaydiff    = mp * (row$Winner_ratingClay - row$Loser_ratingClay)
+  x$ratingHarddiff    = mp * (row$Winner_ratingHard - row$Loser_ratingHard)
+  x$ratingGrassdiff   = mp * (row$Winner_ratingGrass - row$Loser_ratingGrass)
+  x$ratingNotHarddiff = mp * (row$Winner_ratingNotHard - row$Loser_ratingNotHard)
+  x$ratingBo3diff     = mp * (row$Winner_ratingBo3 - row$Loser_ratingBo3)
+  x$ratingBo5diff     = mp * (row$Winner_ratingBo5 - row$Loser_ratingBo5)
   
-  if(surface == "Clay") {
-    x$ratingdiffCurrentSurface = x$ratingClaydiff
-  } else if(surface == "Hard") {
-    x$ratingdiffCurrentSurface = x$ratingHarddiff
-  } else if(surface == "Grass") {
-    x$ratingdiffCurrentSurface = x$ratingGrassdiff
-  } 
+  x$RetiredDiff           = mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
+  x$WalkoverDiff          = mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)
+  x$RetiredOrWalkoverDiff = x$RetiredDiff + x$WalkoverDiff
+  x$FatigueDiff           = mp * (row$Winner_fatigue - row$Loser_fatigue)
+  x$HeadtoHead            = mp * (row$HeadtoHead)
+  x$LastHeadtoHead        = mp * row$LastHeadtoHead
+  x$HomeDiff              = mp * (row$WinnerisHome - row$LoserisHome)
+  
+  if(row$HeadtoHeadMatches != 0) {
+    x$HeadtoHeadPercentageWeightedsqN =  mp * (((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / 
+                                                  (row$HeadtoHeadMatches) - 0.5) * row$HeadtoHeadMatches ^ 0.5) 
+  } else {
+    x$HeadtoHeadPercentageWeightedsqN = 0  
+  }
+  
+  if(row$Best.of == 3){
+    x$ThisBoxSkillDiff           = mp * (row$Winner_skillBo3 - row$Loser_skillBo3)
+    x$ThisBoxSkillDiffPlusScores = mp * (row$Winner_skillBo3PlusScores - row$Loser_skillBo3PlusScores)
+    x$ThisBoxSkillRatingMethod   = mp * ((row$Winner_ratingBo5 - row$Winner_ratingBo3) - 
+                                           (row$Loser_ratingBo5 - row$Loser_ratingBo3))
+  } else {
+    x$ThisBoxSkillDiff           = mp * (row$Winner_skillBo5 - row$Loser_skillBo5)
+    x$ThisBoxSkillDiffPlusScores = mp * (row$Winner_skillBo5PlusScores - row$Loser_skillBo5PlusScores)
+    x$ThisBoxSkillRatingMethod   = mp * ((row$Winner_ratingBo3 - row$Winner_ratingBo5) - 
+                                           (row$Loser_ratingBo3 - row$Loser_ratingBo5))
+  }
+  x$recentGamesDiff = mp * (row$Winner_recentGames - row$Loser_recentGames)
+  
+  x$COPercentMatchesWonDiff = mp * (row$Winner_COPercentMatchesWon -  row$Loser_COPercentMatchesWon )
+  x$COPercentSetsDiff       = mp * (row$Winner_COPercentSetsWon - row$Loser_COPercentSetsWon)
+  x$COPercentGamesDiff      = mp * (row$Winner_COPercentGamesWon - row$Loser_COPercentGamesWon) 
+  x$COPercentPointsDiff     = mp * (row$Winner_COPercentPointsWon - row$Loser_COPercentPointsWon)
+  
+  x$COPercentMatchesWonThisSurfaceDiff = 
+    mp * (row$Winner_COPercentMatchesThisSurfaceWon -  row$Loser_COPercentMatchesThisSurfaceWon )
+  x$COPercentSetsThisSurfaceDiff       = 
+    mp * (row$Winner_COPercentSetsThisSurfaceWon - row$Loser_COPercentSetsThisSurfaceWon)
+  x$COPercentGamesThisSurfaceDiff      = 
+    mp * (row$Winner_COPercentGamesThisSurfaceWon - row$Loser_COPercentGamesThisSurfaceWon) 
+  x$COPercentPointsThisSurfaceDiff     = 
+    mp * (row$Winner_COPercentPointsThisSurfaceWon - row$Loser_COPercentPointsThisSurfaceWon)
+  
+  return(x)
+}
+
+setOtherVariables = function(x, row){
+  x$DummyClay                = as.numeric(row$Surface == "Clay")
+  x$DummyGrass               = as.numeric(row$Surface == "Grass")
+  x$DummyHard                = as.numeric(row$Surface == "Hard")
+  x$ratingdiffCurrentSurface = x$DummyClay * x$ratingClaydiff + x$DummyGrass * x$ratingGrassdiff + 
+    x$DummyHard * x$ratingHarddiff
   
   if(row$Best.of == 5){
-    x$DummyBo5TimesRatingdiff = x$ratingdiff
-    
+    x$DummyBo5                   = 1
+    x$DummyBo5TimesRatingdiff    = x$DummyBo5 * x$ratingdiff
     x$DummyBo5TimesAvgRatingdiff = 0.5 * (x$ratingdiff + x$ratingdiffCurrentSurface)
-    
-    #if(x$ratingdiff > 0) {
-      x$DummyBo5 = 1
-    #} else if(x$ratingdiff < 0) {
-    #  x$DummyBo5 = -1
-    #} else {
-    #  x$DummyBo5 = 0
-    #}
-    
-    
   } else {
-    x$DummyBo5TimesRatingdiff = 0
+    x$DummyBo5                   = 0
+    x$DummyBo5TimesRatingdiff    = 0
     x$DummyBo5TimesAvgRatingdiff = 0
-    x$DummyBo5 = 0
   }
   
   if(x$DummyBo5TimesRatingdiff > 0) {
-    x$DummyBo5TimesRatingdiff_5SameSign = x$DummyBo5TimesRatingdiff ^ 0.5
-    x$DummyBo5TimesRatingdiffSquaredSameSign = (x$DummyBo5TimesRatingdiff) ^ 2
-    x$DummyBo5TimesRatingdiff1_5SameSign = x$DummyBo5TimesRatingdiff ^ 1.5
-    x$DummyBo5TimesRatingdiffthirdSameSign = x$DummyBo5TimesRatingdiff ^ 3
+    x$DummyBo5TimesRatingdiff_5SameSign      = x$DummyBo5TimesRatingdiff ^ 0.5
+    x$DummyBo5TimesRatingdiffSquaredSameSign = x$DummyBo5TimesRatingdiff ^ 2
+    x$DummyBo5TimesRatingdiff1_5SameSign     = x$DummyBo5TimesRatingdiff ^ 1.5
+    x$DummyBo5TimesRatingdiffthirdSameSign   = x$DummyBo5TimesRatingdiff ^ 3
   } else {
     x$DummyBo5TimesRatingdiffSquaredSameSign = - (x$DummyBo5TimesRatingdiff) ^ 2
-    x$DummyBo5TimesRatingdiff_5SameSign = -(abs(x$DummyBo5TimesRatingdiff)) ^ 0.5
-    x$DummyBo5TimesRatingdiff1_5SameSign = -(abs(x$DummyBo5TimesRatingdiff)) ^ 1.5
-    x$DummyBo5TimesRatingdiffthirdSameSign = -(abs(x$DummyBo5TimesRatingdiff)) ^ 3
+    x$DummyBo5TimesRatingdiff_5SameSign      = -(abs(x$DummyBo5TimesRatingdiff)) ^ 0.5
+    x$DummyBo5TimesRatingdiff1_5SameSign     = -(abs(x$DummyBo5TimesRatingdiff)) ^ 1.5
+    x$DummyBo5TimesRatingdiffthirdSameSign   = -(abs(x$DummyBo5TimesRatingdiff)) ^ 3
   }
   
   x$FatigueDiffTimesBo5 = x$DummyBo5 * x$FatigueDiff
   
-  if(surface == "Clay") {
-    x$DummyClay = 1
-    x$DummyGrass = 0
-    x$DummyHard = 0
-  } else if(surface == "Grass") {
-    x$DummyClay = 0
-    x$DummyGrass = 1
-    x$DummyHard = 0
-  } else if(surface == "Hard") {
-    x$DummyClay = 0
-    x$DummyGrass = 0
-    x$DummyHard = 1
+  if(row$Winner_COGames > 0 & row$Loser_COGames > 0) {
+    x$UncertaintyCO = 1 / (row$Winner_COGames * row$Loser_COGames) 
+  } else {
+  x$UncertaintyCO = 2
   }
-  return(x)
-}
-
-regressorvariables = function(y, data) {
-
-  data$y = y
-  x = adply(data, 1, addRegressorVariableRow)
   
-  x$Uncertainty = data$Uncertainty
-  x$Uncertainty2 = data$Uncertainty2
-  x$Surface = data$Surface
-  x$Court = data$Court
-  
-  x$y = y
+  if(row$Winner_COThisSurfaceGames > 0 & row$Loser_COThisSurfaceGames > 0) {
+    x$UncertaintyCOSurface = 1 / (row$Winner_COThisSurfaceGames * row$Loser_COThisSurfaceGames) 
+  } else {
+    x$UncertaintyCOSurface = 2
+  }
   
   return(x)
 }

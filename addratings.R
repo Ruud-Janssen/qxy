@@ -15,7 +15,7 @@ Nall = nrow(allGames)
 for (i in 1: Nall) {
   matchDetails = getMatchDetailsRating(allGames[i, ], rating)
   
-  allGames = addUncertaintyAndGames(allGames, i, matchDetails)
+  allGames = addUncertaintyAndGames(allGames, rating, i, matchDetails)
   allGames = addRatingVariables(allGames, rating, i, matchDetails)
   allGames = addHomePlayers(allGames, rating, i, matchDetails)
   allGames = addSkillsBoX(allGames, rating, i, matchDetails)

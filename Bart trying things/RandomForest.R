@@ -1,10 +1,17 @@
 rm(list = ls())
 
-source("formulas.r")
-source("hyperparametersfunctions.r")
-source("bestsubsetsformulas.r")
+source("formulas.R")
+source("hyperparametersfunctions.R")
+source("bestsubsetsformulas.R")
 
 library(randomForest)
+library(leaps)
+library(bestglm)
+library(glmnet)
+library(plotmo)
+library(glmulti)
+
+threshold = 1e-9
 
 train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
                                     , header = T, sep = ",", quote = "\"", fill = TRUE)
@@ -14,58 +21,51 @@ cv_withRatings = read.table("Data/datasets/cvWithRatings.csv"
 Nt = nrow(train_modelwithRatings)
 #apparantly there is one NA in BestOF, temporarily removal needs to be data cleansed
 cv_withRatings = cv_withRatings[!is.na(cv_withRatings$Best.of), ]
-Ncv =nrow(cv_withRatings)
+Ncv = nrow(cv_withRatings)
 
 set.seed(42)
 yt_m = as.numeric(runif(Nt, 0, 1) > 0.5)
-ycv = as.numeric(runif(Ncv, 0, 1) > 0.5)
+ycv  = as.numeric(runif(Ncv, 0, 1) > 0.5)
 
 xt_m = regressorvariables(yt_m, train_modelwithRatings)
 xcv = regressorvariables(ycv, cv_withRatings)
 
 q = 27
 
-quantile = quantile(xt_m$Uncertainty, q / 100)
+xt_mHard = getXThisSurface(xt_m, "Hard")
+xt_mGrass = getXThisSurface(xt_m, "Grass")
+xt_mClay = getXThisSurface(xt_m, "Clay")
 
-index_xt_m = (xt_m$Uncertainty < quantile)
-xt_m = xt_m[index_xt_m, ]
-yt_m = yt_m[index_xt_m]
+quantileHard = quantile(xt_mHard$UncertaintyCOSurface, q / 100)
 
-indexGrasst_m = (xt_m$Surface == "Grass")
-indexHardt_m = (xt_m$Surface == "Hard")
-indexClayt_m = (xt_m$Surface == "Clay")
+xt_mHard = removeUncertainMatches(xt_mHard, quantileHard, "COSurface")
 
-xt_mGrass = xt_m[indexGrasst_m, ]
-xt_mHard = xt_m[indexHardt_m, ]
-xt_mClay = xt_m[indexClayt_m, ]
+#quantile = quantile(xcv$Uncertainty, q / 100)
 
-yt_mGrass = yt_m[indexGrasst_m]
-yt_mHard = yt_m[indexHardt_m]
-yt_mClay = yt_m[indexClayt_m]
+xcvHard = getXThisSurface(xcv, "Hard")
+xcvGrass = getXThisSurface(xcv, "Grass")
+xcvClay = getXThisSurface(xcv, "Clay")
 
-index_xcv = (xcv$Uncertainty < quantile)
-xcv = xcv[index_xcv, ]
-ycv = ycv[index_xcv]
-
-indexGrasscv = (xcv$Surface == "Grass")
-indexHardcv = (xcv$Surface == "Hard")
-indexClaycv = (xcv$Surface == "Clay")
-
-xcvGrass = xcv[indexGrasscv, ]
-xcvHard = xcv[indexHardcv, ]
-xcvClay = xcv[indexClaycv, ]
-
-ycvGrass = ycv[indexGrasscv]
-ycvHard = ycv[indexHardcv]
-ycvClay = ycv[indexClaycv]
+xcvHard = removeUncertainMatches(xcvHard, quantileHard, "COSurface")
 
 xtmHardRel = relevantVariables(xt_mHard)
+xcvHardRel = relevantVariables(xcvHard)
 
-yt_mHard = as.factor(yt_mHard)
+xtmHardRel = xtmHardRel[!is.na(xtmHardRel$COPercentPointsDiff), ]
+xcvHardRel = xcvHardRel[!is.na(xcvHardRel$COPercentPointsDiff), ]
 
-xtmHardRel$y = yt_mHard
+#Normalization
+sdtrain <- apply(xtmHardRel[, 1:(length(xtmHardRel) - 1)] , 2, sd) 
+#meantrain <- apply(xtmHardRel[, 1:(length(xtmHardRel) - 1)] , 2, mean) 
+#xtmHardRel[, 1:(length(xtmHardRel) - 1)] = xtmHardRel[, 1:(length(xtmHardRel) - 1)] - meantrain
+#xcvHardRel[, 1:(length(xcvHardRel) - 1)] = xcvHardRel[, 1:(length(xcvHardRel) - 1)] - meantrain
 
-#
+xtmHardRel[, 1:(length(xtmHardRel) - 1)] = 
+  as.data.frame(scale(xtmHardRel[, 1:(length(xtmHardRel) - 1)], center = FALSE,scale = sdtrain))
+xcvHardRel[, 1:(length(xcvHardRel) - 1)] = 
+  as.data.frame(scale(xcvHardRel[, 1:(length(xcvHardRel) - 1)], center = FALSE,scale = sdtrain))
+
+xtmHardRel$y = as.factor(xtmHardRel$y)
 
 
 rf = randomForest(y~., data=xtmHardRel, ntree = 3000, nodesize = 10)
@@ -74,10 +74,8 @@ rf$importance
 
 xcvHardRel = relevantVariables(xcvHard)
 
-
 p = predict(rf, xcvHardRel, type = "prob")
-
-LogLoss(p[, 2], ycvHard)
+LogLoss(p[, 2], xcvHardRel$y)
 
 
 #### Try it on the test set I guess

@@ -1,7 +1,9 @@
-source("Import CitiesToCountries2.r")
+source("Import CitiesToCountries2.R")
 
-source("createTrainCVTest.r")
+source("createTrainCVTest.R")
 
-source("addHeadtoHeadAndPrevMatches.r")
-source("addRetiredandFatigue.r")
-source("addratings.r")
+source("addHeadtoHeadAndPrevMatches.R")
+source("addRetiredandFatigue.R")
+
+source("addratings.R")
+source("addCommonOpponents.r")

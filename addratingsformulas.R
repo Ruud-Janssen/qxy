@@ -143,32 +143,33 @@ InitializeRatingVariablesForGames = function(dataset){
   dataset$WinnerisHome = rep(NA, rows)
   dataset$LoserisHome = rep(NA, rows)
   
-  dataset$Winner_games = rep(NA, rows)
-  dataset$Loser_games = rep(NA, rows)
-  dataset$Uncertainty = rep(NA, rows)
-  dataset$Uncertainty2 = rep(NA, rows)
+  dataset$Winner_games       = rep(NA, rows)
+  dataset$Loser_games        = rep(NA, rows)
+  dataset$Uncertainty        = rep(NA, rows)
+  dataset$Uncertainty2       = rep(NA, rows)
+  dataset$UncertaintySurface = rep(NA, rows)
   
-  dataset$Winner_rating = rep(NA, rows)
-  dataset$Winner_ratingClay = rep(NA, rows)
-  dataset$Winner_ratingHard = rep(NA, rows)
+  dataset$Winner_rating      = rep(NA, rows)
+  dataset$Winner_ratingClay  = rep(NA, rows)
+  dataset$Winner_ratingHard  = rep(NA, rows)
   dataset$Winner_ratingGrass = rep(NA, rows)
-  dataset$Winner_ratingBo3 = rep(NA, rows)
-  dataset$Winner_ratingBo5 = rep(NA, rows)
+  dataset$Winner_ratingBo3   = rep(NA, rows)
+  dataset$Winner_ratingBo5   = rep(NA, rows)
   
-  dataset$Loser_rating = rep(NA, rows)
-  dataset$Loser_ratingClay = rep(NA, rows)
-  dataset$Loser_ratingHard = rep(NA, rows)
+  dataset$Loser_rating      = rep(NA, rows)
+  dataset$Loser_ratingClay  = rep(NA, rows)
+  dataset$Loser_ratingHard  = rep(NA, rows)
   dataset$Loser_ratingGrass = rep(NA, rows)
-  dataset$Loser_ratingBo3 = rep(NA, rows)
-  dataset$Loser_ratingBo5 = rep(NA, rows)
+  dataset$Loser_ratingBo3   = rep(NA, rows)
+  dataset$Loser_ratingBo5   = rep(NA, rows)
   
   dataset$Winner_skillBo5 = rep(NA, rows)
   dataset$Winner_skillBo3 = rep(NA, rows)
-  dataset$Loser_skillBo5 = rep(NA, rows)
-  dataset$Loser_skillBo3 = rep(NA, rows)
+  dataset$Loser_skillBo5  = rep(NA, rows)
+  dataset$Loser_skillBo3  = rep(NA, rows)
   
   dataset$Winner_expectationBasedOnRating = rep(NA, rows)
-  dataset$Loser_expectationBasedOnRating = rep(NA, rows)
+  dataset$Loser_expectationBasedOnRating  = rep(NA, rows)
   
   dataset$Winner_skillBo5PlusScores = rep(NA, rows)
   dataset$Winner_skillBo3PlusScores = rep(NA, rows)
@@ -179,63 +180,26 @@ InitializeRatingVariablesForGames = function(dataset){
   return(dataset)
 }
 
-#Note that we assume here that the walkovers are removed
-saveDatasetsWithRating = function(allGames, rating){
-  
-  Nt_r = nrow(RemoveWalkOvers(read.table("Data/datasets/train_rating.csv",  header = T, sep = ",", quote = "\"",
-                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
-  Nt_m = nrow(RemoveWalkOvers(read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
-                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
-  Ncv = nrow(RemoveWalkOvers(read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
-                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
-  Ntest = nrow(RemoveWalkOvers(read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
-                                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
-  
-  firstindextrain_rating = 1
-  lastindextrain_rating = Nt_r
-  train_rating = allGames[firstindextrain_rating : lastindextrain_rating, ]
-  
-  firstindextrain_model = lastindextrain_rating + 1
-  lastindextrain_model = lastindextrain_rating + Nt_m
-  train_model = allGames[firstindextrain_model : lastindextrain_model, ]
-  
-  firstindexcv = lastindextrain_model + 1
-  lastindexcv = lastindextrain_model + Ncv
-  cv = allGames[firstindexcv : lastindexcv, ]
-  
-  firstindextest = lastindexcv + 1
-  lastindextest = lastindexcv + Ntest
-  test = allGames[firstindextest: lastindextest, ]
-  
-  write.csv(file = "Data/datasets/train_ratingWithRatings.csv", train_rating, row.names=FALSE)
-  write.csv(file = "Data/datasets/train_modelWithRatings.csv", train_model, row.names=FALSE)
-  write.csv(file = "Data/datasets/cvWithRatings.csv", cv, row.names=FALSE)
-  write.csv(file = "Data/datasets/testWithRatings.csv", test, row.names=FALSE)
-  
-  write.csv(file = "Data/datasets/ratingafterTest.csv", 
-            rating, row.names=FALSE)
-}
-
 addRatingVariables = function(Games, rating, i, matchDetails){
-  Games$Winner_rating[i] = rating$Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingClay[i] = rating$Clay_Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingHard[i] = rating$Hard_Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingGrass[i] = rating$Grass_Ratings[matchDetails$IndexWinner]
+  Games$Winner_rating[i]        = rating$Ratings[matchDetails$IndexWinner]
+  Games$Winner_ratingClay[i]    = rating$Clay_Ratings[matchDetails$IndexWinner]
+  Games$Winner_ratingHard[i]    = rating$Hard_Ratings[matchDetails$IndexWinner]
+  Games$Winner_ratingGrass[i]   = rating$Grass_Ratings[matchDetails$IndexWinner]
   Games$Winner_ratingNotHard[i] = rating$NotHard_Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingBo3[i] = rating$Bo3_Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingBo5[i] = rating$Bo5_Ratings[matchDetails$IndexWinner]
+  Games$Winner_ratingBo3[i]     = rating$Bo3_Ratings[matchDetails$IndexWinner]
+  Games$Winner_ratingBo5[i]     = rating$Bo5_Ratings[matchDetails$IndexWinner]
   
-  Games$Loser_rating[i] = rating$Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingClay[i] = rating$Clay_Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingHard[i] = rating$Hard_Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingGrass[i] = rating$Grass_Ratings[matchDetails$IndexLoser]
+  Games$Loser_rating[i]        = rating$Ratings[matchDetails$IndexLoser]
+  Games$Loser_ratingClay[i]    = rating$Clay_Ratings[matchDetails$IndexLoser]
+  Games$Loser_ratingHard[i]    = rating$Hard_Ratings[matchDetails$IndexLoser]
+  Games$Loser_ratingGrass[i]   = rating$Grass_Ratings[matchDetails$IndexLoser]
   Games$Loser_ratingNotHard[i] = rating$NotHard_Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingBo3[i] = rating$Bo3_Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingBo5[i] = rating$Bo5_Ratings[matchDetails$IndexLoser]
+  Games$Loser_ratingBo3[i]     = rating$Bo3_Ratings[matchDetails$IndexLoser]
+  Games$Loser_ratingBo5[i]     = rating$Bo5_Ratings[matchDetails$IndexLoser]
   
   Games$Winner_expectationBasedOnRating[i] = 1 - 1 / (1 + 10 ^ ((rating$Ratings[matchDetails$IndexWinner] 
                                                               - rating$Ratings[matchDetails$IndexLoser])/ 400))
-  Games$Loser_expectationBasedOnRating[i] = 1 - Games$Winner_expectationBasedOnRating[i]
+  Games$Loser_expectationBasedOnRating[i]  = 1 - Games$Winner_expectationBasedOnRating[i]
 
   return(Games)
 }
@@ -243,20 +207,20 @@ addRatingVariables = function(Games, rating, i, matchDetails){
 getMatchDetailsRating = function(game, rating){
   matchDetails = list()
   
-  matchDetails$Winner = game$Winner
-  matchDetails$Loser = game$Loser
+  matchDetails$Winner  = game$Winner
+  matchDetails$Loser   = game$Loser
   matchDetails$Surface = game$Surface
   matchDetails$Best.of = game$Best.of
   
   matchDetails$IndexWinner = match(matchDetails$Winner, rating$Players)
-  matchDetails$IndexLoser = match(matchDetails$Loser, rating$Players)
+  matchDetails$IndexLoser  = match(matchDetails$Loser, rating$Players)
   
   matchDetails$Winner_games = rating$games[matchDetails$IndexWinner]
-  matchDetails$Loser_games = rating$games[matchDetails$IndexLoser]
+  matchDetails$Loser_games  = rating$games[matchDetails$IndexLoser]
   
-  matchDetails$Location = game$Location
+  matchDetails$Location       = game$Location
   matchDetails$Winner_country = rating$Country[matchDetails$IndexWinner]
-  matchDetails$Loser_country = rating$Country[matchDetails$IndexLoser]
+  matchDetails$Loser_country  = rating$Country[matchDetails$IndexLoser]
   
   citycountry = read.table("Data/datasets/citycountry.csv",  header = T, sep = ",", quote = "\"",
              colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
@@ -265,30 +229,45 @@ getMatchDetailsRating = function(game, rating){
   return(matchDetails)
 }
 
-addUncertaintyAndGames = function(Games, i, matchDetails){
+addUncertaintyAndGames = function(Games, rating, i, matchDetails){
   Games$Winner_games[i] = matchDetails$Winner_games
-  Games$Loser_games[i] = matchDetails$Loser_games
-  
-  if (Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
-    Games$Uncertainty[i] = 2
-  } else {
-    Games$Uncertainty[i] = 1 / (Games$Winner_games[i] * Games$Loser_games[i])
-  }
+  Games$Loser_games[i]  = matchDetails$Loser_games
+
+  Games$Uncertainty[i] = Uncertainty(Games$Winner_games[i], Games$Loser_games[i])
   
   if (Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
     Games$Uncertainty2[i] = 2
   } else {
     Games$Uncertainty2[i] = 1 / min(Games$Winner_games[i], Games$Loser_games[i])
   }
+  
+  if (matchDetails$Surface == "Hard") {
+    Games$UncertaintySurface[i] = Uncertainty(rating$Hard_games[matchDetails$IndexWinner], 
+                                                  rating$Hard_games[matchDetails$IndexLoser])
+  } else if(matchDetails$Surface == "Grass") {
+    Games$UncertaintySurface[i] = Uncertainty(rating$Grass_games[matchDetails$IndexWinner], 
+                                                  rating$Grass_games[matchDetails$IndexLoser])
+  } else if(matchDetails$Surface == "Clay") {
+    Games$UncertaintySurface[i] = Uncertainty(rating$Clay_games[matchDetails$IndexWinner], 
+                                                  rating$Clay_games[matchDetails$IndexLoser])
+  }
+  
   return(Games)
 }
 
+Uncertainty = function(winnerGames, loserGames) {
+  if (winnerGames == 0 | loserGames == 0) {
+    return(2)
+  }
+  1 / (winnerGames * loserGames)
+}
+
 addHomePlayers = function(Games, rating, i, matchDetails){
-  Games$Country[i] = matchDetails$Country
+  Games$Country[i]        = matchDetails$Country
   Games$Winner_country[i] = matchDetails$Winner_country
-  Games$Loser_country[i] = matchDetails$Loser_country
-  Games$WinnerisHome[i] = as.numeric(matchDetails$Winner_country == matchDetails$Country)
-  Games$LoserisHome[i] = as.numeric(matchDetails$Loser_country == matchDetails$Country)
+  Games$Loser_country[i]  = matchDetails$Loser_country
+  Games$WinnerisHome[i]   = as.numeric(matchDetails$Winner_country == matchDetails$Country)
+  Games$LoserisHome[i]    = as.numeric(matchDetails$Loser_country == matchDetails$Country)
   
   if (is.na(Games$WinnerisHome[i])) {
     Games$WinnerisHome[i] = 0
@@ -302,15 +281,15 @@ addHomePlayers = function(Games, rating, i, matchDetails){
 
 addSkillsBoX = function(Games, rating, i, matchDetails){
   winnerBo5Skill = getBo5Skill(rating, matchDetails$IndexWinner)
-  loserBo5Skill = getBo5Skill(rating, matchDetails$IndexLoser)
+  loserBo5Skill  = getBo5Skill(rating, matchDetails$IndexLoser)
   
   winnerBo3Skill = -winnerBo5Skill
-  loserBo3Skill = -loserBo5Skill
+  loserBo3Skill  = -loserBo5Skill
   
   Games$Winner_skillBo5[i] = winnerBo5Skill
   Games$Winner_skillBo3[i] = winnerBo3Skill
-  Games$Loser_skillBo5[i] = loserBo5Skill
-  Games$Loser_skillBo3[i] = loserBo3Skill
+  Games$Loser_skillBo5[i]  = loserBo5Skill
+  Games$Loser_skillBo3[i]  = loserBo3Skill
   
   Games$Winner_skillBo5PlusScores[i] = getBo5SkillBasedOnRating(rating, matchDetails$IndexWinner)
   Games$Winner_skillBo3PlusScores[i] =  - Games$Winner_skillBo5PlusScores[i]
@@ -330,7 +309,7 @@ getBo5Skill = function(rating, indexPlayer){
   
   percentageWinsBo5 = rating$Bo5Won[indexPlayer] / rating$Bo5Played[indexPlayer]
   percentageWinsBo3 = rating$Bo3Won[indexPlayer] / rating$Bo3Played[indexPlayer]
-  Bo5Skill = percentageWinsBo5 - percentageWinsBo3
+  Bo5Skill          = percentageWinsBo5 - percentageWinsBo3
 }
 
 getBo5SkillBasedOnRating = function(rating, indexPlayer){
@@ -338,8 +317,7 @@ getBo5SkillBasedOnRating = function(rating, indexPlayer){
   if (rating$Bo5Played[indexPlayer] < minGamesRequired | rating$Bo3Played[indexPlayer] < minGamesRequired) {
     return(0)
   }
-  
   meanBo5PlusScore = rating$Bo5PlusScore[indexPlayer] / rating$Bo5Played[indexPlayer]
   meanBo3PlusScore = rating$Bo3PlusScore[indexPlayer] / rating$Bo3Played[indexPlayer]
-  Bo5Skill = meanBo5PlusScore - meanBo3PlusScore
+  Bo5Skill         = meanBo5PlusScore - meanBo3PlusScore
 }

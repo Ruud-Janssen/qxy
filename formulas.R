@@ -295,3 +295,42 @@ saveDatasetsWithoutRating = function(allGames){
   write.csv(file = "Data/datasets/cv.csv", cv, row.names=FALSE)
   write.csv(file = "Data/datasets/test.csv", test, row.names=FALSE)
 }
+
+#Note that we assume here that the walkovers are removed
+saveDatasetsWithRating = function(allGames, rating){
+  
+  Nt_r = nrow(RemoveWalkOvers(read.table("Data/datasets/train_rating.csv",  header = T, sep = ",", quote = "\"",
+                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
+  Nt_m = nrow(RemoveWalkOvers(read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
+                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
+  Ncv = nrow(RemoveWalkOvers(read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
+                                        colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
+  Ntest = nrow(RemoveWalkOvers(read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
+                                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
+  
+  firstindextrain_rating = 1
+  lastindextrain_rating = Nt_r
+  train_rating = allGames[firstindextrain_rating : lastindextrain_rating, ]
+  
+  firstindextrain_model = lastindextrain_rating + 1
+  lastindextrain_model = lastindextrain_rating + Nt_m
+  train_model = allGames[firstindextrain_model : lastindextrain_model, ]
+  
+  firstindexcv = lastindextrain_model + 1
+  lastindexcv = lastindextrain_model + Ncv
+  cv = allGames[firstindexcv : lastindexcv, ]
+  
+  firstindextest = lastindexcv + 1
+  lastindextest = lastindexcv + Ntest
+  test = allGames[firstindextest: lastindextest, ]
+  
+  write.csv(file = "Data/datasets/train_ratingWithRatings.csv", train_rating, row.names=FALSE)
+  write.csv(file = "Data/datasets/train_modelWithRatings.csv", train_model, row.names=FALSE)
+  write.csv(file = "Data/datasets/cvWithRatings.csv", cv, row.names=FALSE)
+  write.csv(file = "Data/datasets/testWithRatings.csv", test, row.names=FALSE)
+  
+  if(!is.null(rating)) {
+    write.csv(file = "Data/datasets/ratingafterTest.csv", 
+              rating, row.names=FALSE)
+  }
+}
