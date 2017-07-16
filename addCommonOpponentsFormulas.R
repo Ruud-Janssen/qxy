@@ -29,16 +29,23 @@ InitializeCommonOpponentsVariables = function(Games) {
   return(Games)
 }
 
-setCommonOpponentVariables = function(Games, i, matchDetails, maxdays) {
-  #Common Opponent Indexes
-  coi = getPreviousGamesIndexes(Games[1 : (i - 1), ], matchDetails, maxdays)
+setCommonOpponentVariablesRow = function(Games, i, matchDetails, maxdays) {
+  previousGames = Games[1 : (i - 1), ]
   
-  Games = setCommonOpponentVariablesPlayer(Games, i, coi$WinnerWon, coi$WinnerLost, winner = 1, surface = 0)
-  Games = setCommonOpponentVariablesPlayer(Games, i, coi$WinnerWonSurface, coi$WinnerLostSurface
+  #Common Opponent Indexes
+  coi = getPreviousGamesIndexes(previousGames, matchDetails, maxdays)
+  
+  row = Games[i, ]
+  
+  row = setCommonOpponentVariablesPlayerRow(previousGames, row, coi$WinnerWon, coi$WinnerLost, 
+                                            winner = 1, surface = 0)
+  row = setCommonOpponentVariablesPlayerRow(previousGames, row, coi$WinnerWonSurface, coi$WinnerLostSurface
                                            , winner = 1, surface = 1)
-  Games = setCommonOpponentVariablesPlayer(Games, i, coi$LoserWon, coi$LoserLost, winner = 0, surface = 0)
-  Games = setCommonOpponentVariablesPlayer(Games, i, coi$LoserWonSurface, coi$LoserLostSurface
+  row = setCommonOpponentVariablesPlayerRow(previousGames, row, coi$LoserWon, coi$LoserLost, 
+                                            winner = 0, surface = 0)
+  row = setCommonOpponentVariablesPlayerRow(previousGames, row, coi$LoserWonSurface, coi$LoserLostSurface
                                            , winner = 0, surface = 1)
+  return(row)
 }
 
 getPreviousGamesIndexes = function(previousGames, matchDetails, maxdays) {
@@ -85,37 +92,37 @@ getIndexesCurrentSurface = function(allIndexes, previousGames, surface) {
   allIndexes[previousGames$Surface[allIndexes] == surface]
 }
 
-setCommonOpponentVariablesPlayer = function(Games, i, wonIndexes, lostIndexes, winner, surface) {
+setCommonOpponentVariablesPlayerRow = function(previousGames, row, wonIndexes, lostIndexes, winner, surface) {
   if (winner == 1) {
     if(surface == 0) {
-      Games$Winner_COPercentMatchesWon[i] = calculatePercentMatchesWon(wonIndexes, lostIndexes)
-      Games$Winner_COPercentSetsWon[i]    = calculatePercentSetsWon(Games, wonIndexes, lostIndexes)
-      Games$Winner_COPercentGamesWon[i]   = calculatePercentGamesWon(Games, wonIndexes, lostIndexes)
-      Games$Winner_COPercentPointsWon[i]  = calculatePercentPointsWon(Games, wonIndexes, lostIndexes)
-      Games$Winner_COGames[i]             = length(wonIndexes) + length(lostIndexes)
+      row$Winner_COPercentMatchesWon = calculatePercentMatchesWon(wonIndexes, lostIndexes)
+      row$Winner_COPercentSetsWon    = calculatePercentSetsWon(previousGames, wonIndexes, lostIndexes)
+      row$Winner_COPercentGamesWon   = calculatePercentGamesWon(previousGames, wonIndexes, lostIndexes)
+      row$Winner_COPercentPointsWon  = calculatePercentPointsWon(previousGames, wonIndexes, lostIndexes)
+      row$Winner_COGames             = length(wonIndexes) + length(lostIndexes)
     } else {
-      Games$Winner_COPercentMatchesThisSurfaceWon[i] = calculatePercentMatchesWon(wonIndexes, lostIndexes)
-      Games$Winner_COPercentSetsThisSurfaceWon[i]    = calculatePercentSetsWon(Games, wonIndexes, lostIndexes)
-      Games$Winner_COPercentGamesThisSurfaceWon[i]   = calculatePercentGamesWon(Games, wonIndexes, lostIndexes)
-      Games$Winner_COPercentPointsThisSurfaceWon[i]  = calculatePercentPointsWon(Games, wonIndexes, lostIndexes)
-      Games$Winner_COThisSurfaceGames[i]             = length(wonIndexes) + length(lostIndexes)
+      row$Winner_COPercentMatchesThisSurfaceWon = calculatePercentMatchesWon(wonIndexes, lostIndexes)
+      row$Winner_COPercentSetsThisSurfaceWon    = calculatePercentSetsWon(previousGames, wonIndexes, lostIndexes)
+      row$Winner_COPercentGamesThisSurfaceWon   = calculatePercentGamesWon(previousGames, wonIndexes, lostIndexes)
+      row$Winner_COPercentPointsThisSurfaceWon  = calculatePercentPointsWon(previousGames, wonIndexes, lostIndexes)
+      row$Winner_COThisSurfaceGames             = length(wonIndexes) + length(lostIndexes)
     }
   } else { 
     if (surface == 0) {
-      Games$Loser_COPercentMatchesWon[i] = calculatePercentMatchesWon(wonIndexes, lostIndexes)
-      Games$Loser_COPercentSetsWon[i]    = calculatePercentSetsWon(Games, wonIndexes, lostIndexes)
-      Games$Loser_COPercentGamesWon[i]   = calculatePercentGamesWon(Games, wonIndexes, lostIndexes)
-      Games$Loser_COPercentPointsWon[i]  = calculatePercentPointsWon(Games, wonIndexes, lostIndexes)
-      Games$Loser_COGames[i]             = length(wonIndexes) + length(lostIndexes)
+      row$Loser_COPercentMatchesWon = calculatePercentMatchesWon(wonIndexes, lostIndexes)
+      row$Loser_COPercentSetsWon    = calculatePercentSetsWon(previousGames, wonIndexes, lostIndexes)
+      row$Loser_COPercentGamesWon   = calculatePercentGamesWon(previousGames, wonIndexes, lostIndexes)
+      row$Loser_COPercentPointsWon  = calculatePercentPointsWon(previousGames, wonIndexes, lostIndexes)
+      row$Loser_COGames             = length(wonIndexes) + length(lostIndexes)
     } else {
-      Games$Loser_COPercentMatchesThisSurfaceWon[i] = calculatePercentMatchesWon(wonIndexes, lostIndexes)
-      Games$Loser_COPercentSetsThisSurfaceWon[i]    = calculatePercentSetsWon(Games, wonIndexes, lostIndexes)
-      Games$Loser_COPercentGamesThisSurfaceWon[i]   = calculatePercentGamesWon(Games, wonIndexes, lostIndexes)
-      Games$Loser_COPercentPointsThisSurfaceWon[i]  = calculatePercentPointsWon(Games, wonIndexes, lostIndexes)
-      Games$Loser_COThisSurfaceGames[i]             = length(wonIndexes) + length(lostIndexes)
+      row$Loser_COPercentMatchesThisSurfaceWon = calculatePercentMatchesWon(wonIndexes, lostIndexes)
+      row$Loser_COPercentSetsThisSurfaceWon    = calculatePercentSetsWon(previousGames, wonIndexes, lostIndexes)
+      row$Loser_COPercentGamesThisSurfaceWon   = calculatePercentGamesWon(previousGames, wonIndexes, lostIndexes)
+      row$Loser_COPercentPointsThisSurfaceWon  = calculatePercentPointsWon(previousGames, wonIndexes, lostIndexes)
+      row$Loser_COThisSurfaceGames             = length(wonIndexes) + length(lostIndexes)
     }
   }
-  return(Games)
+  return(row)
 }
 
 calculatePercentMatchesWon = function(wonIndexes, lostIndexes) {
@@ -129,20 +136,41 @@ calculatePercentSetsWon = function(Games, wonIndexes, lostIndexes) {
 }
 
 calculatePercentGamesWon = function(Games, wonIndexes, lostIndexes) {
-  gamesWon  = sum(as.numeric(Games$Winner_Games[wonIndexes])) + sum(as.numeric(Games$Loser_Games[lostIndexes]))
-  gamesLost = sum(as.numeric(Games$Loser_Games[wonIndexes])) + sum(as.numeric(Games$Winner_Games[lostIndexes]))
-  gamesWon / (gamesWon + gamesLost)
+  #gamesWon  = sum(as.numeric(Games$Winner_Games[wonIndexes])) + sum(as.numeric(Games$Loser_Games[lostIndexes]))
+  #gamesLost = sum(as.numeric(Games$Loser_Games[wonIndexes])) + sum(as.numeric(Games$Winner_Games[lostIndexes]))
+  #gamesWon / (gamesWon + gamesLost)
+  
+  
+  percentGamesInWonGames  = as.numeric(Games$Winner_Games[wonIndexes]) / 
+    (as.numeric(Games$Winner_Games[wonIndexes]) + as.numeric(Games$Loser_Games[wonIndexes]))
+  percentGamesInLostGames = as.numeric(Games$Loser_Games[lostIndexes]) / 
+    (as.numeric(Games$Loser_Games[lostIndexes]) + as.numeric(Games$Winner_Games[lostIndexes]))
+  return(mean(c(percentGamesInWonGames, percentGamesInLostGames)))
 }
 
 calculatePercentPointsWon = function(Games, wonIndexes, lostIndexes) {
-  #wonIndexes  = wonIndexes[is.numeric(Games$WPts[wonIndexes])]
-  #wonIndexes  = wonIndexes[is.numeric(Games$LPts[wonIndexes])]
-  #lostIndexes = lostIndexes[is.numeric(Games$WPts[lostIndexes])]
-  #lostIndexes = lostIndexes[is.numeric(Games$LPts[lostIndexes])]  
-    
-  pointsWon  = sum(as.numeric(Games$WPts[wonIndexes])) + sum(as.numeric(Games$LPts[lostIndexes]))
-  pointsLost = sum(as.numeric(Games$LPts[wonIndexes])) + sum(as.numeric(Games$WPts[lostIndexes]))
-  pointsWon / (pointsWon + pointsLost)
+  wonIndexes  = wonIndexes[!is.na(as.numeric(Games$WPts[wonIndexes]))]
+  wonIndexes  = wonIndexes[!is.na(as.numeric(Games$LPts[wonIndexes]))]
+  lostIndexes = lostIndexes[!is.na(as.numeric(Games$WPts[lostIndexes]))]
+  lostIndexes = lostIndexes[!is.na(as.numeric(Games$LPts[lostIndexes]))]  
+
+  percentPointsInWonGames  = as.numeric(Games$WPts[wonIndexes]) / 
+    (as.numeric(Games$WPts[wonIndexes]) + as.numeric(Games$LPts[wonIndexes]))
+  percentPointsInLostGames = as.numeric(Games$LPts[lostIndexes]) / 
+    (as.numeric(Games$LPts[lostIndexes]) + as.numeric(Games$WPts[lostIndexes]))
+   
+  #pointsWon  = sum(as.numeric(Games$WPts[wonIndexes])) + sum(as.numeric(Games$LPts[lostIndexes]))
+  #pointsLost = sum(as.numeric(Games$LPts[wonIndexes])) + sum(as.numeric(Games$WPts[lostIndexes]))
+  #if (pointsWon == 0 | pointsLost == 0) {
+  # return(NA)
+  #}
+  #pointsWon / (pointsWon + pointsLost)
+  percentPoints = mean(c(percentPointsInWonGames, percentPointsInLostGames))
+  if (length(percentPoints) == 0) {
+    return(NA)
+  } else {
+    return(percentPoints)
+  }
 }
 
 getLastYearsGames = function(Games, name, date, maxdays, won) {

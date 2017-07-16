@@ -1,22 +1,32 @@
 library(tictoc)
-source("formulas.r")
+source("formulas.R")
 source("addCommonOpponentsFormulas.R")
+#Parallel
+library(parallel)
+library(foreach)
+library(doParallel)
+
+cl <- makeCluster(detectCores() - 3)
+registerDoParallel(cl, cores = detectCores() - 3)
 
 #HyperParameters
-maxdays = 365
+maxdays = 2 * 365
 
 allGames = getAllGamesWithRating()
 allGames = InitializeCommonOpponentsVariables(allGames)
 
 Nstart = nrow(read.table("Data/datasets/train_modelWithRatings.csv", header = T, sep = ",", quote = "\"",
                          colClasses = "character", stringsAsFactors = TRUE, fill = TRUE))
-Nall = nrow(allGames)
+Nall   = nrow(allGames)
 
 tic()
-for (i in Nstart: Nall) {
+allGames[Nstart : Nall, ] = foreach(i = Nstart : Nall, .combine = rbind) %dopar% {
+#for(i in Nstart : Nall){
+  source("formulas.R")
+  source("addCommonOpponentsFormulas.R")                          
   matchDetails = getMatchDetails(allGames[i, ])
-  allGames = setCommonOpponentVariables(allGames, i, matchDetails, maxdays)
+  row          = setCommonOpponentVariablesRow(allGames, i, matchDetails, maxdays)
 }
 toc()
-#DONT FORGET TO FOKING SAVE
+stopCluster(cl)
 saveDatasetsWithRating(allGames, NULL)

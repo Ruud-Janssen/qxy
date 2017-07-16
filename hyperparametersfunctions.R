@@ -36,7 +36,7 @@ regressorvariables = function(y, data) {
 addRegressorVariableRow = function(row){
   x = data.frame(matrix(nrow = 1))
   x = setPointOfViewVariables(x, row)
-  x = setOtherVariables(x, row)
+  #x = setOtherVariables(x, row)
 }
 
 setPointOfViewVariables = function(x, row) {
@@ -46,58 +46,66 @@ setPointOfViewVariables = function(x, row) {
     mp = -1
   }
   
-  x$PSWthisplayer = row$y * row$PSW + (1 - row$y) * row$PSL
-  x$PSLthisplayer = row$y * row$PSL + (1 - row$y) * row$PSW
+  #x$PSW   = row$y * row$PSW + (1 - row$y) * row$PSL
+  #x$PSL   = row$y * row$PSL + (1 - row$y) * row$PSW
+  #x$B365W = row$y * row$B365W + (1 - row$y) * row$B365L
+  #x$B365L = row$y * row$B365L + (1 - row$y) * row$B365W
   
   x$ratingdiff        = mp * (row$Winner_rating - row$Loser_rating)
   x$ratingClaydiff    = mp * (row$Winner_ratingClay - row$Loser_ratingClay)
   x$ratingHarddiff    = mp * (row$Winner_ratingHard - row$Loser_ratingHard)
   x$ratingGrassdiff   = mp * (row$Winner_ratingGrass - row$Loser_ratingGrass)
-  x$ratingNotHarddiff = mp * (row$Winner_ratingNotHard - row$Loser_ratingNotHard)
-  x$ratingBo3diff     = mp * (row$Winner_ratingBo3 - row$Loser_ratingBo3)
-  x$ratingBo5diff     = mp * (row$Winner_ratingBo5 - row$Loser_ratingBo5)
+  #x$ratingNotHarddiff = mp * (row$Winner_ratingNotHard - row$Loser_ratingNotHard)
+  #x$ratingBo3diff     = mp * (row$Winner_ratingBo3 - row$Loser_ratingBo3)
+  #x$ratingBo5diff     = mp * (row$Winner_ratingBo5 - row$Loser_ratingBo5)
   
-  x$RetiredDiff           = mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
-  x$WalkoverDiff          = mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)
-  x$RetiredOrWalkoverDiff = x$RetiredDiff + x$WalkoverDiff
-  x$FatigueDiff           = mp * (row$Winner_fatigue - row$Loser_fatigue)
-  x$HeadtoHead            = mp * (row$HeadtoHead)
-  x$LastHeadtoHead        = mp * row$LastHeadtoHead
-  x$HomeDiff              = mp * (row$WinnerisHome - row$LoserisHome)
+  #x$RetiredDiff           = mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
+  #x$WalkoverDiff          = mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)
+  #x$RetiredOrWalkoverDiff = x$RetiredDiff + x$WalkoverDiff
+  #x$FatigueDiff           = mp * (row$Winner_fatigue - row$Loser_fatigue)
+  #x$HeadtoHead            = mp * (row$HeadtoHead)
+  #x$LastHeadtoHead        = mp * row$LastHeadtoHead
+  #x$HomeDiff              = mp * (row$WinnerisHome - row$LoserisHome)
   
-  if(row$HeadtoHeadMatches != 0) {
-    x$HeadtoHeadPercentageWeightedsqN =  mp * (((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / 
-                                                  (row$HeadtoHeadMatches) - 0.5) * row$HeadtoHeadMatches ^ 0.5) 
-  } else {
-    x$HeadtoHeadPercentageWeightedsqN = 0  
-  }
+  #if(row$HeadtoHeadMatches != 0) {
+  #  x$HeadtoHeadPercentageWeightedsqN =  mp * (((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / 
+  #                                                (row$HeadtoHeadMatches) - 0.5) * row$HeadtoHeadMatches ^ 0.5) 
+  #} else {
+  #  x$HeadtoHeadPercentageWeightedsqN = 0  
+  #}
   
-  if(row$Best.of == 3){
-    x$ThisBoxSkillDiff           = mp * (row$Winner_skillBo3 - row$Loser_skillBo3)
-    x$ThisBoxSkillDiffPlusScores = mp * (row$Winner_skillBo3PlusScores - row$Loser_skillBo3PlusScores)
-    x$ThisBoxSkillRatingMethod   = mp * ((row$Winner_ratingBo5 - row$Winner_ratingBo3) - 
-                                           (row$Loser_ratingBo5 - row$Loser_ratingBo3))
-  } else {
-    x$ThisBoxSkillDiff           = mp * (row$Winner_skillBo5 - row$Loser_skillBo5)
-    x$ThisBoxSkillDiffPlusScores = mp * (row$Winner_skillBo5PlusScores - row$Loser_skillBo5PlusScores)
-    x$ThisBoxSkillRatingMethod   = mp * ((row$Winner_ratingBo3 - row$Winner_ratingBo5) - 
-                                           (row$Loser_ratingBo3 - row$Loser_ratingBo5))
-  }
-  x$recentGamesDiff = mp * (row$Winner_recentGames - row$Loser_recentGames)
+  #if(row$Best.of == 3){
+  #  x$ThisBoxSkillDiff           = mp * (row$Winner_skillBo3 - row$Loser_skillBo3)
+  #  x$ThisBoxSkillDiffPlusScores = mp * (row$Winner_skillBo3PlusScores - row$Loser_skillBo3PlusScores)
+  #  x$ThisBoxSkillRatingMethod   = mp * ((row$Winner_ratingBo5 - row$Winner_ratingBo3) - 
+  #                                         (row$Loser_ratingBo5 - row$Loser_ratingBo3))
+  #} else {
+  #  x$ThisBoxSkillDiff           = mp * (row$Winner_skillBo5 - row$Loser_skillBo5)
+  #  x$ThisBoxSkillDiffPlusScores = mp * (row$Winner_skillBo5PlusScores - row$Loser_skillBo5PlusScores)
+  #  x$ThisBoxSkillRatingMethod   = mp * ((row$Winner_ratingBo3 - row$Winner_ratingBo5) - 
+  #                                         (row$Loser_ratingBo3 - row$Loser_ratingBo5))
+  #}
+  #x$recentGamesDiff = mp * (row$Winner_recentGames - row$Loser_recentGames)
   
-  x$COPercentMatchesWonDiff = mp * (row$Winner_COPercentMatchesWon -  row$Loser_COPercentMatchesWon )
-  x$COPercentSetsDiff       = mp * (row$Winner_COPercentSetsWon - row$Loser_COPercentSetsWon)
-  x$COPercentGamesDiff      = mp * (row$Winner_COPercentGamesWon - row$Loser_COPercentGamesWon) 
-  x$COPercentPointsDiff     = mp * (row$Winner_COPercentPointsWon - row$Loser_COPercentPointsWon)
+  #x$COPercentMatchesWonDiff   = mp * (row$Winner_COPercentMatchesWon -  row$Loser_COPercentMatchesWon )
+  #x$COPercentSetsDiff         = mp * (row$Winner_COPercentSetsWon - row$Loser_COPercentSetsWon)
+  #x$COPercentGamesDiff        = mp * (row$Winner_COPercentGamesWon - row$Loser_COPercentGamesWon) 
+  #x$COPercentPointsDiff       = mp * (row$Winner_COPercentPointsWon - row$Loser_COPercentPointsWon)
+  #x$COPercentCompletenessDiff =
+  #  mp * (row$Winner_COPercentPointsWon * row$Winner_COPercentGamesWon - 
+  #          row$Loser_COPercentPointsWon * row$Loser_COPercentGamesWon)
   
-  x$COPercentMatchesWonThisSurfaceDiff = 
-    mp * (row$Winner_COPercentMatchesThisSurfaceWon -  row$Loser_COPercentMatchesThisSurfaceWon )
-  x$COPercentSetsThisSurfaceDiff       = 
-    mp * (row$Winner_COPercentSetsThisSurfaceWon - row$Loser_COPercentSetsThisSurfaceWon)
-  x$COPercentGamesThisSurfaceDiff      = 
-    mp * (row$Winner_COPercentGamesThisSurfaceWon - row$Loser_COPercentGamesThisSurfaceWon) 
-  x$COPercentPointsThisSurfaceDiff     = 
-    mp * (row$Winner_COPercentPointsThisSurfaceWon - row$Loser_COPercentPointsThisSurfaceWon)
+  #x$COPercentMatchesWonThisSurfaceDiff = 
+  #  mp * (row$Winner_COPercentMatchesThisSurfaceWon -  row$Loser_COPercentMatchesThisSurfaceWon )
+  #x$COPercentSetsThisSurfaceDiff       = 
+  #  mp * (row$Winner_COPercentSetsThisSurfaceWon - row$Loser_COPercentSetsThisSurfaceWon)
+  #x$COPercentGamesThisSurfaceDiff      = 
+  #  mp * (row$Winner_COPercentGamesThisSurfaceWon - row$Loser_COPercentGamesThisSurfaceWon) 
+  #x$COPercentPointsThisSurfaceDiff     = 
+  #  mp * (row$Winner_COPercentPointsThisSurfaceWon - row$Loser_COPercentPointsThisSurfaceWon)
+  #x$COPercentCompletenessThisSurfaceDiff = 
+  #  mp * (row$Winner_COPercentPointsThisSurfaceWon * row$Winner_COPercentGamesThisSurfaceWon - 
+  #          row$Loser_COPercentPointsThisSurfaceWon * row$Loser_COPercentGamesThisSurfaceWon)
   
   return(x)
 }
@@ -161,27 +169,27 @@ cvpredictions = function(results, Reg, xcv, ycv, q) {
   for(i in 1 : Npred) {
     winexpectation = cvpred[i]
     lossexpectation = 1 - cvpred[i]
-    if(!is.na(xcv$PSLthisplayer[i]) & !is.na(xcv$PSWthisplayer[i])){# & results$Br[q] > 0) {
-      if(winexpectation * xcv$PSWthisplayer[i] - 1 > 0.05) {
+    if(!is.na(xcv$PSL[i]) & !is.na(xcv$PSW[i])){# & results$Br[q] > 0) {
+      if(winexpectation * xcv$PSW[i] - 1 > 0.05) {
         results$Nrbets[q] = results$Nrbets[q] + 1
-        bets$bet[i] = (winexpectation * xcv$PSWthisplayer[i] - 1) / (xcv$PSWthisplayer[i] - 1)
+        bets$bet[i] = (winexpectation * xcv$PSW[i] - 1) / (xcv$PSW[i] - 1)
         #WHY DOES THIS NOT WORK 
         #bets$bet[i] = 1/4 * results$Br[q] * bets$bet[i]
         #bet won
         if(ycv[i] == 1 ) {
-          bets$result[i] = bets$bet[i]*(xcv$PSWthisplayer[i] - 1) 
+          bets$result[i] = bets$bet[i]*(xcv$PSW[i] - 1) 
           #bet loss
         } else {
           bets$result[i] = -bets$bet[i]
         }
-      } else if(lossexpectation * xcv$PSLthisplayer[i] - 1 > 0.05) {
+      } else if(lossexpectation * xcv$PSL[i] - 1 > 0.05) {
         results$Nrbets[q] = results$Nrbets[q] + 1
-        bets$bet[i] = (lossexpectation * xcv$PSLthisplayer[i] - 1) / (xcv$PSLthisplayer[i] - 1)
+        bets$bet[i] = (lossexpectation * xcv$PSL[i] - 1) / (xcv$PSL[i] - 1)
         #WHY DOES THIS NOT WORK? 
         #bets$bet[i] =  1/4 * results$Br[q] * bets$bet[i]
         #bet won
         if(ycv[i] == 0){
-          bets$result[i] = bets$bet[i] * (xcv$PSLthisplayer[i] - 1)
+          bets$result[i] = bets$bet[i] * (xcv$PSL[i] - 1)
         } else {
           bets$result[i] = -bets$bet[i]
         } 

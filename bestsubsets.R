@@ -52,26 +52,32 @@ xcvClay = getXThisSurface(xcv, "Clay")
 #xcvHard = removeUncertainMatches(xcvHard, quantileHard, "COSurface")
 xcvHard = removeUncertainMatches(xcvHard, quantileHard, "Surface")
 
-xtmHardRel = relevantVariables(xt_mHard)
-xcvHardRel = relevantVariables(xcvHard)
+#xtmHardRel = relevantVariables(xt_mHard)
+#xcvHardRel = relevantVariables(xcvHard)
+xtmHardRel = xt_mHard
+xcvHardRel = xcvHard
 
-xtmHardRel = xtmHardRel[!is.na(xtmHardRel$COPercentPointsDiff), ]
-xcvHardRel = xcvHardRel[!is.na(xcvHardRel$COPercentPointsDiff), ]
 
-#Normalization
-sdtrain <- apply(xtmHardRel[, 1:(length(xtmHardRel) - 1)] , 2, sd) 
-#meantrain <- apply(xtmHardRel[, 1:(length(xtmHardRel) - 1)] , 2, mean) 
-#xtmHardRel[, 1:(length(xtmHardRel) - 1)] = xtmHardRel[, 1:(length(xtmHardRel) - 1)] - meantrain
-#xcvHardRel[, 1:(length(xcvHardRel) - 1)] = xcvHardRel[, 1:(length(xcvHardRel) - 1)] - meantrain
+#Normalization of variance
+#sdtrain <- apply(xtmHardRel[, 1:(length(xtmHardRel) - 1)] , 2, sd) 
 
-xtmHardRel[, 1:(length(xtmHardRel) - 1)] = 
-  as.data.frame(scale(xtmHardRel[, 1:(length(xtmHardRel) - 1)], center = FALSE,scale = sdtrain))
-xcvHardRel[, 1:(length(xcvHardRel) - 1)] = 
-  as.data.frame(scale(xcvHardRel[, 1:(length(xcvHardRel) - 1)], center = FALSE,scale = sdtrain))
+#xtmHardRel[, 1:(length(xtmHardRel) - 1)] = 
+#  as.data.frame(scale(xtmHardRel[, 1:(length(xtmHardRel) - 1)], center = FALSE,scale = sdtrain))
+#xcvHardRel[, 1:(length(xcvHardRel) - 1)] = 
+#  as.data.frame(scale(xcvHardRel[, 1:(length(xcvHardRel) - 1)], center = FALSE,scale = sdtrain))
   
+#Rating results 
+regLamRating = glm(y ~ 0 + ratingdiff + ratingHarddiff 
+                , data = xtmHardRel, family = binomial)
+
+summary(regLamRating)
+
+cvpredLamRating = predict(regLamRating, xcvHardRel, type = "response")
+LogLoss(cvpredLamRating, xcvHardRel$y)
+
 #Modelling
-regLamMin = glm(y ~ 0 + ratingNotHarddiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff2 + RetiredDiff
-                + FatigueDiff
+regLamMin = glm(y ~ 0 + ratingNotHarddiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff2 
+                #+ RetiredDiff + FatigueDiff
                  , data = xtmHardRel, family = binomial)
 
 summary(regLamMin)
@@ -79,15 +85,32 @@ summary(regLamMin)
 cvpredLamMin = predict(regLamMin, xcvHardRel, type = "response")
 LogLoss(cvpredLamMin, xcvHardRel$y)
 
+regLamPoints = glm(y ~ 0 + COPercentPointsThisSurfaceDiff + COPercentPointsDiff : DummyBo5
+                   , data = xtmHardRel, family = binomial)
+
+summary(regLamPoints)
+
+cvpredPoints = predict(regLamPoints, xcvHardRel, type = "response")
+LogLoss(cvpredPoints, xcvHardRel$y)
+
+#I don't even use a foking dummy for Bo5
+regLamPointsProbFake = glm(y ~ 0 + ratingdiff + COPercentGamesDiff + COPercentPointsDiff + COPercentCompletenessDiff + COPercentPointsThisSurfaceDiff + COPercentCompletenessThisSurfaceDiff
+                   , data = xtmHardRel, family = binomial)
+
+summary(regLamPointsProbFake)
+
+cvpredPointsProbFake = predict(regLamPointsProbFake, xcvHardRel, type = "response")
+LogLoss(cvpredPointsProbFake, xcvHardRel$y)
+
 grid = 10 ^ seq(0, -10, length = 100)
 #####RIDGE
-ridge.mod = glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel)-1)]), xt_mHard$y, 
+ridge.mod = glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel) - 1)]), xtmHardRel$y, 
                    family = "binomial", alpha = 0, lambda = grid, intercept = FALSE, thresh = threshold)
 
 plot_glmnet(ridge.mod, xvar = "lambda")
 
-ridge.out = cv.glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel)-1)])
-            , xt_mHard$y, alpha = 0, nfolds = 10, family = "binomial", lambda = grid, 
+ridge.out = cv.glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel) - 1)])
+            , xtmHardRel$y, alpha = 0, nfolds = 10, family = "binomial", lambda = grid, 
             intercept = FALSE , thresh = threshold)
 plot(ridge.out)
 
@@ -96,7 +119,7 @@ plot(ridge.out)
 bestridgelam = ridge.out$lambda.min
 #bestlam = ridge.out$lambda.1se
 
-ridge = glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel)-1)]), xt_mHard$y, alpha = 0, lambda = bestridgelam, family = "binomial",
+ridge = glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel)-1)]), xtmHardRel$y, alpha = 0, lambda = bestridgelam, family = "binomial",
                intercept = FALSE, thresh = threshold)
 ridge.coef = predict(ridge.out, type = "coefficients", s = bestridgelam)
 ridge.coef
@@ -132,8 +155,9 @@ lasso.coef = predict(cvlas.out, type = "coefficients", s = bestlam)
 lasso.coef
 bestlam
 
-cvpredLamMinTrue = predict.cv.glmnet(cvlas.out, newx = as.matrix(xcvHardRel[ , 1:(length(xcvHardRel)-1)]), type = "response", s = bestlam)
-LogLoss(cvpredLamMinTrue, xcvHard$y)
+cvpredLamMinTrue = predict.cv.glmnet(cvlas.out, newx = as.matrix(xcvHardRel[ , 1:(length(xcvHardRel)-1)])
+                                     , type = "response", s = bestlam)
+LogLoss(cvpredLamMinTrue, xcvHardRel$y)
 
 #################Interaction
 f <- as.formula( ~ .^2)
@@ -141,10 +165,10 @@ xtmHardRelInteraction = as.data.frame(model.matrix(f, xtmHardRel[ , 1:(length(xt
 xcvHardRelInteraction = as.data.frame(model.matrix(f, xcvHardRel[ , 1:(length(xcvHardRel)-1)])[, -1])
 
 #################Ridge
-lasso.modINT = glmnet(as.matrix(xtmHardRelInteraction), xt_mHard$y, family = "binomial", alpha = 0, lambda = grid
+lasso.modINT = glmnet(as.matrix(xtmHardRelInteraction), xtmHardRel$y, family = "binomial", alpha = 0, lambda = grid
                       , intercept = FALSE, thresh = threshold)
 
-cv.outINT = cv.glmnet(as.matrix(xtmHardRelInteraction), xt_mHard$y, alpha = 0, nfolds = 10, family = "binomial", 
+cv.outINT = cv.glmnet(as.matrix(xtmHardRelInteraction), xtmHardRel$y, alpha = 0, nfolds = 10, family = "binomial", 
                       intercept = FALSE)
 plot(cv.outINT)
 
@@ -153,7 +177,7 @@ plot(cv.outINT)
 bestlam = cv.outINT$lambda.min
 #bestlam = cv.outINT$lambda.1se
 
-lasso = glmnet(as.matrix(xtmHardRelInteraction), xt_mHard$y, alpha = 0, lambda = bestlam, family = "binomial",
+lasso = glmnet(as.matrix(xtmHardRelInteraction), xtmHardRel$y, alpha = 0, lambda = bestlam, family = "binomial",
                intercept = FALSE, thresh = threshold)
 lasso.coef = predict(cv.outINT, type = "coefficients", s = bestlam)
 lasso.coef
@@ -163,10 +187,10 @@ cvpredINTLamMinTrue = predict.cv.glmnet(cv.outINT, newx = as.matrix(xcvHardRelIn
 LogLoss(cvpredINTLamMinTrue, xcvHardRel$y)
 
 ################Lasso
-lasso.modINT = glmnet(as.matrix(xtmHardRelInteraction), xt_mHard$y, family = "binomial", alpha = 1, lambda = grid
+lasso.modINT = glmnet(as.matrix(xtmHardRelInteraction), xtmHardRel$y, family = "binomial", alpha = 1, lambda = grid
                       , intercept = FALSE, thresh = threshold)
 
-cv.outINT = cv.glmnet(as.matrix(xtmHardRelInteraction), xt_mHard$y, alpha = 1, nfolds = 10, family = "binomial", 
+cv.outINT = cv.glmnet(as.matrix(xtmHardRelInteraction), xtmHardRel$y, alpha = 1, nfolds = 10, family = "binomial", 
                        intercept = FALSE)
 plot(cv.outINT)
 
@@ -175,19 +199,20 @@ plot(cv.outINT)
 bestlam = cv.outINT$lambda.min
 #bestlam = cv.outINT$lambda.1se
 
-lasso = glmnet(as.matrix(xtmHardRelInteraction), xt_mHard$y, alpha = 1, lambda = bestlam, family = "binomial",
+lasso = glmnet(as.matrix(xtmHardRelInteraction), xtmHardRel$y, alpha = 1, lambda = bestlam, family = "binomial",
                intercept = FALSE, thresh = threshold)
 lasso.coef = predict(cv.outINT, type = "coefficients", s = bestlam)
 lasso.coef
 bestlam
 
-cvpredINTLamMinTrue = predict.cv.glmnet(cv.outINT, newx = as.matrix(xcvHardRelInteraction), type = "response", s = bestlam)
+cvpredINTLamMinTrue = predict.cv.glmnet(cv.outINT, newx = as.matrix(xcvHardRelInteraction), 
+                                        type = "response", s = bestlam)
 LogLoss(cvpredINTLamMinTrue, xcvHardRel$y)
 
 
 #lambda min interaction
 
-regLamMinInter = glm(xt_mHard$y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff + RetiredDiff 
+regLamMinInter = glm(y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff + RetiredDiff 
                      + FatigueDiff  + FatigueDiffTimesBo5 + ratingdiff:ratingClaydiff 
                      + ratingClaydiff:DummyBo5TimesratingHarddiff + ratingClaydiff:WalkoverDiff 
                      + ratingHarddiff:DummyBo5TimesratingClaydiff + ratingGrassdiff:RetiredDiff 

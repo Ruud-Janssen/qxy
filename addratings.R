@@ -2,6 +2,8 @@ rm(list = ls())
 source("formulas.r")
 source("addratingsformulas.r")
 
+#K = 20.6
+
 allGames = getAllGamesWithoutRating()
 
 #######Create Ratings for all players and Start initializing them######

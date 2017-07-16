@@ -137,7 +137,7 @@ getMatchDetails = function(game){
   matchDetails$Loser = game$Loser
   matchDetails$Surface = game$Surface
   matchDetails$Best.of = game$Best.of
-  matchDetails$Date = game$Date
+  matchDetails$Date = as.Date(as.character(game$Date), format = "%m/%d/%Y")  
   
   return(matchDetails)
 }

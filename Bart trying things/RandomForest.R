@@ -68,7 +68,7 @@ xcvHardRel[, 1:(length(xcvHardRel) - 1)] =
 xtmHardRel$y = as.factor(xtmHardRel$y)
 
 
-rf = randomForest(y~., data=xtmHardRel, ntree = 3000, nodesize = 10)
+rf = randomForest(y~., data=xtmHardRel, ntree = 5000, nodesize = 1)
 plot(rf)
 rf$importance
 

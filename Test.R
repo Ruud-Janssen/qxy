@@ -37,13 +37,13 @@ xtrain = regressorvariables(ytrain, xtrain)
 q = 27
 quantile = quantile(xtrain$Uncertainty, q / 100)
 
-xtrain = removeUncertainMatches(xtrain, quantile)
+xtrain = removeUncertainMatches(xtrain, quantile, "peter")
 
 xtrainHard = getXThisSurface(xtrain, "Hard")
 xtrainGrass = getXThisSurface(xtrain, "Grass")
 
-xtrainHard$ImpProb = xtrainHard$PSLthisplayer/(xtrainHard$PSLthisplayer + xtrainHard$PSWthisplayer)
-xtrainGrass$ImpProb = xtrainGrass$PSLthisplayer/(xtrainGrass$PSLthisplayer + xtrainGrass$PSWthisplayer)
+xtrainHard = relevantVariables(xtrainHard)
+
 
 regHard = glm(y ~ 0 + ratingdiff + ratingHarddiff +
                 DummyBo5TimesAvgRatingdiff     
@@ -57,26 +57,16 @@ regGrass = glm(y ~ 0 + ratingdiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff
                  , data = xtrainGrass, family = binomial)
 
 xtest = regressorvariables(ytest, test)
-xtest = removeUncertainMatches(xtest, quantile)
+xtest = removeUncertainMatches(xtest, quantile, "Peter")
 
 xtestHard = getXThisSurface(xtest, "Hard")
+xtestHard = relevantVariables(xtestHard)
 xtestGrass = getXThisSurface(xtest, "Grass")
-
-xtestHard$ImpProb = xtestHard$PSLthisplayer/(xtestHard$PSLthisplayer + xtestHard$PSWthisplayer)
-xtestGrass$ImpProb = xtestGrass$PSLthisplayer/(xtestGrass$PSLthisplayer + xtestGrass$PSWthisplayer)
-
-iHard = !is.na(xtestHard$ImpProb)
-iGrass = !is.na(xtestGrass$ImpProb)
-
-xtestHard = xtestHard[iHard, ]
-xtestGrass = xtestGrass[iGrass, ]
 
 testpredHard = predict(regHard, xtestHard, type = "response")
 LogLoss(testpredHard, xtestHard$y)
 
 testpredGrass = predict(regGrass, xtestGrass, type = "response")
-
-
 
 #predictionsHard = 0.4314 * testpredHard + 0.5790 * xtestHard$ImpProb
 #predictionsGrass =  0.8582 * testpredGrass + 0.1607 * xtestGrass$ImpProb
@@ -86,8 +76,8 @@ testpredGrass = predict(regGrass, xtestGrass, type = "response")
 #predictionsHard = 0.85 * testpredHard  + 0.15 * xtestHard$ImpProb
 #predictionsGrass = 0.85 * testpredGrass + 0.15 * xtestGrass$ImpProb
 
-predictionsHard = 0.2 * testpredHard + 0.8 * xtestHard$ImpProb
-predictionsGrass = 0.2 *testpredGrass + 0.8 * xtestGrass$ImpProb
+predictionsHard = 0.2 * testpredHard + 0.8 * xtestHard$PSWImpr
+predictionsGrass = 0.2 *testpredGrass + 0.8 * xtestGrass$PSWImpr
 
 combinedResultsHard = result(predictionsHard, xtestHard, xtestHard$y)
 combinedResultsGrass = result(predictionsGrass, xtestGrass, xtestGrass$y)

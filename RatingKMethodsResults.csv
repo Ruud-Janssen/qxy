@@ -1,0 +1,7 @@
+﻿Results different K-factors,,,,
+,,,,
+,,,,
+,,,Constant,K = c * b ^ nrgames
+,,,K,c = 36.8
+,,,20.6,b = 0.9999
+,,LogLoss,0.5310094,0.5359804
