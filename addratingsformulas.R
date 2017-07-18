@@ -1,7 +1,7 @@
 InitializeRating = function(winners, losers){
   rating = SetUniquePlayers(winners, losers)
   rating = InitializeRatingVariables(rating)
-  rating = SetContinentsAndNationalities(rating)
+  #rating = SetContinentsAndNationalities(rating)
 }
 
 SetUniquePlayers = function(winners, losers){
@@ -13,6 +13,7 @@ SetUniquePlayers = function(winners, losers){
   
   rating = rbind(winners_all, losers_all)
   rating = unique(rating)
+  return(rating)
 }
 
 InitializeRatingVariables = function(rating){
@@ -210,6 +211,10 @@ getMatchDetailsRating = function(game, rating){
   matchDetails$Winner  = game$Winner
   matchDetails$Loser   = game$Loser
   matchDetails$Surface = game$Surface
+  if(is.na(matchDetails$Surface)) {
+    matchDetails$Surface = "Missing"
+  }
+  
   matchDetails$Best.of = game$Best.of
   
   matchDetails$IndexWinner = match(matchDetails$Winner, rating$Players)

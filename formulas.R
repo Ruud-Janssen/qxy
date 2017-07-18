@@ -112,7 +112,7 @@ NewRating <- function(ratingPlayer, KPlayer, expectationPlayer, result) {
 K <- function(numberOfGames) {
   #Got changed after found out that constant 20.6 is better when you remove a lot of the games
   #return (250 / (numberOfGames + 12) ^ 0.44)
-  20.6
+  25
 }
 
 Expectation <- function(diff) {

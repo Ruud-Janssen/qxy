@@ -2,7 +2,7 @@ rm(list = ls())
 source("formulas.r")
 source("addratingsformulas.r")
 
-#K = 20.6
+#K = 25
 
 allGames = getAllGamesWithoutRating()
 
@@ -19,7 +19,7 @@ for (i in 1: Nall) {
   
   allGames = addUncertaintyAndGames(allGames, rating, i, matchDetails)
   allGames = addRatingVariables(allGames, rating, i, matchDetails)
-  allGames = addHomePlayers(allGames, rating, i, matchDetails)
+  #allGames = addHomePlayers(allGames, rating, i, matchDetails)
   allGames = addSkillsBoX(allGames, rating, i, matchDetails)
   
   rating = UpdateRating(rating, matchDetails, allGames$Winner_expectationBasedOnRating[i])
