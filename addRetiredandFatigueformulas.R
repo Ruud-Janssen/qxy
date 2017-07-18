@@ -1,5 +1,3 @@
-library(plyr)
-
 CreateRetiredWalkoverAndFatigue = function(dataset, maxdays, base, gamesBarier){
   #Create Retired and Walkover
   dataset = SetRetired(dataset)

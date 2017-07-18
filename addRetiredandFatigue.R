@@ -8,5 +8,6 @@ base = 0.63
 gamesBarier = 24
 
 allGames = getAllGamesWithoutRating()
+player <- getPlayers()
 allGames = CreateRetiredWalkoverAndFatigue(allGames, maxdays, base, gamesBarier)
 saveDatasetsWithoutRating(allGames)

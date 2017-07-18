@@ -263,6 +263,11 @@ getAllGamesWithRating = function() {
   dplyr::bind_rows(train_rating, train_model, cv, test)
 }
 
+getPlayers = function() {
+  read.table("Data/datasets/players.csv", header = T, sep = ",", quote = "\"",
+                            colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
+}
+
 saveDatasetsWithoutRating = function(allGames){
   
   Nt_r = nrow(read.table("Data/datasets/train_rating.csv",  header = T, sep = ",", quote = "\"",
@@ -333,4 +338,8 @@ saveDatasetsWithRating = function(allGames, rating){
     write.csv(file = "Data/datasets/ratingafterTest.csv", 
               rating, row.names=FALSE)
   }
+}
+
+savePlayers = function(player) {
+  write.csv(file = "Data/datasets/players.csv", player, row.names=FALSE)
 }

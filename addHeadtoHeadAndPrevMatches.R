@@ -65,3 +65,6 @@ for(i in 1: Nall) {
 }
 
 saveDatasetsWithoutRating(allGames)
+
+savePlayers(player)
+
