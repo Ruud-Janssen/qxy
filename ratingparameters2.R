@@ -21,26 +21,23 @@ yt_m = as.numeric(runif(Nt, 0, 1) > 0.5)
 
 tic()
 total = foreach (k = 1 : 20, .combine = rbind) %do% {
-  constant = 36 + k / 10
-
-  offset = 5
-  #return(foreach(offset = 5 : 7, .combine = rbind) %do%{
-    
-    return(foreach(p = 1 : 1, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
+  constant = 85 + 0.5 * k
+  offset = 0.1
+  #return(foreach(p = 1 : 1, .combine = rbind) %do%{
+  #  power = 0.2
+    return(foreach(p = 1 : 20, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
       source("hyperparametersfunctions.r")
       source("hyperratingfunctions2.r")
+      power = 0.22 + p / 1000
       
-      power = 0.999900
       train_modelwithRatings = GetRatings(offset, power, constant)
   
       xt_m = regressorvariables(yt_m, train_modelwithRatings)
+      lastGame2011 = 13091
       
-      set.seed(40)
-      train = sample(1:nrow(xt_m), nrow(xt_m)/2)
-      validation = (-train)
       
-      xTrain = xt_m[train, ]
-      xValidation = xt_m[validation, ]
+      xTrain = xt_m[1:lastGame2011, ]
+      xValidation = xt_m[(lastGame2011 + 1) : nrow(xt_m), ]
   
       results = as.data.frame(matrix(0, 20))
       results$LogLossOutOfSampleHard = rep(0, 20)

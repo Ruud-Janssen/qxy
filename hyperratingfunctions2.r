@@ -188,6 +188,7 @@ NewRating <- function(ratingPlayer, KPlayer, expectationPlayer, result) {
 }  
 
 K <- function(numberOfGames, offset, power, constant) {
+  #constant
   constant / (offset + numberOfGames) ^ power
 }
 
