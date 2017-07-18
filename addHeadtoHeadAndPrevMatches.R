@@ -8,6 +8,13 @@ source("formulas.r")
 
 allGames <- getAllGamesWithoutRating()
 
+if("idWinner" %in% colnames(allGames)) {
+  allGames <- subset(allGames, select = -c(idWinner) )
+}
+if("idLoser" %in% colnames(allGames)) {
+  allGames <- subset(allGames, select = -c(idLoser) )
+}
+
 allGames <- mutate(allGames, Winner2 = trimws(tolower(str_replace_all(Winner, "[^[:alnum:]]", " "))))
 allGames <- mutate(allGames, Loser2 = trimws(tolower(str_replace_all(Loser, "[^[:alnum:]]", " "))))
 allGames <- allGames %>% filter(Winner2 != "" | Loser2 != "")
