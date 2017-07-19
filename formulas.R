@@ -248,6 +248,21 @@ getAllGamesWithoutRating = function() {
                     colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
 
   allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
+  
+  #everything is now character, however some columns need to be numeric
+  if ("Result" %in% colnames(allGames)) {
+    allGames <- mutate(allGames, Result = as.numeric(Result)) 
+  }
+  
+  if ("HeadtoHead" %in% colnames(allGames)) {
+    allGames <- mutate(allGames, 
+                    HeadtoHead = as.numeric(HeadtoHead),
+                    HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
+                    LastHeadtoHead = as.numeric(LastHeadtoHead)
+                ) 
+  }
+  return(allGames)
+  
 }
 
 getAllGamesWithRating = function() {

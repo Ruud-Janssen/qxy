@@ -31,7 +31,7 @@ allGamesWithoutRating <- getAllGamesWithoutRating()
 
 city <- trimws(unique(allGamesWithoutRating$Location))
 city <- as.data.frame(city, stringsAsFactors = FALSE)
-city <- filter(city, city$city != "")
+city <- filter(city, city != "")
 unique_cities <- count(distinct(city, city))
 
 
