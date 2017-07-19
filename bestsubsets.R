@@ -8,10 +8,6 @@ library(glmnet)
 library(plotmo)
 library(glmulti)
 
-removeCommonOpponentLessMatches = function(dataset){
-  dataset = dataset[!is.na(dataset$Winner_COPercentPointsWon), ]
-}
-
 threshold = 1e-9
 
 train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
