@@ -1,6 +1,6 @@
 rm(list = ls())
-source("formulas2.r")
-source("addratingsformulas2.r")
+source("formulas.r")
+source("addratingsformulas.r")
 
 startTime <- Sys.time ()
 
