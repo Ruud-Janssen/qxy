@@ -1,19 +1,8 @@
-InitializeRating = function(winners, losers){
-  rating = SetUniquePlayers(winners, losers)
-  rating = InitializeRatingVariables(rating)
-  #rating = SetContinentsAndNationalities(rating)
-}
-
-SetUniquePlayers = function(winners, losers){
-  winners_all = as.data.frame(matrix(nrow = length(winners), ncol = 0))
-  winners_all$Players = winners
-  
-  losers_all = as.data.frame(matrix(nrow = length(losers), ncol = 0))
-  losers_all$Players = losers
-  
-  rating = rbind(winners_all, losers_all)
-  rating = unique(rating)
-  return(rating)
+InitializeRating = function(player){
+  #player = SetUniquePlayers(winners, losers)
+  #player = SetContinentsAndNationalities(player)
+  rating <- InitializeRatingVariables(player)
+ 
 }
 
 InitializeRatingVariables = function(rating){
@@ -22,137 +11,136 @@ InitializeRatingVariables = function(rating){
   #Add start rating and number of games
   rating$Ratings = rep(1500, numberOfPlayers)
   rating$games = rep(0, numberOfPlayers)
+  rating$games_won = rep(0, numberOfPlayers)
   
   #Create Speciality Ratings
   rating$Hard_Ratings = rating$Ratings
   rating$Hard_games = rating$games
+  rating$Hard_games = rating$games
+  rating$Hard_games_won = rating$games
   
   rating$Grass_Ratings = rating$Ratings
   rating$Grass_games = rating$games
+  rating$Grass_games_won = rating$games
   
   rating$Clay_Ratings = rating$Ratings
   rating$Clay_games = rating$games
-  
-  rating$Carpet_Ratings = rating$Ratings
-  rating$Carpet_games = rating$games
+  rating$Clay_games_won = rating$games
   
   rating$NotHard_Ratings = rating$Ratings
   rating$NotHard_games =  rating$games
+  rating$NotHard_games_won =  rating$games
   
   rating$Bo3_Ratings =  rating$Ratings
   rating$Bo3_games = rating$games
+  rating$Bo3_games_won = rating$games
   
   rating$Bo5_Ratings = rating$Ratings
   rating$Bo5_games = rating$games
-  
-  rating$Bo5Played = rep(0, numberOfPlayers)
-  rating$Bo5Won = rep(0, numberOfPlayers)
-  rating$Bo5PlusScore = rep(0, numberOfPlayers)
-  
-  rating$Bo3Played = rep(0, numberOfPlayers)
-  rating$Bo3Won = rep(0, numberOfPlayers)
-  rating$Bo3PlusScore = rep(0, numberOfPlayers)
-  
+  rating$Bo5_games_won = rating$games
+
   return(rating)
 }
 
-SetContinentsAndNationalities = function(rating){
-  numberOfPlayers = nrow(rating)
-  
-  atp_players = read.table("Data/datasets/atp_players.csv", header = T, sep = ",", 
-                           quote = "\"", fill = TRUE)
-  
-  rating$Nationality = rep(NA, numberOfPlayers)
-  rating$Handed = rep(NA, numberOfPlayers)
-  
-  for (i in 1 : length(rating$Players)) {
-    name = rating$Players[i]
-    if (name == "") {
-      next()
-    }
-    name = gsub("Jr.", "", name)
-    
-    name = unlist(strsplit(as.character(name), '.', fixed = TRUE))[1]
-    name = unlist(strsplit(as.character(name), ' (?=[^ ]+$)', perl=TRUE))
-    lastName = name[1]
-    firstName = name[2]
-    
-    
-    indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
-    if (sum(!is.na(indexLastName)) > 0) {
-      for (j in 1:length(indexLastName)) {
-        playerNumberAtp = indexLastName[j]
-        if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
-          rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
-          rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
-        }
-      }
-    } else {
-      if (lastName == "Nadal-Parera"){
-        lastName = "Nadal"
-      }
-      if (lastName == "Hantschek") {
-        lastName = "Hantschk"
-      }
-      if (lastName =="Roger-Vasselin"){
-        lastName = "Vasselin"
-      }
-      if (lastName ==" Hajek"){
-        lastName = "Hajek"
-      }
-      
-      lastName = gsub("-", " ", lastName)
-      lastName = gsub("\'", "", lastName)
-      
-      indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
-      if (sum(!is.na(indexLastName)) > 0) {
-        for (j in 1:length(indexLastName)) {
-          playerNumberAtp = indexLastName[j]
-          if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
-            rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
-            rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
-          }
-        }
-      }
-    }
-  }
-  
-  #Add country codes and continent, apparantly the files uses IOC
-  countrycodes = read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
-                            quote = "\"", fill = TRUE)
-  
-  rating$Country = rep(NA, numberOfPlayers)
-  rating$Continent = rep(NA, numberOfPlayers)
-  
-  for (i in 1 : length(rating$Players)) {
-    country = rating$Nationality[i]
-    countryCodePlayer = match(country, countrycodes$IOC)
-    rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
-    rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
-  }
-  return(rating)
-}
+# SetContinentsAndNationalities = function(rating){
+#   numberOfPlayers = nrow(rating)
+#   
+#   atp_players = read.table("Data/datasets/atp_players.csv", header = T, sep = ",", 
+#                            quote = "\"", fill = TRUE)
+#   
+#   rating$Nationality = rep(NA, numberOfPlayers)
+#   rating$Handed = rep(NA, numberOfPlayers)
+#   
+#   for (i in 1 : length(rating$Players)) {
+#     name = rating$Players[i]
+#     if (name == "") {
+#       next()
+#     }
+#     name = gsub("Jr.", "", name)
+#     
+#     name = unlist(strsplit(as.character(name), '.', fixed = TRUE))[1]
+#     name = unlist(strsplit(as.character(name), ' (?=[^ ]+$)', perl=TRUE))
+#     lastName = name[1]
+#     firstName = name[2]
+#     
+#     
+#     indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
+#     if (sum(!is.na(indexLastName)) > 0) {
+#       for (j in 1:length(indexLastName)) {
+#         playerNumberAtp = indexLastName[j]
+#         if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
+#           rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
+#           rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
+#         }
+#       }
+#     } else {
+#       if (lastName == "Nadal-Parera"){
+#         lastName = "Nadal"
+#       }
+#       if (lastName == "Hantschek") {
+#         lastName = "Hantschk"
+#       }
+#       if (lastName =="Roger-Vasselin"){
+#         lastName = "Vasselin"
+#       }
+#       if (lastName ==" Hajek"){
+#         lastName = "Hajek"
+#       }
+#       
+#       lastName = gsub("-", " ", lastName)
+#       lastName = gsub("\'", "", lastName)
+#       
+#       indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
+#       if (sum(!is.na(indexLastName)) > 0) {
+#         for (j in 1:length(indexLastName)) {
+#           playerNumberAtp = indexLastName[j]
+#           if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
+#             rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
+#             rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
+#           }
+#         }
+#       }
+#     }
+#   }
+#   
+#   #Add country codes and continent, apparantly the files uses IOC
+#   countrycodes = read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
+#                             quote = "\"", fill = TRUE)
+#   
+#   rating$Country = rep(NA, numberOfPlayers)
+#   rating$Continent = rep(NA, numberOfPlayers)
+#   
+#   for (i in 1 : length(rating$Players)) {
+#     country = rating$Nationality[i]
+#     countryCodePlayer = match(country, countrycodes$IOC)
+#     rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
+#     rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
+#   }
+#   return(rating)
+# }
 
 #This functions creates empty lists for locations, ratings and uncertainty
 InitializeRatingVariablesForGames = function(dataset){
   
   rows = nrow(dataset)
   
-  dataset$Country = rep(NA, rows)
-  dataset$Winner_home = rep(NA, rows)
-  dataset$Loser_home = rep(NA, rows)
-  dataset$WinnerisHome = rep(NA, rows)
-  dataset$LoserisHome = rep(NA, rows)
+  # dataset$Country = rep(NA, rows)
+  # dataset$Winner_home = rep(NA, rows)
+  # dataset$Loser_home = rep(NA, rows)
+  # dataset$WinnerisHome = rep(NA, rows)
+  # dataset$LoserisHome = rep(NA, rows)
   
-  dataset$Winner_games       = rep(NA, rows)
-  dataset$Loser_games        = rep(NA, rows)
+  # dataset$Winner_games       = rep(NA, rows)
+  # dataset$Loser_games        = rep(NA, rows)
   dataset$Uncertainty        = rep(NA, rows)
   dataset$Uncertainty2       = rep(NA, rows)
   dataset$UncertaintySurface = rep(NA, rows)
+  dataset$UncertaintyBestOf  = rep(NA, rows)
   
   dataset$Winner_rating      = rep(NA, rows)
   dataset$Winner_ratingClay  = rep(NA, rows)
   dataset$Winner_ratingHard  = rep(NA, rows)
+  dataset$Winner_ratingNotHard  = rep(NA, rows)
   dataset$Winner_ratingGrass = rep(NA, rows)
   dataset$Winner_ratingBo3   = rep(NA, rows)
   dataset$Winner_ratingBo5   = rep(NA, rows)
@@ -160,169 +148,101 @@ InitializeRatingVariablesForGames = function(dataset){
   dataset$Loser_rating      = rep(NA, rows)
   dataset$Loser_ratingClay  = rep(NA, rows)
   dataset$Loser_ratingHard  = rep(NA, rows)
+  dataset$Loser_ratingNotHard  = rep(NA, rows)
   dataset$Loser_ratingGrass = rep(NA, rows)
   dataset$Loser_ratingBo3   = rep(NA, rows)
   dataset$Loser_ratingBo5   = rep(NA, rows)
   
-  dataset$Winner_skillBo5 = rep(NA, rows)
-  dataset$Winner_skillBo3 = rep(NA, rows)
-  dataset$Loser_skillBo5  = rep(NA, rows)
-  dataset$Loser_skillBo3  = rep(NA, rows)
-  
   dataset$Winner_expectationBasedOnRating = rep(NA, rows)
   dataset$Loser_expectationBasedOnRating  = rep(NA, rows)
+  dataset$Winner_expectationSurfaceBasedOnRating = rep(NA, rows)
+  dataset$Loser_expectationSurfaceBasedOnRating  = rep(NA, rows)
+  dataset$Winner_expectationBestOfBasedOnRating = rep(NA, rows)
+  dataset$Loser_expectationBestOfBasedOnRating  = rep(NA, rows)
   
-  dataset$Winner_skillBo5PlusScores = rep(NA, rows)
-  dataset$Winner_skillBo3PlusScores = rep(NA, rows)
-  
-  dataset$Loser_skillBo5PlusScores = rep(NA, rows)
-  dataset$Loser_skillBo3PlusScores = rep(NA, rows)
+  dataset$Winner_skillBo3  = rep(NA, rows)
+  dataset$Winner_skillBo5  = rep(NA, rows)
+  dataset$Loser_skillBo3  = rep(NA, rows)
+  dataset$Loser_skillBo5  = rep(NA, rows)
   
   return(dataset)
 }
 
-addRatingVariables = function(Games, rating, i, matchDetails){
-  Games$Winner_rating[i]        = rating$Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingClay[i]    = rating$Clay_Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingHard[i]    = rating$Hard_Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingGrass[i]   = rating$Grass_Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingNotHard[i] = rating$NotHard_Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingBo3[i]     = rating$Bo3_Ratings[matchDetails$IndexWinner]
-  Games$Winner_ratingBo5[i]     = rating$Bo5_Ratings[matchDetails$IndexWinner]
-  
-  Games$Loser_rating[i]        = rating$Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingClay[i]    = rating$Clay_Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingHard[i]    = rating$Hard_Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingGrass[i]   = rating$Grass_Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingNotHard[i] = rating$NotHard_Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingBo3[i]     = rating$Bo3_Ratings[matchDetails$IndexLoser]
-  Games$Loser_ratingBo5[i]     = rating$Bo5_Ratings[matchDetails$IndexLoser]
-  
-  Games$Winner_expectationBasedOnRating[i] = 1 - 1 / (1 + 10 ^ ((rating$Ratings[matchDetails$IndexWinner] 
-                                                              - rating$Ratings[matchDetails$IndexLoser])/ 400))
-  Games$Loser_expectationBasedOnRating[i]  = 1 - Games$Winner_expectationBasedOnRating[i]
 
-  return(Games)
+
+getWinExpectationBasedOnRating = function(rating_winner, rating_loser, perspective = "winner"){
+  Winner_expectationBasedOnRating = 1 - 1 / (1 + 10 ^ ((rating_winner - rating_loser) / 400))
+  if (perspective == "loser") { 1 - Winner_expectationBasedOnRating } else { Winner_expectationBasedOnRating }
 }
 
-getMatchDetailsRating = function(game, rating){
-  matchDetails = list()
-  
-  matchDetails$Winner  = game$Winner
-  matchDetails$Loser   = game$Loser
-  matchDetails$Surface = game$Surface
-  if(is.na(matchDetails$Surface)) {
-    matchDetails$Surface = "Missing"
+
+getUncertainty <- function (total_matches_winner, total_matches_loser, type_uncertainty = 1) {
+  uncertainty <- 2
+  if (type_uncertainty == 1) {
+    if (total_matches_winner != 0 & total_matches_loser != 0) {
+      uncertainty <- 1 / (total_matches_winner * total_matches_loser)  
+    }
+  } else if (type_uncertainty == 2) {
+    if (total_matches_winner != 0 & total_matches_loser != 0) {
+      uncertainty <- 1 / min(total_matches_winner, total_matches_loser)
+    }
   }
-  
-  matchDetails$Best.of = game$Best.of
-  
-  matchDetails$IndexWinner = match(matchDetails$Winner, rating$Players)
-  matchDetails$IndexLoser  = match(matchDetails$Loser, rating$Players)
-  
-  matchDetails$Winner_games = rating$games[matchDetails$IndexWinner]
-  matchDetails$Loser_games  = rating$games[matchDetails$IndexLoser]
-  
-  matchDetails$Location       = game$Location
-  matchDetails$Winner_country = rating$Country[matchDetails$IndexWinner]
-  matchDetails$Loser_country  = rating$Country[matchDetails$IndexLoser]
-  
-  citycountry = read.table("Data/datasets/citycountry.csv",  header = T, sep = ",", quote = "\"",
-             colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
-  
-  matchDetails$Country = citycountry$country[match(matchDetails$Location, citycountry$city)]
-  return(matchDetails)
+  return (uncertainty)
 }
 
-addUncertaintyAndGames = function(Games, rating, i, matchDetails){
-  Games$Winner_games[i] = matchDetails$Winner_games
-  Games$Loser_games[i]  = matchDetails$Loser_games
+# addHomePlayers = function(Games, rating, i, matchDetails){
+#   Games$Country[i]        = matchDetails$Country
+#   Games$Winner_country[i] = matchDetails$Winner_country
+#   Games$Loser_country[i]  = matchDetails$Loser_country
+#   Games$WinnerisHome[i]   = as.numeric(matchDetails$Winner_country == matchDetails$Country)
+#   Games$LoserisHome[i]    = as.numeric(matchDetails$Loser_country == matchDetails$Country)
+#   
+#   if (is.na(Games$WinnerisHome[i])) {
+#     Games$WinnerisHome[i] = 0
+#   }
+#   
+#   if (is.na(Games$LoserisHome[i])) {
+#     Games$LoserisHome[i] = 0
+#   }
+#   return(Games)
+# }
 
-  Games$Uncertainty[i] = Uncertainty(Games$Winner_games[i], Games$Loser_games[i])
-  
-  if (Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
-    Games$Uncertainty2[i] = 2
+
+
+getBo5vsBo3Skill <- function(total_won_matches_Bo5, total_won_matches_Bo3, total_matches_Bo5, total_matches_Bo3, min_games_required = 10) {
+  if (total_matches_Bo5 <= min_games_required | total_matches_Bo3 <= min_games_required) {
+    #if no games in bo5 or bo3 the skill will be 0
+    Bo5vsBo3_skill <- 0
   } else {
-    Games$Uncertainty2[i] = 1 / min(Games$Winner_games[i], Games$Loser_games[i])
+    perc_won_matches_Bo5 <- total_won_matches_Bo5 / total_matches_Bo5
+    perc_won_matches_Bo3 <- total_won_matches_Bo3 / total_matches_Bo3
+    Bo5vsBo3_skill <- perc_won_matches_Bo5 - perc_won_matches_Bo3
   }
-  
-  if (matchDetails$Surface == "Hard") {
-    Games$UncertaintySurface[i] = Uncertainty(rating$Hard_games[matchDetails$IndexWinner], 
-                                                  rating$Hard_games[matchDetails$IndexLoser])
-  } else if(matchDetails$Surface == "Grass") {
-    Games$UncertaintySurface[i] = Uncertainty(rating$Grass_games[matchDetails$IndexWinner], 
-                                                  rating$Grass_games[matchDetails$IndexLoser])
-  } else if(matchDetails$Surface == "Clay") {
-    Games$UncertaintySurface[i] = Uncertainty(rating$Clay_games[matchDetails$IndexWinner], 
-                                                  rating$Clay_games[matchDetails$IndexLoser])
-  }
-  
-  return(Games)
+  return (Bo5vsBo3_skill)
 }
 
-Uncertainty = function(winnerGames, loserGames) {
-  if (winnerGames == 0 | loserGames == 0) {
-    return(2)
-  }
-  1 / (winnerGames * loserGames)
+# 
+# getBo5vsBo3SkillBasedOnRating <- function(Bo5_plus_score, Bo3_plus_score, total_matches_Bo5, total_matches_Bo3, min_games_required = 10) {
+#   if (total_matches_Bo5 <= min_games_required | total_matches_Bo3 <= min_games_required) {
+#     #if no games in bo5 or bo3 the skill will be 0
+#     Bo5vsBo3_skill_based_on_rating <- 0
+#   } else {
+#     mean_Bo5_plus_score <- Bo5_plus_score / total_matches_Bo5
+#     mean_Bo3_plus_score <- Bo3_plus_score / total_matches_Bo3
+#     Bo5vsBo3_skill_based_on_rating <- mean_Bo5_plus_score - mean_Bo3_plus_score
+#   }
+#   return (Bo5vsBo3_skill_based_on_rating)
+# }
+
+calculateNewRating <- function(current_rating, total_matches, expectation_based_on_rating, result) {
+  Kfactor <- K(total_matches)
+
+  #OLD CODE IN COMMENT but already defined elsewhere, expectationWinner = 1 - 1 / (1 + 10 ^ ((ratingWinner - ratingLoser)/ 400))
+  new_rating <- current_rating + Kfactor * (result - expectation_based_on_rating)
 }
 
-addHomePlayers = function(Games, rating, i, matchDetails){
-  Games$Country[i]        = matchDetails$Country
-  Games$Winner_country[i] = matchDetails$Winner_country
-  Games$Loser_country[i]  = matchDetails$Loser_country
-  Games$WinnerisHome[i]   = as.numeric(matchDetails$Winner_country == matchDetails$Country)
-  Games$LoserisHome[i]    = as.numeric(matchDetails$Loser_country == matchDetails$Country)
-  
-  if (is.na(Games$WinnerisHome[i])) {
-    Games$WinnerisHome[i] = 0
-  }
-  
-  if (is.na(Games$LoserisHome[i])) {
-    Games$LoserisHome[i] = 0
-  }
-  return(Games)
-}
-
-addSkillsBoX = function(Games, rating, i, matchDetails){
-  winnerBo5Skill = getBo5Skill(rating, matchDetails$IndexWinner)
-  loserBo5Skill  = getBo5Skill(rating, matchDetails$IndexLoser)
-  
-  winnerBo3Skill = -winnerBo5Skill
-  loserBo3Skill  = -loserBo5Skill
-  
-  Games$Winner_skillBo5[i] = winnerBo5Skill
-  Games$Winner_skillBo3[i] = winnerBo3Skill
-  Games$Loser_skillBo5[i]  = loserBo5Skill
-  Games$Loser_skillBo3[i]  = loserBo3Skill
-  
-  Games$Winner_skillBo5PlusScores[i] = getBo5SkillBasedOnRating(rating, matchDetails$IndexWinner)
-  Games$Winner_skillBo3PlusScores[i] =  - Games$Winner_skillBo5PlusScores[i]
-  
-  Games$Loser_skillBo5PlusScores[i] = getBo5SkillBasedOnRating(rating, matchDetails$IndexLoser)
-  Games$Loser_skillBo3PlusScores[i] = -Games$Loser_skillBo5PlusScores[i]
-    
-  return(Games)
-}
-
-#if no games in bo5 or bo3 the skill will be 0
-getBo5Skill = function(rating, indexPlayer){
-  minGamesRequired = 10
-  if (rating$Bo5Played[indexPlayer] < minGamesRequired | rating$Bo3Played[indexPlayer] < minGamesRequired) {
-    return(0)
-  }
-  
-  percentageWinsBo5 = rating$Bo5Won[indexPlayer] / rating$Bo5Played[indexPlayer]
-  percentageWinsBo3 = rating$Bo3Won[indexPlayer] / rating$Bo3Played[indexPlayer]
-  Bo5Skill          = percentageWinsBo5 - percentageWinsBo3
-}
-
-getBo5SkillBasedOnRating = function(rating, indexPlayer){
-  minGamesRequired = 10
-  if (rating$Bo5Played[indexPlayer] < minGamesRequired | rating$Bo3Played[indexPlayer] < minGamesRequired) {
-    return(0)
-  }
-  meanBo5PlusScore = rating$Bo5PlusScore[indexPlayer] / rating$Bo5Played[indexPlayer]
-  meanBo3PlusScore = rating$Bo3PlusScore[indexPlayer] / rating$Bo3Played[indexPlayer]
-  Bo5Skill         = meanBo5PlusScore - meanBo3PlusScore
+K <- function(total_matches) {
+  #Got changed after found out that constant 20.6 is better when you remove a lot of the games
+  #return (250 / (numberOfGames + 12) ^ 0.44)
+  25
 }

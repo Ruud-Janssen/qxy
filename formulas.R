@@ -1,119 +1,5 @@
 library(dplyr)
 
-UpdateRating <- function(rating, matchDetails, expectationWinner) {
-  expectationLoser = 1 - expectationWinner
-
-  #Normal ratings
-  rating$Ratings = UpdateThisRatingType(rating$Ratings, rating$games, 
-                                        matchDetails$IndexWinner, matchDetails$IndexLoser)
-  rating$games = addAGame(rating$games, matchDetails$IndexWinner, matchDetails$IndexLoser)
-  
-  if(is.na(matchDetails$Surface)) {
-    surface = "Missing"
-  }
-                                         
-  #Surface Ratings
-  if(matchDetails$Surface == "Hard") {
-    rating$Hard_Ratings = UpdateThisRatingType(rating$Hard_Ratings, rating$Hard_games
-                                               , matchDetails$IndexWinner, matchDetails$IndexLoser)
-    rating$Hard_games = addAGame(rating$Hard_games, 
-                                 matchDetails$IndexWinner, matchDetails$IndexLoser)
-  } else{
-    rating$NotHard_Ratings = UpdateThisRatingType(rating$NotHard_Ratings, rating$NotHard_games
-                                               , matchDetails$IndexWinner, matchDetails$IndexLoser)
-    rating$NotHard_games = addAGame(rating$NotHard_games, 
-                                 matchDetails$IndexWinner, matchDetails$IndexLoser)
-  }
-  if(matchDetails$Surface == "Grass") {
-      rating$Grass_Ratings = UpdateThisRatingType(rating$Grass_Ratings, rating$Grass_games,
-                                                  matchDetails$IndexWinner, matchDetails$IndexLoser)
-      rating$Grass_games = addAGame(rating$Grass_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
-      
-    } else if(matchDetails$Surface == "Clay") {
-      rating$Clay_Ratings = UpdateThisRatingType(rating$Clay_Ratings, rating$Clay_games, 
-                                                 matchDetails$IndexWinner, matchDetails$IndexLoser)
-      rating$Clay_games = addAGame(rating$Clay_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
-    
-    } else if(matchDetails$Surface == "Carpet") {
-      rating$Carpet_Ratings = UpdateThisRatingType(rating$Carpet_Ratings, rating$Carpet_games, 
-                                                   matchDetails$IndexWinner, matchDetails$IndexLoser)
-      rating$Carpet_games = addAGame(rating$Carpet_games, matchDetails$IndexWinner, matchDetails$IndexLoser)
-    }
-  
-  if(is.na(matchDetails$Best.of)) {
-    matchDetails$Best.of = 0
-  }
-  
-  if(matchDetails$Best.of == 3){
-    rating$Bo3_Ratings = UpdateThisRatingType(rating$Bo3_Ratings, rating$Bo3_games
-                                               , matchDetails$IndexWinner, matchDetails$IndexLoser)
-    rating$Bo3_games = addAGame(rating$Bo3_games, 
-                                 matchDetails$IndexWinner, matchDetails$IndexLoser)
-    
-    rating$Bo3Played[matchDetails$IndexWinner] = rating$Bo3Played[matchDetails$IndexWinner] + 1
-    rating$Bo3Played[matchDetails$IndexLoser] = rating$Bo3Played[matchDetails$IndexLoser] + 1
-    
-    rating$Bo3Won[matchDetails$IndexWinner] = rating$Bo3Won[matchDetails$IndexWinner] + 1
-    
-    rating$Bo3PlusScore[matchDetails$IndexWinner] = rating$Bo3PlusScore[matchDetails$IndexWinner] +
-      (1 - expectationWinner)
-    
-    rating$Bo3PlusScore[matchDetails$IndexLoser] = rating$Bo3PlusScore[matchDetails$IndexLoser] -
-        expectationLoser
-    
-  } else if(matchDetails$Best.of == 5) {
-    rating$Bo5_Ratings = UpdateThisRatingType(rating$Bo5_Ratings, rating$Bo5_games
-                                              , matchDetails$IndexWinner, matchDetails$IndexLoser)
-    rating$Bo5_games = addAGame(rating$Bo5_games, 
-                                matchDetails$IndexWinner, matchDetails$IndexLoser)
-    
-    rating$Bo5Played[matchDetails$IndexWinner] = rating$Bo5Played[matchDetails$IndexWinner] + 1
-    rating$Bo5Played[matchDetails$IndexLoser] = rating$Bo5Played[matchDetails$IndexLoser] + 1
-    
-    rating$Bo5Won[matchDetails$IndexWinner] = rating$Bo5Won[matchDetails$IndexWinner] + 1
-    
-    rating$Bo5PlusScore[matchDetails$IndexWinner] = rating$Bo5PlusScore[matchDetails$IndexWinner] +
-      (1 - expectationWinner)
-    
-    rating$Bo5PlusScore[matchDetails$IndexLoser] = rating$Bo5PlusScore[matchDetails$IndexLoser] -
-        expectationLoser
-  }
-
-  return(rating)
-}
-
-UpdateThisRatingType <- function(Ratings, games, indexWinner, indexLoser) {
-  Kwinner = K(games[indexWinner])
-  Kloser = K(games[indexLoser])
-  
-  ratingWinner = Ratings[indexWinner]
-  ratingLoser = Ratings[indexLoser]
-  
-  expectationWinner = 1 - 1 / (1 + 10 ^ ((ratingWinner - ratingLoser)/ 400))
-  expectationLoser = 1 - expectationWinner
-  
-  Ratings[indexWinner] = NewRating(ratingWinner, Kwinner, expectationWinner, 1)
-  Ratings[indexLoser] = NewRating(ratingLoser, Kloser, expectationLoser, 0)
-
-  return(Ratings)
-}
-
-addAGame <- function(games, indexWinner, indexLoser) {
-  games[indexWinner] = games[indexWinner] + 1
-  games[indexLoser] = games[indexLoser] + 1
-  
-  return(games)
-}
-
-NewRating <- function(ratingPlayer, KPlayer, expectationPlayer, result) {
-  ratingPlayer + KPlayer * (result - expectationPlayer)
-}  
-
-K <- function(numberOfGames) {
-  #Got changed after found out that constant 20.6 is better when you remove a lot of the games
-  #return (250 / (numberOfGames + 12) ^ 0.44)
-  25
-}
 
 Expectation <- function(diff) {
   1 - 1 / (1 + 10 ^ (diff / 400))
@@ -125,40 +11,12 @@ LogLoss = function(pred, actual){
   -1*mean(log(pred[model.matrix(~ actual + 0) - pred > 0]))
 }
 
+
 RemoveWalkOvers = function(Data){
   Data = Data[Data$Comment != "Walkover", ]
   Data = Data[Data$Comment != "Walover", ]
 }
 
-getMatchDetails = function(game){
-  matchDetails = list()
-  
-  matchDetails$Winner = game$Winner
-  matchDetails$Loser = game$Loser
-  matchDetails$Surface = game$Surface
-  matchDetails$Best.of = game$Best.of
-  matchDetails$Date = as.Date(as.character(game$Date), format = "%m/%d/%Y")  
-  
-  return(matchDetails)
-}
-
-addUncertaintyAndGames = function(Games, i, matchDetails){
-  Games$Winner_games[i] = matchDetails$Winner_games
-  Games$Loser_games[i] = matchDetails$Loser_games
-  
-  if (Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
-    Games$Uncertainty[i] = 2
-  } else {
-    Games$Uncertainty[i] = 1 / (Games$Winner_games[i] * Games$Loser_games[i])
-  }
-  
-  if (Games$Winner_games[i] == 0 | Games$Loser_games[i] == 0) {
-    Games$Uncertainty2[i] = 2
-  } else {
-    Games$Uncertainty2[i] = 1 / min(Games$Winner_games[i], Games$Loser_games[i])
-  }
-  return(Games)
-}
 
 #returns a vector containing the next game if available and 
 #an index indicating whether it's the winner (1), loser (2)
@@ -237,6 +95,7 @@ FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatch
   return(nextGame)
 }
 
+
 getAllGamesWithoutRating = function() {
   train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",
                             colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
@@ -246,24 +105,31 @@ getAllGamesWithoutRating = function() {
                   colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
   test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
                     colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
-
+  
   allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
   
   #everything is now character, however some columns need to be numeric
+  if ("idWinner" %in% colnames(allGames)) {
+    allGames <- mutate(allGames, 
+                       idWinner = as.numeric(idWinner),
+                       idLoser = as.numeric(idLoser)
+    ) 
+  }
+
   if ("Result" %in% colnames(allGames)) {
     allGames <- mutate(allGames, Result = as.numeric(Result)) 
   }
   
   if ("HeadtoHead" %in% colnames(allGames)) {
     allGames <- mutate(allGames, 
-                    HeadtoHead = as.numeric(HeadtoHead),
-                    HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
-                    LastHeadtoHead = as.numeric(LastHeadtoHead)
-                ) 
+                       HeadtoHead = as.numeric(HeadtoHead),
+                       HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
+                       LastHeadtoHead = as.numeric(LastHeadtoHead)
+    ) 
   }
   return(allGames)
-  
 }
+
 
 getAllGamesWithRating = function() {
   train_rating = read.table("Data/datasets/train_ratingWithRatings.csv", header = T, sep = ",", quote = "\"",
@@ -275,24 +141,52 @@ getAllGamesWithRating = function() {
   test = read.table("Data/datasets/testWithRatings.csv", header = T, sep = ",", quote = "\"",
                     colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
   
-  dplyr::bind_rows(train_rating, train_model, cv, test)
+  allGames <- dplyr::bind_rows(train_rating, train_model, cv, test)
+
+  #everything is now character, however some columns need to be numeric
+  if ("idWinner" %in% colnames(allGames)) {
+    allGames <- mutate(allGames, 
+                       idWinner = as.numeric(idWinner),
+                       idLoser = as.numeric(idLoser)
+    ) 
+  }
+  
+  if ("Result" %in% colnames(allGames)) {
+    allGames <- mutate(allGames, Result = as.numeric(Result)) 
+  }
+  
+  if ("HeadtoHead" %in% colnames(allGames)) {
+    allGames <- mutate(allGames, 
+                       HeadtoHead = as.numeric(HeadtoHead),
+                       HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
+                       LastHeadtoHead = as.numeric(LastHeadtoHead)
+    ) 
+  }
+  return(allGames)
 }
 
+
 getPlayers = function() {
-  read.table("Data/datasets/players.csv", header = T, sep = ",", quote = "\"",
-                            colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
+  player <- read.table("Data/datasets/players.csv", header = T, sep = ",", quote = "\"",
+             colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
+  
+  if ("id" %in% colnames(player)) {
+    player <- mutate(player, id = as.numeric(id)) 
+  }
+  return(player)
 }
+
 
 saveDatasetsWithoutRating = function(allGames){
   
   Nt_r = nrow(read.table("Data/datasets/train_rating.csv",  header = T, sep = ",", quote = "\"",
-                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
+                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
   Nt_m = nrow(read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
-                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
+                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
   Ncv = nrow(read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
-                                        colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
+                        colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
   Ntest = nrow(read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
-                                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
+                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
   
   firstindextrain_rating = 1
   lastindextrain_rating = Nt_r
@@ -315,6 +209,7 @@ saveDatasetsWithoutRating = function(allGames){
   write.csv(file = "Data/datasets/cv.csv", cv, row.names=FALSE)
   write.csv(file = "Data/datasets/test.csv", test, row.names=FALSE)
 }
+
 
 #Note that we assume here that the walkovers are removed
 saveDatasetsWithRating = function(allGames, rating){
@@ -354,6 +249,7 @@ saveDatasetsWithRating = function(allGames, rating){
               rating, row.names=FALSE)
   }
 }
+
 
 savePlayers = function(player) {
   write.csv(file = "Data/datasets/players.csv", player, row.names=FALSE)
