@@ -27,10 +27,6 @@ InitializeRatingVariables = function(rating){
   rating$Clay_games = rating$games
   rating$Clay_games_won = rating$games
   
-  rating$Carpet_Ratings = rating$Ratings
-  rating$Carpet_games = rating$games
-  rating$Carpet_games_won = rating$games
-  
   rating$NotHard_Ratings = rating$Ratings
   rating$NotHard_games =  rating$games
   rating$NotHard_games_won =  rating$games

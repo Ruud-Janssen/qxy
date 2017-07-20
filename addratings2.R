@@ -142,18 +142,9 @@ for (i in 1: Nall) {
       rating$Clay_games[row_nr_loser]                    <- rating$Clay_games[row_nr_loser]  + 1
       rating$Clay_games_won[row_nr_winner]               <- rating$Clay_games_won[row_nr_winner] + 1
       
-    } else if(allGames$Surface[i] == "Carpet") {
-      allGames$UncertaintySurface[i]                     <- getUncertainty(rating$Carpet_games[row_nr_winner], rating$Carpet_games[row_nr_loser])
-  
-      allGames$Winner_expectationSurfaceBasedOnRating[i] <- getWinExpectationBasedOnRating(rating$Carpet_Ratings[row_nr_winner], rating$Carpet_Ratings[row_nr_loser])
-      allGames$Loser_expectationSurfaceBasedOnRating[i]  <- getWinExpectationBasedOnRating(rating$Carpet_Ratings[row_nr_winner], rating$Carpet_Ratings[row_nr_loser], perspective = "loser")
-      
-      rating$Carpet_Ratings[row_nr_winner]               <- calculateNewRating(rating$Carpet_Ratings[row_nr_winner], rating$Carpet_games[row_nr_winner], allGames$Winner_expectationSurfaceBasedOnRating[i], 1)
-      rating$Carpet_Ratings[row_nr_loser]                <- calculateNewRating(rating$Carpet_Ratings[row_nr_loser], rating$Carpet_games[row_nr_loser], allGames$Loser_expectationSurfaceBasedOnRating[i], 0)
-      
-      rating$Carpet_games[row_nr_winner]                 <- rating$Carpet_games[row_nr_winner] + 1
-      rating$Carpet_games[row_nr_loser]                  <- rating$Carpet_games[row_nr_loser]  + 1
-      rating$Carpet_games_won[row_nr_winner]             <- rating$Carpet_games_won[row_nr_winner] + 1
+    } 
+    #Since carpet is not in use since 2009 no carpet variables will be saved
+    else if(allGames$Surface[i] == "Carpet") {
     }
   } else {
     print("ERROR: Player cannot be matched with Rating")

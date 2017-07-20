@@ -91,10 +91,10 @@ player$id <- seq.int(nrow(player))
 
 
 allGames <- left_join(allGames, player, by = c("Winner2" = "playername") )
-allGames <- rename(allGames, idWinner = id)
+allGames <- dplyr::rename(allGames, idWinner = id)
 
 allGames <- left_join(allGames, player, by = c("Loser2" = "playername") )
-allGames <- rename(allGames, idLoser = id)
+allGames <- dplyr::rename(allGames, idLoser = id)
 
 allGames <- mutate(allGames, Match = ifelse(idWinner < idLoser, paste(idWinner, idLoser, sep="-"), paste(idLoser, idWinner, sep="-")))
 allGames <- mutate(allGames, Result = ifelse(idWinner < idLoser, 1, -1))
