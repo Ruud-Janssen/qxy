@@ -6,7 +6,7 @@ source("addGlickoFormulas.R")
 startRating         = 1500
 startRD             = 350
 #periodLength        = 1 #(day)
-rdIncreasePerPeriod = 15.49 #got to optimize this I guess, but assuming 500 days and average 50 15.49 is value
+rdIncreasePerPeriod = 1 #got to optimize this I guess, but assuming 500 days and average 50 15.49 is value
 
 
 allGames = getAllGamesWithRating()

@@ -13,4 +13,5 @@ source("addHeadtoHeadAndPrevMatches.R")
 # source("addRetiredandFatigue.R")
 
 source("addratings.R")
-source("addCommonOpponents.r")
+source("addGlicko.R")
+#source("addCommonOpponents.r")

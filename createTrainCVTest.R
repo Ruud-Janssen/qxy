@@ -12,7 +12,6 @@ data2003<-read.table(paste(dataTrainRatingDir, "2003.csv", sep = ""), header = T
 data2004<-read.table(paste(dataTrainRatingDir, "2004.csv", sep = ""), header = T, sep = ",", quote = "",colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
 
 train_rating = dplyr::bind_rows(data2000, data2001, data2002, data2003, data2004)
-train_rating = train_rating[train_rating$Surface!= "Carpet", ]
 
 write.csv(file = paste(saveDatasetsDir, "train_rating.csv", sep = ""), train_rating, row.names=FALSE)
 
@@ -30,7 +29,6 @@ data2012<-read.table(paste(dataTrainModelDir, "2012.csv", sep = ""), header = T,
 
 train_model = dplyr::bind_rows(data2005, data2006, data2007, data2008, data2009, 
                                 data2010, data2011, data2012)
-train_model = train_model[train_model$Surface!= "Carpet", ]
 
 write.csv(file = paste(saveDatasetsDir, "train_model.csv", sep = ""), train_model, row.names=FALSE)
 
