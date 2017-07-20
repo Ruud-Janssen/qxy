@@ -6,6 +6,8 @@ source("import_cities_to_countries.R")
 
 source("add_id_for_player_and_matches.R")
 
+source("enhance_games_data.R")
+
 source("addHeadtoHeadAndPrevMatches.R")
 
 # source("addRetiredandFatigue.R")
