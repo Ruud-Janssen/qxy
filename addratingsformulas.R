@@ -1,5 +1,4 @@
 InitializeRating = function(player){
-  #player = SetUniquePlayers(winners, losers)
   #player = SetContinentsAndNationalities(player)
   rating <- InitializeRatingVariables(player)
  

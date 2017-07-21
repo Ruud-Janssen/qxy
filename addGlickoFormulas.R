@@ -1,51 +1,42 @@
-InitializeGlicko = function(winners, losers, startRating, startRD){
-  glicko = SetUniquePlayers(winners, losers)
-  glicko = InitializeGlickoVariables(glicko, startRating, startRD)
+InitializeGlicko <- function(player, startRating, startRD){
+  glicko <- InitializeGlickoVariables(player)
 }
 
-SetUniquePlayers = function(winners, losers) {
-  winners_all = as.data.frame(matrix(nrow = length(winners), ncol = 0))
-  winners_all$Players = winners
+InitializeGlickoVariables <- function(glicko) {
+  startRating <- 1500
+  startRD     <- 350
   
-  losers_all = as.data.frame(matrix(nrow = length(losers), ncol = 0))
-  losers_all$Players = losers
-  
-  glicko = rbind(winners_all, losers_all)
-  glicko = unique(glicko)
-}
-
-InitializeGlickoVariables = function(glicko, startRating, startRD) {
-  numberOfPlayers = nrow(glicko)
+  numberOfPlayers <- nrow(glicko)
   
   #Add start rating and number of games
-  glicko$Ratings   = rep(startRating, numberOfPlayers)
-  glicko$rd        = rep(startRD, numberOfPlayers)
-  glicko$last_game = rep(NA, numberOfPlayers)
+  glicko$Ratings   <- rep(startRating, numberOfPlayers)
+  glicko$rd        <- rep(startRD, numberOfPlayers)
+  glicko$last_game <- rep(NA, numberOfPlayers)
   
   #Create Speciality Ratings
-  glicko$Hard_Ratings   = glicko$Ratings
-  glicko$Hard_rd        = glicko$rd
-  glicko$Hard_last_game = glicko$last_game
+  glicko$Hard_Ratings   <- glicko$Ratings
+  glicko$Hard_rd        <- glicko$rd
+  glicko$Hard_last_game <- glicko$last_game
   
-  glicko$Grass_Ratings   = glicko$Ratings
-  glicko$Grass_rd        = glicko$rd
-  glicko$Grass_last_game = glicko$last_game
+  glicko$Grass_Ratings   <- glicko$Ratings
+  glicko$Grass_rd        <- glicko$rd
+  glicko$Grass_last_game <- glicko$last_game
   
-  glicko$Clay_Ratings   = glicko$Ratings
-  glicko$Clay_rd        = glicko$rd
-  glicko$Clay_last_game = glicko$last_game
+  glicko$Clay_Ratings   <- glicko$Ratings
+  glicko$Clay_rd        <- glicko$rd
+  glicko$Clay_last_game <- glicko$last_game
   
-  glicko$NotHard_Ratings   = glicko$Ratings
-  glicko$NotHard_rd        = glicko$rd
-  glicko$NotHard_last_game = glicko$last_game
+  glicko$NotHard_Ratings   <- glicko$Ratings
+  glicko$NotHard_rd        <- glicko$rd
+  glicko$NotHard_last_game <- glicko$last_game
   
-  glicko$Bo3_Ratings   =  glicko$Ratings
-  glicko$Bo3_rd        = glicko$rd
-  glicko$Bo3_last_game = glicko$last_game
+  glicko$Bo3_Ratings   <-  glicko$Ratings
+  glicko$Bo3_rd        <- glicko$rd
+  glicko$Bo3_last_game <- glicko$last_game
   
-  glicko$Bo5_Ratings   = glicko$Ratings
-  glicko$Bo5_rd        = glicko$rd
-  glicko$Bo5_last_game = glicko$last_game
+  glicko$Bo5_Ratings   <- glicko$Ratings
+  glicko$Bo5_rd        <- glicko$rd
+  glicko$Bo5_last_game <- glicko$last_game
   
   return(glicko)
 }
@@ -147,101 +138,40 @@ addGlickoVariables = function(Games, glicko, i, matchDetails) {
 }
 
 #Formula for updating RD: RD' = sqrt(RD^2 + t * c ^ 2), with t the periods passed (days in our case)
-updateRDBeforeGame = function(glicko, matchDetails, c) {
-  glicko = updateRDBeforeGamePlayer(glicko, matchDetails$IndexWinner, matchDetails$Date, matchDetails$Surface, c)
-  glicko = updateRDBeforeGamePlayer(glicko, matchDetails$IndexLoser, matchDetails$Date, matchDetails$Surface, c)
-  return(glicko)
-}
-
-updateRDBeforeGamePlayer = function(glicko, indexPlayer, currentDate, surface, c) {
-  glicko$rd[indexPlayer] = 
-    updateRDBeforeGamePlayerThisRating(glicko$rd[indexPlayer], glicko$last_game[indexPlayer], currentDate, c)
-  glicko$last_game[indexPlayer] = currentDate
-
-  if(surface == "Grass") {
-    glicko$Grass_rd[indexPlayer] = 
-      updateRDBeforeGamePlayerThisRating(glicko$Grass_rd[indexPlayer], 
-                                     glicko$Grass_last_game[indexPlayer], currentDate, c)
-    glicko$Grass_last_game[indexPlayer] = currentDate
-    
-  } else if(surface == "Clay") {
-    glicko$Clay_rd[indexPlayer] = 
-      updateRDBeforeGamePlayerThisRating(glicko$Clay_rd[indexPlayer], 
-                                     glicko$Clay_last_game[indexPlayer], currentDate, c)
-    glicko$Clay_last_game[indexPlayer] = currentDate
-  } else if(surface == "Hard") {
-    glicko$Hard_rd[indexPlayer]  = 
-      updateRDBeforeGamePlayerThisRating(glicko$Hard_rd[indexPlayer], 
-                                     glicko$Hard_last_game[indexPlayer], currentDate, c)
-    glicko$Hard_last_game[indexPlayer] = currentDate
-  }
-  return(glicko)
-}
-
-updateRDBeforeGamePlayerThisRating = function(rd, lastGameDate, currentDate, c) {
+updateRDBeforeGame <- function(rd, lastGameDate, gameDate, c = 3.2) {
   if(is.na(lastGameDate)) {
     return(350)
   }
   df = "%m/%d/%Y"
   
   lastGameDate = as.Date(as.character(lastGameDate), format = df)
-  currentDate  = as.Date(as.character(currentDate), format = df)
+  gameDate  = as.Date(as.character(gameDate), format = df)
   
-  timeDiff = as.numeric(abs(lastGameDate - currentDate))
-  rd       = min(350, sqrt(rd ^ 2 + timeDiff * c ^ 2))
+  timeDiff = as.numeric(abs(lastGameDate - gameDate))
+  min(350, sqrt(rd ^ 2 + timeDiff * c ^ 2))
 }
 
-UpdateGlicko = function(glicko, matchDetails) {
-  glicko$Ratings = UpdateGlickoRating(glicko$Ratings, glicko$rd, matchDetails$IndexWinner, matchDetails$IndexLoser)
-  glicko$rd      = UpdateRDAfterGame(glicko$Ratings, glicko$rd, matchDetails$IndexWinner, matchDetails$IndexLoser)
-  
-  if(matchDetails$Surface == "Grass") {
-    glicko$Grass_Ratings = UpdateGlickoRating(glicko$Grass_Ratings, glicko$Grass_rd, 
-                                                           matchDetails$IndexWinner, matchDetails$IndexLoser)
-    glicko$Grass_rd = UpdateRDAfterGame(glicko$Grass_Ratings, glicko$Grass_rd, 
-                                                     matchDetails$IndexWinner, matchDetails$IndexLoser)
-  } else if(matchDetails$Surface == "Clay") {
-    glicko$Clay_Ratings = UpdateGlickoRating(glicko$Clay_Ratings, glicko$Clay_rd, 
-                                                           matchDetails$IndexWinner, matchDetails$IndexLoser)
-    glicko$Clay_rd = UpdateRDAfterGame(glicko$Clay_Ratings, glicko$Clay_rd, 
-                                                     matchDetails$IndexWinner, matchDetails$IndexLoser)
-  } else if(matchDetails$Surface == "Hard") {
-    glicko$Hard_Ratings = UpdateGlickoRating(glicko$Hard_Ratings, glicko$Hard_rd, 
-                                                           matchDetails$IndexWinner, matchDetails$IndexLoser)
-    glicko$Hard_rd = UpdateRDAfterGame(glicko$Hard_Ratings, glicko$Hard_rd, 
-                                                     matchDetails$IndexWinner, matchDetails$IndexLoser)
-  }
-  return(glicko)
-}
-
-UpdateGlickoRating = function(ratings, rds, indexWinner, indexLoser) {
-  ratings[indexWinner] = UpdateGlickoRatingPlayer(ratings[indexWinner], ratings[indexLoser], 
-                                                  rds[indexWinner], rds[indexLoser], 1)
-  ratings[indexLoser]  = UpdateGlickoRatingPlayer(ratings[indexLoser], ratings[indexWinner], 
-                                                  rds[indexLoser], rds[indexWinner], 0)
-  return(ratings)
-}
-
-UpdateGlickoRatingPlayer = function(ratingPlayer, ratingOpponent, rdPlayer, rdOpponent, result) {
+g <- function(rd) {
   q = 0.0057565
-  gRD = 1 / sqrt(1 + 3 * q ^ 2 * rdOpponent ^ 2 / pi ^ 2)
+  1 / sqrt(1 + 3 * q ^ 2 * rd ^ 2 / pi ^ 2)
+}
+
+calculateNewGlicko = function(ratingPlayer, ratingOpponent, rdPlayer, rdOpponent, result) {
+  q = 0.0057565
+  gRD = g(rdOpponent)
   E = 1 / (1 + 10 ^ (-gRD * (ratingPlayer - ratingOpponent)/ 400))
   dsquared = (q ^ 2 * gRD ^ 2 * E * (1 - E)) ^ - 1
   ratingPlayer + q / (1 / rdPlayer ^ 2 + 1 / dsquared) * gRD * (result - E)
 }
 
-UpdateRDAfterGame = function(ratings, rds, indexWinner, indexLoser) {
-  rds[indexWinner] = UpdateRDAfterGamePlayer(ratings[indexWinner], ratings[indexLoser], 
-                                                  rds[indexWinner], rds[indexLoser], 1)
-  rds[indexLoser]  = UpdateRDAfterGamePlayer(ratings[indexLoser], ratings[indexWinner], 
-                                                  rds[indexLoser], rds[indexWinner], 0)
-  return(rds)
-}
-
-UpdateRDAfterGamePlayer = function(ratingPlayer, ratingOpponent, rdPlayer, rdOpponent, result) {
+calculateRDAfterGame <- function(ratingPlayer, ratingOpponent, rdPlayer, rdOpponent, result) {
   q = 0.0057565
-  gRD = 1 / sqrt(1 + 3 * q ^ 2 * rdOpponent ^ 2 / pi ^ 2)
+  gRD = g(rdOpponent)
   E = 1 / (1 + 10 ^ (-gRD * (ratingPlayer - ratingOpponent)/ 400))
   dsquared = (q ^ 2 * gRD ^ 2 * E * (1 - E)) ^ - 1
   sqrt(1 / (1 / rdPlayer  ^ 2 + 1 / dsquared))
+}
+
+calculateGlickoVariable <- function(rating, rd1, rd2) {
+  g(sqrt(rd1 ^ 2 + rd2 ^ 2)) * rating
 }

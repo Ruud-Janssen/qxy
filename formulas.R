@@ -212,7 +212,7 @@ saveDatasetsWithoutRating = function(allGames){
 
 
 #Note that we assume here that the walkovers are removed
-saveDatasetsWithRating = function(allGames, rating){
+saveDatasetsWithRating = function(allGames, rating = NULL){
   
   Nt_r = nrow(RemoveWalkOvers(read.table("Data/datasets/train_rating.csv",  header = T, sep = ",", quote = "\"",
                                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))

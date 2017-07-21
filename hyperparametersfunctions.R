@@ -57,7 +57,7 @@ setPointOfViewVariables = function(x, row) {
   x$ratingClaydiff    = mp * (row$Winner_ratingClay - row$Loser_ratingClay)
   x$ratingHarddiff    = mp * (row$Winner_ratingHard - row$Loser_ratingHard)
   x$ratingGrassdiff   = mp * (row$Winner_ratingGrass - row$Loser_ratingGrass)
-  #x$ratingNotHarddiff = mp * (row$Winner_ratingNotHard - row$Loser_ratingNotHard)
+  x$ratingNotHarddiff = mp * (row$Winner_ratingNotHard - row$Loser_ratingNotHard)
   #x$ratingBo3diff     = mp * (row$Winner_ratingBo3 - row$Loser_ratingBo3)
   #x$ratingBo5diff     = mp * (row$Winner_ratingBo5 - row$Loser_ratingBo5)
   
@@ -65,6 +65,7 @@ setPointOfViewVariables = function(x, row) {
   x$glickoClaydiff    = mp * (row$Winner_glickoClay - row$Loser_glickoClay)
   x$glickoHarddiff    = mp * (row$Winner_glickoHard - row$Loser_glickoHard)
   x$glickoGrassdiff   = mp * (row$Winner_glickoGrass - row$Loser_glickoGrass)
+  x$glickoNotHarddiff = mp * (row$Winner_glickoNotHard - row$Loser_glickoNotHard)
   
   #x$RetiredDiff           = mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
   #x$WalkoverDiff          = mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)

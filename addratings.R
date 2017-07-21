@@ -1,24 +1,24 @@
 rm(list = ls())
-source("formulas2.r")
-source("addratingsformulas2.r")
+source("formulas.r")
+source("addratingsformulas.r")
 
 startTime <- Sys.time ()
 
-allGames = getAllGamesWithoutRating()
-player = getPlayers()
+allGames <- getAllGamesWithoutRating()
+player   <- getPlayers()
 
 # Create Ratings for all players, ratings are adapted after each match
-rating = InitializeRating(player)
+rating <- InitializeRating(player)
 
-allGames = RemoveWalkOvers(allGames)
-allGames = InitializeRatingVariablesForGames(allGames)
+allGames <- RemoveWalkOvers(allGames)
+allGames <- InitializeRatingVariablesForGames(allGames)
 
-Nall = nrow(allGames)
+Nall <- nrow(allGames)
 
 for (i in 1: Nall) {
     # get matching winner and loserplayer in rating and save the rownr
   row_nr_winner <- which(rating$id == allGames$idWinner[i])
-  row_nr_loser <- which(rating$id == allGames$idLoser[i])
+  row_nr_loser  <- which(rating$id == allGames$idLoser[i])
 
   if (row_nr_winner > 0 & row_nr_loser > 0) {
     # NOTE: allGames = addHomePlayers(allGames, rating, i, matchDetails) NOT YET CONVERTED!!!!  
@@ -143,8 +143,8 @@ for (i in 1: Nall) {
       rating$Clay_games_won[row_nr_winner]               <- rating$Clay_games_won[row_nr_winner] + 1
       
     } 
-    #Since carpet is not in use since 2009 no carpet variables will be saved
     else if(allGames$Surface[i] == "Carpet") {
+      #Since carpet is not in use since 2009 no carpet variables will be saved
     }
   } else {
     print("ERROR: Player cannot be matched with Rating")
