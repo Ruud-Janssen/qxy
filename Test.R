@@ -42,25 +42,25 @@ xtrain = removeUncertainMatches(xtrain, quantile, "peter")
 xtrainHard = getXThisSurface(xtrain, "Hard")
 xtrainGrass = getXThisSurface(xtrain, "Grass")
 
-xtrainHard = relevantVariables(xtrainHard)
+#xtrainHard = relevantVariables(xtrainHard)
 
 
-regHard = glm(y ~ 0 + ratingdiff + ratingHarddiff +
-                DummyBo5TimesAvgRatingdiff     
-                + RetiredDiff + FatigueDiff#+ HeadtoHeadPercentageWeightedsqN #this one even better
+regHard = glm(y ~ 0 + ratingdiff + ratingHarddiff
+                #+ DummyBo5TimesAvgRatingdiff     
+               # + RetiredDiff + FatigueDiff#+ HeadtoHeadPercentageWeightedsqN #this one even better
               #+ HeadtoHead  #appears to improve the loglikelihood, so maybe interesting, also improve
               #BR a lot but doesn't work for grass
                 , data = xtrainHard, family = binomial)
 
-regGrass = glm(y ~ 0 + ratingdiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff 
-               +FatigueDiff 
-                 , data = xtrainGrass, family = binomial)
+#regGrass = glm(y ~ 0 + ratingdiff + ratingGrassdiff + DummyBo5TimesAvgRatingdiff 
+#               +FatigueDiff 
+#                 , data = xtrainGrass, family = binomial)
 
 xtest = regressorvariables(ytest, test)
 xtest = removeUncertainMatches(xtest, quantile, "Peter")
 
 xtestHard = getXThisSurface(xtest, "Hard")
-xtestHard = relevantVariables(xtestHard)
+#xtestHard = relevantVariables(xtestHard)
 xtestGrass = getXThisSurface(xtest, "Grass")
 
 testpredHard = predict(regHard, xtestHard, type = "response")

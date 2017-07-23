@@ -33,7 +33,7 @@ total = foreach (k = 1 : 20, .combine = rbind) %do% {
       train_modelwithRatings = GetRatings(offset, power, constant)
   
       xt_m = regressorvariables(yt_m, train_modelwithRatings)
-      lastGame2011 = 13091
+      #lastGame2011 = 13091
       
       
       xTrain = xt_m[1:lastGame2011, ]

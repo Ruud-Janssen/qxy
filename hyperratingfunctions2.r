@@ -1,4 +1,5 @@
 source("formulas.r")
+source("addratingsformulas.r")
 
 GetRatings = function(offset, power, constant) {
   train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",
@@ -14,79 +15,205 @@ GetRatings = function(offset, power, constant) {
   
   Ntot = Nt_r + Nt_m
   
-  allData = dplyr::bind_rows(train_rating, train_model)
+  allGames = dplyr::bind_rows(train_rating, train_model)
   
   #######Create Ratings for all players and Start initializing them######
-  rating = InitializeRating(allData$Winner, allData$Loser)
+  
+  player   <- getPlayers()
+  rating = InitializeRating(player)
   
   #Update ratings with train_rating
-  for (i in 1: Nt_r) {
-    winner = allData$Winner[i]
-    loser = allData$Loser[i]
-    surface = allData$Surface[i]
+  allGames <- InitializeRatingVariablesForGames(allGames)
+  
+  for (i in 1: Ntot) {
+    # get matching winner and loserplayer in rating and save the rownr
+    row_nr_winner <- which(rating$id == allGames$idWinner[i])
+    row_nr_loser  <- which(rating$id == allGames$idLoser[i])
     
-    rating = UpdateRating(rating, winner, loser, surface, offset, power, constant)
-  }
-  
-  #Create extra variables to analyze later
-  allData$Winner_expectation = rep(NA, Ntot)
-  allData$Loser_expectation = rep(NA, Ntot)
-  
-  allData$Winner_games = rep(NA, Ntot)
-  allData$Loser_games = rep(NA, Ntot)
-  allData$Uncertainty = rep(NA, Ntot)
-  
-  allData$Winner_rating = rep(NA, Ntot)
-  allData$Winner_ratingClay = rep(NA, Ntot)
-  allData$Winner_ratingHard = rep(NA, Ntot)
-  allData$Winner_ratingGrass = rep(NA, Ntot)
-  
-  allData$Loser_rating = rep(NA, Ntot)
-  allData$Loser_ratingClay = rep(NA, Ntot)
-  allData$Loser_ratingHard = rep(NA, Ntot)
-  allData$Loser_ratingGrass = rep(NA, Ntot)
-  
-  for(i in (Nt_r + 1): Ntot) {
-    winner = allData$Winner[i]
-    loser = allData$Loser[i]
-    surface = allData$Surface[i]
-    
-    indexWinner = match(winner, rating$Players)
-    indexLoser = match(loser, rating$Players)
-    
-    allData$Winner_games[i] = rating$games[indexWinner]
-    allData$Loser_games[i] = rating$games[indexLoser]
-    
-    if(allData$Winner_games[i] == 0 | allData$Loser_games[i] == 0) {
-      allData$Uncertainty[i] = 2
+    if (row_nr_winner > 0 & row_nr_loser > 0) {
+      # NOTE: allGames = addHomePlayers(allGames, rating, i, matchDetails) NOT YET CONVERTED!!!!  
+      
+      # calculate surface independent variables
+      allGames$Uncertainty[i]                              <- getUncertainty(rating$games[row_nr_winner], rating$games[row_nr_loser])
+      allGames$Uncertainty2[i]                             <- getUncertainty(rating$games[row_nr_winner], rating$games[row_nr_loser], type_uncertainty = 2)
+      
+      allGames$Winner_rating[i]                            <- rating$Ratings[row_nr_winner]
+      allGames$Winner_ratingClay[i]                        <- rating$Clay_Ratings[row_nr_winner]
+      allGames$Winner_ratingHard[i]                        <- rating$Hard_Ratings[row_nr_winner]
+      allGames$Winner_ratingGrass[i]                       <- rating$Grass_Ratings[row_nr_winner]
+      allGames$Winner_ratingNotHard[i]                     <- rating$NotHard_Ratings[row_nr_winner]
+      allGames$Winner_ratingBo3[i]                         <- rating$Bo3_Ratings[row_nr_winner]
+      allGames$Winner_ratingBo5[i]                         <- rating$Bo5_Ratings[row_nr_winner]
+      allGames$Winner_skillBo5[i]                          <- getBo5vsBo3Skill(rating$Bo5_games_won[row_nr_winner], rating$Bo3_games_won[row_nr_winner], rating$Bo5_games[row_nr_winner], rating$Bo3_games[row_nr_winner])
+      allGames$Winner_skillBo3[i]                          <-  - allGames$Winner_skillBo5[i]
+      #    allGames$Winner_skillBo5PlusScores[i]                <- getBo5SkillBasedOnRating(rating$Bo5PlusScore[row_nr_winner], rating$Bo3PlusScore[row_nr_winner], rating$Bo5_games[row_nr_winner], rating$Bo3_games[row_nr_winner])
+      #    allGames$Winner_skillBo3PlusScores[i]                <-  - Games$Winner_skillBo5PlusScores[i]
+      
+      allGames$Loser_rating[i]                             <- rating$Ratings[row_nr_loser]
+      allGames$Loser_ratingClay[i]                         <- rating$Clay_Ratings[row_nr_loser]
+      allGames$Loser_ratingHard[i]                         <- rating$Hard_Ratings[row_nr_loser]
+      allGames$Loser_ratingGrass[i]                        <- rating$Grass_Ratings[row_nr_loser]
+      allGames$Loser_ratingNotHard[i]                      <- rating$NotHard_Ratings[row_nr_loser]
+      allGames$Loser_ratingBo3[i]                          <- rating$Bo3_Ratings[row_nr_loser]
+      allGames$Loser_ratingBo5[i]                          <- rating$Bo5_Ratings[row_nr_loser]
+      allGames$Loser_skillBo5[i]                           <- getBo5vsBo3Skill(rating$Bo5_games_won[row_nr_loser], rating$Bo3_games_won[row_nr_loser], rating$Bo5_games[row_nr_loser], rating$Bo3_games[row_nr_loser])
+      allGames$Loser_skillBo3[i]                           <-  - allGames$Loser_skillBo5[i]
+      #   allGames$Loser_skillBo5PlusScores[i]                 <- getBo5SkillBasedOnRating(rating$Bo5PlusScore[row_nr_loser], rating$Bo3PlusScore[row_nr_loser], rating$Bo5_games[row_nr_loser], rating$Bo3_games[row_nr_loser])
+      #   allGames$Loser_skillBo3PlusScores[i]                 <-  - Games$Loser_skillBo5PlusScores[i]
+      
+      # Update rating        
+      allGames$Winner_expectationBasedOnRating[i]          <- getWinExpectationBasedOnRating(rating$Ratings[row_nr_winner], rating$Ratings[row_nr_loser])
+      allGames$Loser_expectationBasedOnRating[i]           <- getWinExpectationBasedOnRating(rating$Ratings[row_nr_winner], rating$Ratings[row_nr_loser], perspective = "loser")
+      
+      rating$Ratings[row_nr_winner]                        <- calculateNewRating(rating$Ratings[row_nr_winner], rating$games[row_nr_winner], allGames$Winner_expectationBasedOnRating[i], 1, offset, power, constant)
+      rating$Ratings[row_nr_loser]                         <- calculateNewRating(rating$Ratings[row_nr_loser] , rating$games[row_nr_loser] , allGames$Loser_expectationBasedOnRating[i] , 0, offset, power, constant)
+      
+      # Update games         
+      rating$games[row_nr_winner]                          <- rating$games[row_nr_winner] + 1
+      rating$games[row_nr_loser]                           <- rating$games[row_nr_loser]  + 1
+      rating$games_won[row_nr_winner]                      <- rating$games_won[row_nr_winner] + 1
+      
+      # bo3 and bo5 ratings  
+      if (allGames$Best.of[i] == 3) {  
+        allGames$UncertaintyBestOf[i]                      <- getUncertainty(rating$Bo3_games[row_nr_winner], rating$Bo3_games[row_nr_loser])
+        
+        allGames$Winner_expectationBestOfBasedOnRating[i]  <- getWinExpectationBasedOnRating(rating$Bo3_Ratings[row_nr_winner], rating$Bo3_Ratings[row_nr_loser])
+        allGames$Loser_expectationBestOfBasedOnRating[i]   <- getWinExpectationBasedOnRating(rating$Bo3_Ratings[row_nr_winner], rating$Bo3_Ratings[row_nr_loser], perspective = "loser")
+        
+        rating$Bo3_Ratings[row_nr_winner]                  <- calculateNewRating(rating$Bo3_Ratings[row_nr_winner], rating$Bo3_games[row_nr_winner], allGames$Winner_expectationBestOfBasedOnRating[i], 1, offset, power, constant)
+        rating$Bo3_Ratings[row_nr_loser]                   <- calculateNewRating(rating$Bo3_Ratings[row_nr_loser] , rating$Bo3_games[row_nr_loser] , allGames$Loser_expectationBestOfBasedOnRating[i] , 0, offset, power, constant)
+        
+        rating$Bo3_games[row_nr_winner]                    <- rating$Bo3_games[row_nr_winner] + 1
+        rating$Bo3_games[row_nr_loser]                     <- rating$Bo3_games[row_nr_loser]  + 1
+        rating$Bo3_games_won[row_nr_winner]                <- rating$Bo3_games_won[row_nr_winner] + 1
+      } else {        
+        allGames$UncertaintyBestOf[i]                      <- getUncertainty(rating$Bo5_games[row_nr_winner], rating$Bo5_games[row_nr_loser])
+        
+        allGames$Winner_expectationBestOfBasedOnRating[i]  <- getWinExpectationBasedOnRating(rating$Bo5_Ratings[row_nr_winner], rating$Bo5_Ratings[row_nr_loser])
+        allGames$Loser_expectationBestOfBasedOnRating[i]   <- getWinExpectationBasedOnRating(rating$Bo5_Ratings[row_nr_winner], rating$Bo5_Ratings[row_nr_loser], perspective = "loser")
+        
+        rating$Bo5_Ratings[row_nr_winner]                  <- calculateNewRating(rating$Bo5_Ratings[row_nr_winner], rating$Bo5_games[row_nr_winner], allGames$Winner_expectationBestOfBasedOnRating[i], 1, offset, power, constant)
+        rating$Bo5_Ratings[row_nr_loser]                   <- calculateNewRating(rating$Bo5_Ratings[row_nr_loser] , rating$Bo5_games[row_nr_loser] , allGames$Loser_expectationBestOfBasedOnRating[i] , 0, offset, power, constant)
+        
+        rating$Bo5_games[row_nr_winner]                    <- rating$Bo5_games[row_nr_winner] + 1
+        rating$Bo5_games[row_nr_loser]                     <- rating$Bo5_games[row_nr_loser]  + 1
+        rating$Bo5_games_won[row_nr_winner]                <- rating$Bo5_games_won[row_nr_winner] + 1
+      }  
+      
+      # surface dependent variables
+      if (allGames$Surface[i] == "Hard") {
+        allGames$UncertaintySurface[i]                     <- getUncertainty(rating$Hard_games[row_nr_winner], rating$Hard_games[row_nr_loser])
+        
+        allGames$Winner_expectationSurfaceBasedOnRating[i] <- getWinExpectationBasedOnRating(rating$Hard_Ratings[row_nr_winner], rating$Hard_Ratings[row_nr_loser])
+        allGames$Loser_expectationSurfaceBasedOnRating[i]  <- getWinExpectationBasedOnRating(rating$Hard_Ratings[row_nr_winner], rating$Hard_Ratings[row_nr_loser], perspective = "loser")
+        
+        rating$Hard_Ratings[row_nr_winner]                 <- calculateNewRating(rating$Hard_Ratings[row_nr_winner], rating$Hard_games[row_nr_winner], allGames$Winner_expectationSurfaceBasedOnRating[i], 1, offset, power, constant)
+        rating$Hard_Ratings[row_nr_loser]                  <- calculateNewRating(rating$Hard_Ratings[row_nr_loser], rating$Hard_games[row_nr_loser], allGames$Loser_expectationSurfaceBasedOnRating[i], 0, offset, power, constant)
+        
+        rating$Hard_games[row_nr_winner]                   <- rating$Hard_games[row_nr_winner] + 1
+        rating$Hard_games[row_nr_loser]                    <- rating$Hard_games[row_nr_loser]  + 1
+        rating$Hard_games_won[row_nr_winner]               <- rating$Hard_games_won[row_nr_winner] + 1
+      } else { # Not Hard
+        Winner_expectationNotHardSurfaceBasedOnRating      <- getWinExpectationBasedOnRating(rating$NotHard_Ratings[row_nr_winner], rating$NotHard_Ratings[row_nr_loser])
+        Loser_expectationNotHardSurfaceBasedOnRating       <- getWinExpectationBasedOnRating(rating$NotHard_Ratings[row_nr_winner], rating$NotHard_Ratings[row_nr_loser], perspective = "loser")
+        
+        rating$NotHard_Ratings[row_nr_winner]              <- calculateNewRating(rating$NotHard_Ratings[row_nr_winner], rating$NotHard_games[row_nr_winner], Winner_expectationNotHardSurfaceBasedOnRating, 1, offset, power, constant)
+        rating$NotHard_Ratings[row_nr_loser]               <- calculateNewRating(rating$NotHard_Ratings[row_nr_loser], rating$NotHard_games[row_nr_loser], Loser_expectationNotHardSurfaceBasedOnRating, 0, offset, power, constant)
+        rm(Winner_expectationNotHardSurfaceBasedOnRating, Loser_expectationNotHardSurfaceBasedOnRating)
+        
+        rating$NotHard_games[row_nr_winner]                <- rating$NotHard_games[row_nr_winner] + 1
+        rating$NotHard_games[row_nr_loser]                 <- rating$NotHard_games[row_nr_loser]  + 1
+        rating$NotHard_games_won[row_nr_winner]            <- rating$NotHard_games_won[row_nr_winner] + 1
+        
+      }
+      if(allGames$Surface[i] == "Grass") {
+        allGames$UncertaintySurface[i]                     <- getUncertainty(rating$Grass_games[row_nr_winner], rating$Grass_games[row_nr_loser])
+        
+        allGames$Winner_expectationSurfaceBasedOnRating[i] <- getWinExpectationBasedOnRating(rating$Grass_Ratings[row_nr_winner], rating$Grass_Ratings[row_nr_loser])
+        allGames$Loser_expectationSurfaceBasedOnRating[i]  <- getWinExpectationBasedOnRating(rating$Grass_Ratings[row_nr_winner], rating$Grass_Ratings[row_nr_loser], perspective = "loser")
+        
+        rating$Grass_Ratings[row_nr_winner]                <- calculateNewRating(rating$Grass_Ratings[row_nr_winner], rating$Grass_games[row_nr_winner], allGames$Winner_expectationSurfaceBasedOnRating[i], 1, offset, power, constant)
+        rating$Grass_Ratings[row_nr_loser]                 <- calculateNewRating(rating$Grass_Ratings[row_nr_loser], rating$Grass_games[row_nr_loser], allGames$Loser_expectationSurfaceBasedOnRating[i], 0, offset, power, constant)
+        
+        rating$Grass_games[row_nr_winner]                  <- rating$Grass_games[row_nr_winner] + 1
+        rating$Grass_games[row_nr_loser]                   <- rating$Grass_games[row_nr_loser]  + 1
+        rating$Grass_games_won[row_nr_winner]              <- rating$Grass_games_won[row_nr_winner] + 1
+        
+      } else if(allGames$Surface[i] == "Clay") {
+        allGames$UncertaintySurface[i]                     <- getUncertainty(rating$Clay_games[row_nr_winner], rating$Clay_games[row_nr_loser])
+        
+        allGames$Winner_expectationSurfaceBasedOnRating[i] <- getWinExpectationBasedOnRating(rating$Clay_Ratings[row_nr_winner], rating$Clay_Ratings[row_nr_loser])
+        allGames$Loser_expectationSurfaceBasedOnRating[i]  <- getWinExpectationBasedOnRating(rating$Clay_Ratings[row_nr_winner], rating$Clay_Ratings[row_nr_loser], perspective = "loser")
+        
+        rating$Clay_Ratings[row_nr_winner]                 <- calculateNewRating(rating$Clay_Ratings[row_nr_winner], rating$Clay_games[row_nr_winner], allGames$Winner_expectationSurfaceBasedOnRating[i], 1, offset, power, constant)
+        rating$Clay_Ratings[row_nr_loser]                  <- calculateNewRating(rating$Clay_Ratings[row_nr_loser], rating$Clay_games[row_nr_loser], allGames$Loser_expectationSurfaceBasedOnRating[i], 0, offset, power, constant)
+        
+        rating$Clay_games[row_nr_winner]                   <- rating$Clay_games[row_nr_winner] + 1
+        rating$Clay_games[row_nr_loser]                    <- rating$Clay_games[row_nr_loser]  + 1
+        rating$Clay_games_won[row_nr_winner]               <- rating$Clay_games_won[row_nr_winner] + 1
+        
+      } 
+      else if(allGames$Surface[i] == "Carpet") {
+        #Since carpet is not in use since 2009 no carpet variables will be saved
+      }
     } else {
-      allData$Uncertainty[i] = 1 / (allData$Winner_games[i] * allData$Loser_games[i])
+      print("ERROR: Player cannot be matched with Rating")
     }
-    
-    expectationWinner = 1 - 1 / (1 + 10 ^ ((rating$Ratings[indexWinner] 
-                                            - rating$Ratings[indexLoser])/ 400))
-    expectationLoser = 1 - expectationWinner
-    
-    allData$Winner_expectation[i] = expectationWinner
-    allData$Loser_expectation[i] = expectationLoser
-    
-    allData$Winner_rating[i] = rating$Ratings[indexWinner]
-    allData$Winner_ratingClay[i] = rating$Clay_Ratings[indexWinner]
-    allData$Winner_ratingHard[i] = rating$Hard_Ratings[indexWinner]
-    allData$Winner_ratingGrass[i] = rating$Grass_Ratings[indexWinner]
-
-    
-    allData$Loser_rating[i] = rating$Ratings[indexLoser]
-    allData$Loser_ratingClay[i] = rating$Clay_Ratings[indexLoser]
-    allData$Loser_ratingHard[i] = rating$Hard_Ratings[indexLoser]
-    allData$Loser_ratingGrass[i] = rating$Grass_Ratings[indexLoser]
-    
-    #update rating
-    rating = UpdateRating(rating, winner, loser, surface, offset, power, constant)
   }
   
-  return(allData[(Nt_r + 1):Ntot, ])
+  return(allGames[(Nt_r + 1):Ntot, ])
 }
+
+InitializeRating = function(player){
+  #player = SetContinentsAndNationalities(player)
+  rating <- InitializeRatingVariables(player)
+  
+}
+
+InitializeRatingVariables = function(rating){
+  numberOfPlayers = nrow(rating)
+  
+  #Add start rating and number of games
+  rating$Ratings = rep(1500, numberOfPlayers)
+  rating$games = rep(0, numberOfPlayers)
+  rating$games_won = rep(0, numberOfPlayers)
+  
+  #Create Speciality Ratings
+  rating$Hard_Ratings = rating$Ratings
+  rating$Hard_games = rating$games
+  rating$Hard_games = rating$games
+  rating$Hard_games_won = rating$games
+  
+  rating$Grass_Ratings = rating$Ratings
+  rating$Grass_games = rating$games
+  rating$Grass_games_won = rating$games
+  
+  rating$Clay_Ratings = rating$Ratings
+  rating$Clay_games = rating$games
+  rating$Clay_games_won = rating$games
+  
+  rating$NotHard_Ratings = rating$Ratings
+  rating$NotHard_games =  rating$games
+  rating$NotHard_games_won =  rating$games
+  
+  rating$Bo3_Ratings =  rating$Ratings
+  rating$Bo3_games = rating$games
+  rating$Bo3_games_won = rating$games
+  
+  rating$Bo5_Ratings = rating$Ratings
+  rating$Bo5_games = rating$games
+  rating$Bo5_games_won = rating$games
+  
+  return(rating)
+}
+
+calculateNewRating <- function(current_rating, total_matches, expectation_based_on_rating, result, offset, power, constant) {
+  Kfactor <- K(total_matches, offset, power, constant)
+  
+  #OLD CODE IN COMMENT but already defined elsewhere, expectationWinner = 1 - 1 / (1 + 10 ^ ((ratingWinner - ratingLoser)/ 400))
+  new_rating <- current_rating + Kfactor * (result - expectation_based_on_rating)
+}
+
 
 
 CalculateExpectation <- function(rating, surface, winner, loser) {
@@ -209,54 +336,6 @@ RemoveWalkOvers = function(Data){
   Data = Data[Data$Comment != "Walover", ]
   
   return(Data)
-}
-
-InitializeRating = function(winners, losers){
-  winners_all = as.data.frame(matrix(nrow = length(winners), ncol = 0))
-  winners_all$Players = winners
-  
-  losers_all = as.data.frame(matrix(nrow = length(losers), ncol = 0))
-  losers_all$Players = losers
-  
-  rating = rbind(winners_all, losers_all)
-  rating = unique(rating)
-  
-  numberOfPlayers = length(rating[, ])
-  
-  #Add the moment I do not see the value of IDs, maybe if I care later I can add it again
-  #Add ID numbers
-  #rating$id = rep(0, numberOfPlayers)
-  
-  #for(i in 1 : numberOfPlayers) {
-  #Search in winners
-  #indexPlayer = match(rating$Players[i], allData$winner_name)
-  #if(!is.na(indexPlayer)) {
-  #  rating$id[i] = allData$winner_id[indexPlayer]
-  #  next()
-  #}
-  
-  #Search in losers
-  #indexPlayer = match(rating$Players[i], allData$loser_name)
-  #if(!is.na(indexPlayer)) {
-  #  rating$id[i] = allData$loser_id[indexPlayer]
-  #}
-  #}
-  
-  #Add start rating and number of games
-  rating$Ratings = rep(1500, numberOfPlayers)
-  rating$games = rep(0, numberOfPlayers)
-  
-  #Create Surface Ratings
-  rating$Hard_Ratings = rating$Ratings
-  rating$Hard_games = rating$games
-  
-  rating$Grass_Ratings = rating$Ratings
-  rating$Grass_games = rating$games
-  
-  rating$Clay_Ratings = rating$Ratings
-  rating$Clay_games = rating$games
-  
-  return(rating)
 }
 
 #returns a vector containing the next game if available and 
