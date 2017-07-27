@@ -16,6 +16,7 @@ allGames <- InitializeRatingVariablesForGames(allGames)
 Nall <- nrow(allGames)
 
 for (i in 1: Nall) {
+  
     # get matching winner and loserplayer in rating and save the rownr
   row_nr_winner <- which(rating$id == allGames$idWinner[i])
   row_nr_loser  <- which(rating$id == allGames$idLoser[i])
@@ -62,6 +63,27 @@ for (i in 1: Nall) {
     rating$games[row_nr_winner]                          <- rating$games[row_nr_winner] + 1
     rating$games[row_nr_loser]                           <- rating$games[row_nr_loser]  + 1
     rating$games_won[row_nr_winner]                      <- rating$games_won[row_nr_winner] + 1
+    
+    #UncertaintyParameters: 
+    if (allGames$Best.of[i] == 3) {  
+      allGames$UncertaintyBestOf[i]                      <- getUncertainty(rating$Bo3_games[row_nr_winner], rating$Bo3_games[row_nr_loser])
+      
+      } else {        
+      allGames$UncertaintyBestOf[i]                      <- getUncertainty(rating$Bo5_games[row_nr_winner], rating$Bo5_games[row_nr_loser])
+      
+      }  
+    
+    # surface dependent variables
+    if (allGames$Surface[i] == "Hard") {
+      allGames$UncertaintySurface[i]                     <- getUncertainty(rating$Hard_games[row_nr_winner], rating$Hard_games[row_nr_loser])
+      } else if(allGames$Surface[i] == "Grass") {
+      allGames$UncertaintySurface[i]                     <- getUncertainty(rating$Grass_games[row_nr_winner], rating$Grass_games[row_nr_loser])
+    } else if(allGames$Surface[i] == "Clay") {
+      allGames$UncertaintySurface[i]                     <- getUncertainty(rating$Clay_games[row_nr_winner], rating$Clay_games[row_nr_loser])
+    } else if(allGames$Surface[i] == "Carpet") {
+      #Since carpet is not in use since 2009 no carpet variables will be saved
+    }
+    
     
     # bo3 and bo5 ratings  
     if (allGames$Best.of[i] == 3) {  

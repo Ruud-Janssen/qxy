@@ -81,9 +81,9 @@ InitializeGlickoVariablesForGames = function(dataset) {
 }
 
 #Formula for updating RD: RD' = sqrt(RD^2 + t * c ^ 2), with t the periods passed (days in our case)
-updateRDBeforeGame <- function(rd, lastGameDate, gameDate, c = 2.5) {
+updateRDBeforeGame <- function(rd, lastGameDate, gameDate, c = 2.5, maxRD = 110) {
   if(is.na(lastGameDate)) {
-    return(110)
+    return(maxRD)
   }
   df = "%m/%d/%Y"
   
@@ -91,7 +91,7 @@ updateRDBeforeGame <- function(rd, lastGameDate, gameDate, c = 2.5) {
   gameDate  = as.Date(as.character(gameDate), format = df)
   
   timeDiff = as.numeric(abs(lastGameDate - gameDate))
-  min(110, sqrt(rd ^ 2 + timeDiff * c ^ 2))
+  min(maxRD, sqrt(rd ^ 2 + timeDiff * c ^ 2))
 }
 
 g <- function(rd) {

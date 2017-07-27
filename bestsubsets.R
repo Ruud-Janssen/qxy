@@ -68,8 +68,17 @@ regLamRating = glm(y ~ 0 + ratingdiff + ratingHarddiff
 
 summary(regLamRating)
 
-cvpredLamRating = predict(regLamRating, xcvHardRel, type = "response")
-LogLoss(cvpredLamRating, xcvHardRel$y)
+cvpredRating = predict(regLamRating, xcvHardRel, type = "response")
+LogLoss(cvpredRating, xcvHardRel$y)
+
+#Rating Glicko Break Games Result
+regLamGlicko = glm(y ~ 0 + glickoGamesdiff + glickoHardGamesdiff 
+                   , data = xtmHardRel, family = binomial)
+
+summary(regLamGlicko)
+
+cvpredGlicko = predict(regGlicko, xcvHardRel, type = "response")
+LogLoss(cvpredGlicko, xcvHardRel$y)
 
 #Modelling
 regLamMin = glm(y ~ 0 + ratingNotHarddiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff2 

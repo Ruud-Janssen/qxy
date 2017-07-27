@@ -254,3 +254,9 @@ saveDatasetsWithRating = function(allGames, rating = NULL){
 savePlayers = function(player) {
   write.csv(file = "Data/datasets/players.csv", player, row.names=FALSE)
 }
+
+calculateGames <- function(row) {
+  wonGames  <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
+  lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
+  Games <- wonGames + lostGames
+}

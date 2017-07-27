@@ -24,8 +24,8 @@ for (i in 1: Nall) {
   if (row_nr_winner > 0 & row_nr_loser > 0) {
     gameDate <- allGames$Date[i]
     #update RDs before game
-    glicko$rd[row_nr_winner] <- updateRDBeforeGame(glicko$rd[row_nr_winner], glicko$last_game[row_nr_winner], gameDate, c = 9)
-    glicko$rd[row_nr_loser]  <- updateRDBeforeGame(glicko$rd[row_nr_loser], glicko$last_game[row_nr_loser], gameDate, c = 9)
+    glicko$rd[row_nr_winner] <- updateRDBeforeGame(glicko$rd[row_nr_winner], glicko$last_game[row_nr_winner], gameDate)
+    glicko$rd[row_nr_loser]  <- updateRDBeforeGame(glicko$rd[row_nr_loser], glicko$last_game[row_nr_loser], gameDate)
     #Update date last game
     glicko$last_game[row_nr_winner] <- gameDate 
     glicko$last_game[row_nr_loser]  <- gameDate

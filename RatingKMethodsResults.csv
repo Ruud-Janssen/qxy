@@ -1,8 +1,0 @@
-"Results different K-factors						",,,,,
-"						",,,,,
-,,,,,K = c / (0.1 + nrgames) ^ p
-,,,Constant,K = c * b ^ nrgames,c = 89
-,,,K = 25,c = 46,o = 0.1
-,,,,b = 0.998,p = 0.238
-,,LogLoss,0.5323564,0.533463,0.5325531
-"						",,,,,

@@ -27,6 +27,19 @@ regressorvariables = function(y, data) {
   returnData$Uncertainty2 = data$Uncertainty2
   returnData$Surface = data$Surface
   returnData$Court = data$Court
+  returnData$Bo5 = as.numeric(data$Best.of == 5)
+  
+  returnData$Bo5RatingAdv = 0
+  
+  for(i in 1 : nrow(returnData)) {
+    if(returnData$ratingdiff[i] + returnData$ratingHarddiff[i] > 400) {
+      returnData$Bo5RatingAdv[i] = data$Best.of[i]
+    } else if (returnData$ratingdiff[i] + returnData$ratingHarddiff[i] <  -400) {
+      returnData$Bo5RatingAdv[i] = -data$Best.of[i]
+    }
+  }
+  
+  
   
   returnData$y = y
   
@@ -66,6 +79,9 @@ setPointOfViewVariables = function(x, row) {
   x$glickoHarddiff    = mp * (row$Winner_glickoHard - row$Loser_glickoHard)
   x$glickoGrassdiff   = mp * (row$Winner_glickoGrass - row$Loser_glickoGrass)
   x$glickoNotHarddiff = mp * (row$Winner_glickoNotHard - row$Loser_glickoNotHard)
+  
+  x$glickoGamesdiff   <- mp * (row$Winner_glickoGames - row$Loser_glickoGames)
+  x$glickoHardGamesdiff   <- mp * (row$Winner_glickoHardGames - row$Loser_glickoHardGames)
   
   #x$RetiredDiff           = mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
   #x$WalkoverDiff          = mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)
