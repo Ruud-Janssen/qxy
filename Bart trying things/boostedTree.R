@@ -6,6 +6,7 @@ source("bestsubsetsformulas.R")
 #library(devtools)
 #install_github("gbm-developers/gbm3")
 library(gbm3)
+library(ggplot2)
 
 
 train_modelwithRatings = read.table("Data/datasets/train_modelWithRatings.csv"
@@ -38,31 +39,35 @@ xcvHard = removeUncertainMatches(xcvHard, quantileHard, "Surface")
 xtmHardRel = relevantVariables(xt_mHard)
 xcvHardRel = relevantVariables(xcvHard)
 
-f = y ~ 0 + ratingdiff + ratingHarddiff + Bo5 + FatigueDiff + HomeDiff
+for(i in 1 : 10) {
 
-train_params <- training_params(num_trees = 5000,
-                                   shrinkage = 0.00175,
-                                   bag_fraction = 0.5,
-                                   num_train = nrow(xtmHardRel) / 2,
-                                   id=seq_len(nrow(xtmHardRel)),
-                                   min_num_obs_in_node = 10,
-                                   interaction_depth = 3,
-                                   num_features = 2)
+  f = y ~ 0 + ratingdiff + ratingHarddiff + Bo5 + FatigueDiff + HomeDiff + RetiredDiff + LeftieDiff
+  
+  train_params <- training_params(num_trees = 5000,
+                                     shrinkage = 0.00175,
+                                     bag_fraction = 0.5,
+                                     num_train = nrow(xtmHardRel) / 2,
+                                     id=seq_len(nrow(xtmHardRel)),
+                                     min_num_obs_in_node = 10,
+                                     interaction_depth = 3,
+                                     num_features = 2)
+  
+  gbm1 = gbmt(formula = f, data = xtmHardRel, distribution=gbm_dist("Bernoulli"), train_params = train_params, 
+              keep_gbm_data = TRUE)
+  plot(gbm1$valid.error)
+  min(gbm1$valid.error)
+  
+  y = as.numeric(xcvHardRel$y)
+  xcvHardRel$y = -20
+  
+  p = predict(gbm1, xcvHardRel, n.trees = 3000, type = "response")
+  
+  xcvHardRel$y = y
+  xcvH
+  print(LogLoss(p, xcvHardRel$y))
+  print(mean((p > 0.5) == xcvHardRel$y))
+}
 
-gbm1 = gbmt(formula = f, data = xtmHardRel, distribution=gbm_dist("Bernoulli"), train_params = train_params)
-plot(gbm1$valid.error)
-min(gbm1$valid.error)
-
-y = as.numeric(xcvHardRel$y)
-xcvHardRel$y = -20
-
-p = predict(gbm1, xcvHardRel, n.trees = 3000, type = "response")
-
-xcvHardRel$y = y
-
-LogLoss(p, xcvHardRel$y)
-mean(abs(p - xcvHardRel$y))
-mean((p-xcvHardRel$y) ^ 2)
 
 #LogLoss(cvpredRating, xcvHardRel$y)
 #[1] 0.5408071

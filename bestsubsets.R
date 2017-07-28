@@ -48,10 +48,9 @@ xcvClay = getXThisSurface(xcv, "Clay")
 #xcvHard = removeUncertainMatches(xcvHard, quantileHard, "COSurface")
 xcvHard = removeUncertainMatches(xcvHard, quantileHard, "Surface")
 
-#xtmHardRel = relevantVariables(xt_mHard)
-#xcvHardRel = relevantVariables(xcvHard)
-xtmHardRel = xt_mHard
-xcvHardRel = xcvHard
+xtmHardRel = relevantVariables(xt_mHard)
+xcvHardRel = relevantVariables(xcvHard)
+
 
 
 #Normalization of variance

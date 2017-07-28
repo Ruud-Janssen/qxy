@@ -29,18 +29,6 @@ regressorvariables = function(y, data) {
   returnData$Court = data$Court
   returnData$Bo5 = as.numeric(data$Best.of == 5)
   
-  returnData$Bo5RatingAdv = 0
-  
-  for(i in 1 : nrow(returnData)) {
-    if(returnData$ratingdiff[i] + returnData$ratingHarddiff[i] > 400) {
-      returnData$Bo5RatingAdv[i] = data$Best.of[i]
-    } else if (returnData$ratingdiff[i] + returnData$ratingHarddiff[i] <  -400) {
-      returnData$Bo5RatingAdv[i] = -data$Best.of[i]
-    }
-  }
-  
-  
-  
   returnData$y = y
   
   return(returnData)
@@ -49,8 +37,10 @@ regressorvariables = function(y, data) {
 addRegressorVariableRow = function(row){
   x = data.frame(matrix(nrow = 1))
   x = setPointOfViewVariables(x, row)
+  
   #x = setOtherVariables(x, row)
-}
+  return(x)
+} 
 
 
 
@@ -83,13 +73,30 @@ setPointOfViewVariables = function(x, row) {
   x$glickoGamesdiff   <- mp * (row$Winner_glickoGames - row$Loser_glickoGames)
   x$glickoHardGamesdiff   <- mp * (row$Winner_glickoHardGames - row$Loser_glickoHardGames)
   
-  #x$RetiredDiff           = mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
-  #x$WalkoverDiff          = mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)
+  x$RetiredDiff           = mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
+  x$WalkoverDiff          = mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)
   #x$RetiredOrWalkoverDiff = x$RetiredDiff + x$WalkoverDiff
   x$FatigueDiff           = mp * (row$Winner_fatigue - row$Loser_fatigue)
   x$HeadtoHeaddiff            = mp * (row$HeadtoHead)
   #x$LastHeadtoHead        = mp * row$LastHeadtoHead
   x$HomeDiff              = mp * (row$WinnerisHome - row$LoserisHome)
+  
+  if(is.na(row$Winner_hand)) {
+    row$Winner_hand = "U"
+  }
+  
+  if(is.na(row$Loser_hand)) {
+    row$Loser_hand = "U"
+  }
+  
+  x$LeftieDiff = 0
+  
+  if(row$Winner_hand == "L"){
+    x$LeftieDiff = x$LeftieDiff + mp
+  } 
+  if (row$Loser_hand == "L") {
+    x$LeftieDiff = x$LeftieDiff - mp
+  }
   
   #if(row$HeadtoHeadMatches != 0) {
   #  x$HeadtoHeadPercentageWeightedsqN =  mp * (((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / 

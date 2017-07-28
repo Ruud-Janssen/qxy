@@ -18,6 +18,10 @@ relevantVariables = function(dataset){
   variables$glickoGamesdiff     <- dataset$glickoGamesdiff   
   variables$glickoHardGamesdiff <- dataset$glickoHardGamesdiff 
   variables$Bo5                 <- dataset$Bo5 
+  variables$LeftieDiff          <- dataset$LeftieDiff
+  
+  variables$Round              <- dataset$Round
+  
   
   #variables$DummyBo3                       = 1 - dataset$DummyBo5 
   #variables$DummyBo5                       = dataset$DummyBo5
@@ -32,8 +36,8 @@ relevantVariables = function(dataset){
    
   
     
-  #variables$RetiredDiff           = dataset$RetiredDiff
-  #variables$WalkoverDiff          = dataset$WalkoverDiff
+  variables$RetiredDiff           = dataset$RetiredDiff
+  variables$WalkoverDiff          = dataset$WalkoverDiff
   #variables$RetiredOrWalkoverDiff = dataset$RetiredOrWalkoverDiff
 
   variables$FatigueDiff         = dataset$FatigueDiff
