@@ -1,3 +1,5 @@
+library(stringr)
+
 InitializeRating = function(player){
   #player = SetContinentsAndNationalities(player)
   rating <- InitializeRatingVariables(player)
@@ -41,93 +43,96 @@ InitializeRatingVariables = function(rating){
   return(rating)
 }
 
-# SetContinentsAndNationalities = function(rating){
-#   numberOfPlayers = nrow(rating)
-#   
-#   atp_players = read.table("Data/datasets/atp_players.csv", header = T, sep = ",", 
-#                            quote = "\"", fill = TRUE)
-#   
-#   rating$Nationality = rep(NA, numberOfPlayers)
-#   rating$Handed = rep(NA, numberOfPlayers)
-#   
-#   for (i in 1 : length(rating$Players)) {
-#     name = rating$Players[i]
-#     if (name == "") {
-#       next()
-#     }
-#     name = gsub("Jr.", "", name)
-#     
-#     name = unlist(strsplit(as.character(name), '.', fixed = TRUE))[1]
+SetContinentsAndNationalities = function(rating) {
+   numberOfPlayers = nrow(rating)
+   
+   atp_players = read.table("Data/datasets/atp_players2.csv", header = T, sep = ",", 
+                            quote = "\"", fill = TRUE)
+   
+   atp_players  <- mutate(atp_players , firstName = str_replace_all(trimws(tolower(str_replace_all(firstName, "[^[:alnum:]]", " "))), "  ", " "))
+   atp_players  <- mutate(atp_players , lastName = str_replace_all(trimws(tolower(str_replace_all(lastName, "[^[:alnum:]]", " "))), "  ", " "))
+   
+  
+  rating$Nationality <- rep(NA, numberOfPlayers)
+  rating$Handed      <- rep(NA, numberOfPlayers)
+   
+   for (i in 1 : length(rating$playername)) {
+     name <- rating$playername[i]
+     if (name == "") {
+       next()
+     }
+     name <- gsub("Jr.", "", name)
+     
+     name <- unlist(strsplit(as.character(name), ' (?=[^ ]+$)', perl = TRUE))
 #     name = unlist(strsplit(as.character(name), ' (?=[^ ]+$)', perl=TRUE))
-#     lastName = name[1]
-#     firstName = name[2]
-#     
-#     
-#     indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
-#     if (sum(!is.na(indexLastName)) > 0) {
-#       for (j in 1:length(indexLastName)) {
-#         playerNumberAtp = indexLastName[j]
-#         if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
-#           rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
-#           rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
-#         }
-#       }
-#     } else {
-#       if (lastName == "Nadal-Parera"){
-#         lastName = "Nadal"
-#       }
-#       if (lastName == "Hantschek") {
-#         lastName = "Hantschk"
-#       }
-#       if (lastName =="Roger-Vasselin"){
-#         lastName = "Vasselin"
-#       }
-#       if (lastName ==" Hajek"){
-#         lastName = "Hajek"
-#       }
-#       
-#       lastName = gsub("-", " ", lastName)
-#       lastName = gsub("\'", "", lastName)
-#       
-#       indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
-#       if (sum(!is.na(indexLastName)) > 0) {
-#         for (j in 1:length(indexLastName)) {
-#           playerNumberAtp = indexLastName[j]
-#           if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
-#             rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
-#             rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
-#           }
-#         }
-#       }
-#     }
-#   }
-#   
-#   #Add country codes and continent, apparantly the files uses IOC
-#   countrycodes = read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
-#                             quote = "\"", fill = TRUE)
-#   
-#   rating$Country = rep(NA, numberOfPlayers)
-#   rating$Continent = rep(NA, numberOfPlayers)
-#   
-#   for (i in 1 : length(rating$Players)) {
-#     country = rating$Nationality[i]
-#     countryCodePlayer = match(country, countrycodes$IOC)
-#     rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
-#     rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
-#   }
-#   return(rating)
-# }
+     lastName <- name[1]
+     firstName <- name[2]
+     
+    
+     indexLastName <- grep(lastName, atp_players$lastName ,ignore.case=TRUE)
+    if (sum(!is.na(indexLastName)) > 0) {
+       for (playerNumberAtp in indexLastName) {
+         if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
+           rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
+           rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
+         }
+       }
+     } else {
+       if (lastName == "Nadal Parera"){
+         lastName = "Nadal"
+       }
+       if (lastName == "Hantschek") {
+         lastName = "Hantschk"
+       }
+       if (lastName =="Roger-Vasselin"){
+         lastName = "Vasselin"
+       }
+       if (lastName ==" Hajek"){
+         lastName = "Hajek"
+       }
+       
+       lastName = gsub("-", " ", lastName)
+       lastName = gsub("\'", "", lastName)
+      
+       indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
+       if (sum(!is.na(indexLastName)) > 0) {
+         for (j in 1:length(indexLastName)) {
+           playerNumberAtp = indexLastName[j]
+           if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
+             rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
+             rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
+           }
+         }
+       }
+     }
+   }
+   
+   #Add country codes and continent, apparantly the files uses IOC
+   countrycodes = read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
+                             quote = "\"", fill = TRUE)
+   
+   rating$Country = rep(NA, numberOfPlayers)
+   rating$Continent = rep(NA, numberOfPlayers)
+   
+   for (i in 1 : length(rating$playername)) {
+     country = rating$Nationality[i]
+     countryCodePlayer = match(country, countrycodes$IOC)
+     rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
+     rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
+   }
+   return(rating)
+}
 
 #This functions creates empty lists for locations, ratings and uncertainty
 InitializeRatingVariablesForGames = function(dataset){
   
   rows = nrow(dataset)
   
-  # dataset$Country = rep(NA, rows)
-  # dataset$Winner_home = rep(NA, rows)
-  # dataset$Loser_home = rep(NA, rows)
-  # dataset$WinnerisHome = rep(NA, rows)
-  # dataset$LoserisHome = rep(NA, rows)
+   dataset$Country = rep(NA, rows)
+   dataset$Winner_home = rep(NA, rows)
+   dataset$Loser_home = rep(NA, rows)
+   dataset$WinnerisHome = rep(NA, rows)
+   dataset$LoserisHome = rep(NA, rows)
   
   # dataset$Winner_games       = rep(NA, rows)
   # dataset$Loser_games        = rep(NA, rows)

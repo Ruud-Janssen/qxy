@@ -26,9 +26,10 @@ xt_m = regressorvariables(yt_m, train_modelwithRatings)
 xcv = regressorvariables(ycv, cv_withRatings)
 
 q = 27
-quantileHard = quantile(xt_mHard$UncertaintySurface, q / 100)
+
 
 xt_mHard = getXThisSurface(xt_m, "Hard")
+quantileHard = quantile(xt_mHard$UncertaintySurface, q / 100)
 xt_mHard = removeUncertainMatches(xt_mHard, quantileHard, "Surface")
 
 xcvHard = getXThisSurface(xcv, "Hard")
@@ -37,25 +38,40 @@ xcvHard = removeUncertainMatches(xcvHard, quantileHard, "Surface")
 xtmHardRel = relevantVariables(xt_mHard)
 xcvHardRel = relevantVariables(xcvHard)
 
-f = y ~ 0 + ratingdiff + ratingHarddiff 
+f = y ~ 0 + ratingdiff + ratingHarddiff + Bo5 + FatigueDiff + HomeDiff
 
-train_params <- training_params(num_trees = 3000,
-                                   shrinkage = 0.001,
+train_params <- training_params(num_trees = 5000,
+                                   shrinkage = 0.00175,
                                    bag_fraction = 0.5,
-                                   num_train = nrow(xtmHardRel)/2,
+                                   num_train = nrow(xtmHardRel) / 2,
                                    id=seq_len(nrow(xtmHardRel)),
                                    min_num_obs_in_node = 10,
                                    interaction_depth = 3,
                                    num_features = 2)
 
 gbm1 = gbmt(formula = f, data = xtmHardRel, distribution=gbm_dist("Bernoulli"), train_params = train_params)
+plot(gbm1$valid.error)
+min(gbm1$valid.error)
 
 y = as.numeric(xcvHardRel$y)
 xcvHardRel$y = -20
 
 p = predict(gbm1, xcvHardRel, n.trees = 3000, type = "response")
 
-LogLoss(p, y)
+xcvHardRel$y = y
+
+LogLoss(p, xcvHardRel$y)
+mean(abs(p - xcvHardRel$y))
+mean((p-xcvHardRel$y) ^ 2)
+
+#LogLoss(cvpredRating, xcvHardRel$y)
+#[1] 0.5408071
+
+#mean(abs(xcvHardRel$y - cvpredRating))
+#[1] 0.3708295
+
+#mean((xcvHardRel$y - cvpredRating)^2)
+#[1] 0.1877846
 
 
 

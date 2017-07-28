@@ -10,7 +10,7 @@ source("enhance_games_data.R")
 
 source("addHeadtoHeadAndPrevMatches.R")
 
-# source("addRetiredandFatigue.R")
+ source("addRetiredandFatigue.R")
 
 source("addratings.R")
 source("addGlicko.R")

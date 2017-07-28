@@ -36,13 +36,13 @@ relevantVariables = function(dataset){
   #variables$WalkoverDiff          = dataset$WalkoverDiff
   #variables$RetiredOrWalkoverDiff = dataset$RetiredOrWalkoverDiff
 
-  #variables$FatigueDiff         = dataset$FatigueDiff
+  variables$FatigueDiff         = dataset$FatigueDiff
   #variables$FatigueDiffTimesBo5 = dataset$FatigueDiffTimesBo5
-  #variables$HeadtoHead          = dataset$HeadtoHead
+  variables$HeadtoHeaddiff          = dataset$HeadtoHeaddiff
   #variables$LastHeadtoHead      = dataset$LastHeadtoHead
   
   #variables$HeadtoHeadPercentageWeightedsqN = dataset$HeadtoHeadPercentageWeightedsqN
-  #variables$HomeDiff                        = dataset$HomeDiff
+  variables$HomeDiff                        = dataset$HomeDiff
   
   #variables$ThisBoxSkillDiff           = dataset$ThisBoxSkillDiff
   #variables$ThisBoxSkillDiffPlusScores = dataset$ThisBoxSkillDiffPlusScores

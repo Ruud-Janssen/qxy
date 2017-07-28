@@ -86,10 +86,10 @@ setPointOfViewVariables = function(x, row) {
   #x$RetiredDiff           = mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
   #x$WalkoverDiff          = mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)
   #x$RetiredOrWalkoverDiff = x$RetiredDiff + x$WalkoverDiff
-  #x$FatigueDiff           = mp * (row$Winner_fatigue - row$Loser_fatigue)
-  #x$HeadtoHead            = mp * (row$HeadtoHead)
+  x$FatigueDiff           = mp * (row$Winner_fatigue - row$Loser_fatigue)
+  x$HeadtoHeaddiff            = mp * (row$HeadtoHead)
   #x$LastHeadtoHead        = mp * row$LastHeadtoHead
-  #x$HomeDiff              = mp * (row$WinnerisHome - row$LoserisHome)
+  x$HomeDiff              = mp * (row$WinnerisHome - row$LoserisHome)
   
   #if(row$HeadtoHeadMatches != 0) {
   #  x$HeadtoHeadPercentageWeightedsqN =  mp * (((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / 
