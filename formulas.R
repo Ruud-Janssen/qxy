@@ -6,9 +6,9 @@ Expectation <- function(diff) {
 }
 
 
-#Just ctrl-c ctrl-ved this one, need to check it maybe
-LogLoss = function(pred, actual){
-  -1*mean(log(pred[model.matrix(~ actual + 0) - pred > 0]))
+LogLoss = function(actual, predicted, eps = 1e-15) {
+  predicted = pmin(pmax(predicted, eps), 1-eps) 
+  - (sum(actual * log(predicted) + (1 - actual) * log(1 - predicted))) / length(actual)
 }
 
 
@@ -115,7 +115,7 @@ getAllGamesWithoutRating = function() {
                        idLoser = as.numeric(idLoser)
     ) 
   }
-
+  
   if ("Result" %in% colnames(allGames)) {
     allGames <- mutate(allGames, Result = as.numeric(Result)) 
   }
@@ -142,7 +142,7 @@ getAllGamesWithRating = function() {
                     colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
   
   allGames <- dplyr::bind_rows(train_rating, train_model, cv, test)
-
+  
   #everything is now character, however some columns need to be numeric
   if ("idWinner" %in% colnames(allGames)) {
     allGames <- mutate(allGames, 
@@ -168,7 +168,7 @@ getAllGamesWithRating = function() {
 
 getPlayers = function() {
   player <- read.table("Data/datasets/players.csv", header = T, sep = ",", quote = "\"",
-             colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
+                       colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
   
   if ("id" %in% colnames(player)) {
     player <- mutate(player, id = as.numeric(id)) 
