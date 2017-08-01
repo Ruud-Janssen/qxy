@@ -7,6 +7,7 @@ library(bestglm)
 library(glmnet)
 library(plotmo)
 library(glmulti)
+library(caret)
 
 threshold = 1e-9
 
@@ -51,24 +52,26 @@ xcvHard = removeUncertainMatches(xcvHard, quantileHard, "Surface")
 xtmHardRel = relevantVariables(xt_mHard)
 xcvHardRel = relevantVariables(xcvHard)
 
-
-
 #Normalization of variance
-#sdtrain <- apply(xtmHardRel[, 1:(length(xtmHardRel) - 1)] , 2, sd) 
+sdtrain <- apply(xtmHardRel[, 1:(length(xtmHardRel) - 1)] , 2, sd) 
 
-#xtmHardRel[, 1:(length(xtmHardRel) - 1)] = 
-#  as.data.frame(scale(xtmHardRel[, 1:(length(xtmHardRel) - 1)], center = FALSE,scale = sdtrain))
-#xcvHardRel[, 1:(length(xcvHardRel) - 1)] = 
-#  as.data.frame(scale(xcvHardRel[, 1:(length(xcvHardRel) - 1)], center = FALSE,scale = sdtrain))
-  
+xtmHardRel[, 1:(length(xtmHardRel) - 1)] = 
+  as.data.frame(scale(xtmHardRel[, 1:(length(xtmHardRel) - 1)], center = FALSE,scale = sdtrain))
+xcvHardRel[, 1:(length(xcvHardRel) - 1)] = 
+  as.data.frame(scale(xcvHardRel[, 1:(length(xcvHardRel) - 1)], center = FALSE,scale = sdtrain))
+
 #Rating results 
 regLamRating = glm(y ~ 0 + ratingdiff + ratingHarddiff 
-                , data = xtmHardRel, family = binomial)
+                   , data = xtmHardRel, family = binomial)
 
 summary(regLamRating)
 
 cvpredRating = predict(regLamRating, xcvHardRel, type = "response")
-LogLoss(cvpredRating, xcvHardRel$y)
+LogLoss( xcvHardRel$y, cvpredRating)
+
+testProbs <- data.frame(Class = as.factor(xcvHardRel$y),
+                        LogReg = 1 - cvpredRating)
+plot(calibration(Class ~ LogReg, data = testProbs), type = "l")
 
 #Rating Glicko Break Games Result
 regLamGlicko = glm(y ~ 0 + glickoGamesdiff + glickoHardGamesdiff 
@@ -82,7 +85,7 @@ LogLoss(cvpredGlicko, xcvHardRel$y)
 #Modelling
 regLamMin = glm(y ~ 0 + ratingNotHarddiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff2 
                 #+ RetiredDiff + FatigueDiff
-                 , data = xtmHardRel, family = binomial)
+                , data = xtmHardRel, family = binomial)
 
 summary(regLamMin)
 
@@ -99,7 +102,7 @@ LogLoss(cvpredPoints, xcvHardRel$y)
 
 #I don't even use a foking dummy for Bo5
 regLamPointsProbFake = glm(y ~ 0 + ratingdiff + COPercentGamesDiff + COPercentPointsDiff + COPercentCompletenessDiff + COPercentPointsThisSurfaceDiff + COPercentCompletenessThisSurfaceDiff
-                   , data = xtmHardRel, family = binomial)
+                           , data = xtmHardRel, family = binomial)
 
 summary(regLamPointsProbFake)
 
@@ -114,8 +117,8 @@ ridge.mod = glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel) - 1)]), xtmHard
 plot_glmnet(ridge.mod, xvar = "lambda")
 
 ridge.out = cv.glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel) - 1)])
-            , xtmHardRel$y, alpha = 0, nfolds = 10, family = "binomial", lambda = grid, 
-            intercept = FALSE , thresh = threshold)
+                      , xtmHardRel$y, alpha = 0, nfolds = 10, family = "binomial", lambda = grid, 
+                      intercept = FALSE , thresh = threshold)
 plot(ridge.out)
 
 ##random stackoverflow says the second one is preferred!!!
@@ -131,7 +134,7 @@ bestridgelam
 
 cvpredRidgeMinTrue = predict.cv.glmnet(ridge.out, newx = as.matrix(xcvHardRel[, 1:(length(xcvHardRel)-1)])
                                        , type = "response", s = bestridgelam, thresh = threshold)
-LogLoss(cvpredRidgeMinTrue, xcvHardRel$y)
+LogLoss(actual = xcvHardRel$y, predicted = cvpredRidgeMinTrue)
 
 #####LASSO
 cvlam.out = cv.glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel)-1)]), xtmHardRel$y, alpha = 0, nfolds = 10, family = "binomial", 
@@ -140,7 +143,7 @@ plot(cvlam.out)
 
 
 lasso.mod = glmnet(as.matrix(xtmHardRel[ , 1:(length(xtmHardRel)-1)]), xtmHardRel$y, family = "binomial", alpha = 1, lambda = grid
-               , intercept = FALSE, thresh = threshold)
+                   , intercept = FALSE, thresh = threshold)
 plot_glmnet(lasso.mod, xvar = "lambda")
 
 #Lambda subset selection
@@ -161,7 +164,7 @@ bestlam
 
 cvpredLamMinTrue = predict.cv.glmnet(cvlas.out, newx = as.matrix(xcvHardRel[ , 1:(length(xcvHardRel)-1)])
                                      , type = "response", s = bestlam)
-LogLoss(cvpredLamMinTrue, xcvHardRel$y)
+LogLoss(actual = xcvHardRel$y, predicted = cvpredLamMinTrue)
 
 #################Interaction
 f <- as.formula( ~ .^2)
@@ -195,7 +198,7 @@ lasso.modINT = glmnet(as.matrix(xtmHardRelInteraction), xtmHardRel$y, family = "
                       , intercept = FALSE, thresh = threshold)
 
 cv.outINT = cv.glmnet(as.matrix(xtmHardRelInteraction), xtmHardRel$y, alpha = 1, nfolds = 10, family = "binomial", 
-                       intercept = FALSE)
+                      intercept = FALSE)
 plot(cv.outINT)
 
 ##random stackoverflow says the second one is preferred!!!
@@ -233,7 +236,7 @@ LogLoss(cvpredLamMin, ycvHard)
 
 #lambda min
 regLamMin = glm(y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff + RetiredDiff
-          + FatigueDiff, data = xtmHardRel, family = binomial)
+                + FatigueDiff, data = xtmHardRel, family = binomial)
 
 summary(regLamMin)
 
@@ -266,8 +269,8 @@ LogLoss(cvpredLam1se, ycvHard)
 
 
 reg = glm(xt_mHard$y ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff + 
-                DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
-              +FatigueDiff, data = xtmHardRel, family = binomial)
+            DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
+          +FatigueDiff, data = xtmHardRel, family = binomial)
 
 xtmHardRel$y = xt_mHard$y
 reg = bestglm(Xy = xtmHardRel, family = binomial, IC = "AIC", intercept = FALSE)
@@ -277,7 +280,7 @@ reg = glm(xt_mHard$y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingd
           family = binomial)
 
 summary(reg)
-                         
+
 cvpred = predict(reg, xcvHard, type = "response")
 LogLoss(cvpred, ycvHard)
 

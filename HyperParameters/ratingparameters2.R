@@ -25,7 +25,7 @@ total = foreach (k = 1 : 1, .combine = rbind) %do% {
   offset = 0.1
   #return(foreach(p = 1 : 1, .combine = rbind) %do%{
   #  power = 0.2
-    return(foreach(p = 1 : 10, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
+    return(foreach(p = 1 : 1, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
       source("hyperparametersfunctions.r")
       source("HyperParameters/hyperratingfunctions2.r")
       power = 0.238
