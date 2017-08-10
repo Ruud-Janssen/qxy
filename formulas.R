@@ -96,6 +96,8 @@ FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatch
 }
 
 
+
+
 getAllGamesWithoutRating = function() {
   train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",
                             colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
@@ -174,6 +176,66 @@ getPlayers = function() {
     player <- mutate(player, id = as.numeric(id)) 
   }
   return(player)
+}
+
+getATPPlayers <- function() {
+  atp_players <- read.table("Data/datasets/atp_players2.csv", header = T, sep = ",", quote = "\"", fill = TRUE)
+  
+  # remove the ID's which are double in this list
+  # it is important that systems referencing this list by id (not name) also use this converted list
+  # the function convert_ATP_player_ID does this
+  
+  #  "109613" = 104834,
+  #  "103863" = 103862,
+  #  "103806" = 103805,
+  #  "109254" = 103473,
+  #  "110685" = 104711,
+  #  "109251" = 109250,
+  #  "109365" = 108774,
+  #  "104084" = 104083,
+  #  "105314" = 105313,
+  #  "103921" = 103920,
+  #  "103651" = 103650,
+  #  "104458" = 104457,
+  #  "127301" = 110774
+  list_ID_duplicated_players <- c(
+    109613,
+    103863,
+    103806,
+    109254,
+    110685,
+    109251,
+    109365,
+    104084,
+    105314,
+    103921,
+    103651,
+    104458,
+    127301
+  )
+  
+  atp_players <- filter(atp_players, !ID %in% list_ID_duplicated_players)
+}
+
+
+convert_ATP_player_ID <- function (ID) {
+  id_converted <- switch (as.character(ID),
+                          "109613" = 104834,
+                          "103863" = 103862,
+                          "103806" = 103805,
+                          "109254" = 103473,
+                          "110685" = 104711,
+                          "109251" = 109250,
+                          "109365" = 108774,
+                          "104084" = 104083,
+                          "105314" = 105313,
+                          "103921" = 103920,
+                          "103651" = 103650,
+                          "104458" = 104457,
+                          "127301" = 110774
+  )
+  
+  if(is.null(id_converted)) { return (ID) } else { return (id_converted) }
 }
 
 
@@ -260,3 +322,120 @@ calculateGames <- function(row) {
   lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
   Games <- wonGames + lostGames
 }
+
+
+
+saveDatasets <- function(df, dir, filename, lvl = "", ext = ".csv") {
+   if(!lvl == "") { lvl <- paste("_", lvl, sep = "") }
+   write.csv(file = paste(dir, filename, lvl, ext, sep = ""), df, row.names=FALSE)
+}
+
+getDatasets <- function(dir, filename, ext=".csv", lvl = "", last = F, change_datatype=TRUE) {
+  if (lvl == "") {
+    dir_filename = paste(dir, filename, ext, sep = "")
+  } 
+  else {
+    dir_filename = paste(dir, filename, "_", lvl, ext, sep = "")
+  }
+  
+  # TODO if last == T, search the file list and get the last added file
+  #Support for extra variables of read table
+  
+  df <- read.table(dir_filename, header = T, sep = ",", quote = "\"",
+                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+  
+  #everything is now character, however some columns need to be numeric
+  if (change_datatype) {
+    if ("id" %in% colnames(df)) {
+      df <- mutate(df, id = as.integer(id)) 
+    }
+
+    if ("StartDate" %in% colnames(df)) {
+      df <- mutate(df,
+                   StartDate = as.Date(StartDate, format="%Y-%m-%d")
+      )
+    }
+    if ("Date" %in% colnames(df)) {
+      df <- mutate(df,
+                          Date = as.Date(Date, format="%Y-%m-%d")
+      )
+    }
+    if ("Date.x" %in% colnames(df)) {
+      df <- mutate(df,
+                   Date.x = as.Date(Date.x, format="%Y-%m-%d")
+      )
+    }
+    if ("Date.y" %in% colnames(df)) {
+      df <- mutate(df,
+                   Date.y = as.Date(Date.y, format="%Y-%m-%d")
+      )
+    }
+    if ("idWinner" %in% colnames(df)) {
+      df <- mutate(df, 
+                         idWinner = as.integer(idWinner),
+                         idLoser = as.integer(idLoser)
+      ) 
+    }
+    if ("id_atp" %in% colnames(df)) {
+      df <- mutate(df, 
+                   id_atp = as.integer(id_atp)
+      ) 
+    }
+    if ("id_Sackmann" %in% colnames(df)) {
+      df <- mutate(df, 
+                   id_Sackmann = as.integer(id_Sackmann)
+      ) 
+    }
+    if ("Result" %in% colnames(df)) {
+      df <- mutate(df, Result = as.numeric(Result)) 
+    }
+    if ("HeadtoHead" %in% colnames(df)) {
+      df <- mutate(df, 
+                         HeadtoHead = as.numeric(HeadtoHead),
+                         HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
+                         LastHeadtoHead = as.numeric(LastHeadtoHead)
+      )
+    }
+  }
+  return (df)
+}
+
+#Note that we assume here that the walkovers are removed
+saveDatasetsWithRating = function(allGames, rating = NULL){
+  
+  Nt_r = nrow(RemoveWalkOvers(read.table("Data/datasets/train_rating.csv",  header = T, sep = ",", quote = "\"",
+                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
+  Nt_m = nrow(RemoveWalkOvers(read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
+                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
+  Ncv = nrow(RemoveWalkOvers(read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
+                                        colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
+  Ntest = nrow(RemoveWalkOvers(read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
+                                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
+  
+  firstindextrain_rating = 1
+  lastindextrain_rating = Nt_r
+  train_rating = allGames[firstindextrain_rating : lastindextrain_rating, ]
+  
+  firstindextrain_model = lastindextrain_rating + 1
+  lastindextrain_model = lastindextrain_rating + Nt_m
+  train_model = allGames[firstindextrain_model : lastindextrain_model, ]
+  
+  firstindexcv = lastindextrain_model + 1
+  lastindexcv = lastindextrain_model + Ncv
+  cv = allGames[firstindexcv : lastindexcv, ]
+  
+  firstindextest = lastindexcv + 1
+  lastindextest = lastindexcv + Ntest
+  test = allGames[firstindextest: lastindextest, ]
+  
+  write.csv(file = "Data/datasets/train_ratingWithRatings.csv", train_rating, row.names=FALSE)
+  write.csv(file = "Data/datasets/train_modelWithRatings.csv", train_model, row.names=FALSE)
+  write.csv(file = "Data/datasets/cvWithRatings.csv", cv, row.names=FALSE)
+  write.csv(file = "Data/datasets/testWithRatings.csv", test, row.names=FALSE)
+  
+  if(!is.null(rating)) {
+    write.csv(file = "Data/datasets/ratingafterTest.csv", 
+              rating, row.names=FALSE)
+  }
+}
+
