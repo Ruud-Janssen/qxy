@@ -21,7 +21,7 @@ player   <- getPlayers()
 glicko <- InitializeGlicko(player)
 
 allGames <- RemoveWalkOvers(allGames)
-allGames <- InitializeGlickoVariablesForGames(allGames)
+#allGames <- InitializeGlickoVariablesForGames(allGames)
 
 Nall <- nrow(allGames)
 

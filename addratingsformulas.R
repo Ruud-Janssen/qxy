@@ -247,6 +247,27 @@ calculateNewRating <- function(current_rating, total_matches, expectation_based_
 
 K <- function(total_matches) {
   #Got changed after found out that constant 20.6 is better when you remove a lot of the games
-  #return (250 / (numberOfGames + 12) ^ 0.44)
-  25
+  #return (32 / (total_matches + 0.1) ^ 0.1)
+  #return (70 / (total_matches + 0.1) ^ 0.25)
+  16.8
+}
+
+
+calculateFractionNetBreakGamesWinnerWon <- function(row) {
+  wonGames  <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
+  lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
+  percentWonBreakGames <- 0.5 + (wonGames - lostGames) / (wonGames + lostGames)
+}
+
+calculateFractionGamesWinnerWon <- function(row) {
+  wonGames  <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
+  lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
+  percentWonGames <- wonGames / (wonGames + lostGames)
+}
+
+
+calculateGames <- function(row) {
+  wonGames  <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
+  lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
+  Games <- wonGames + lostGames
 }

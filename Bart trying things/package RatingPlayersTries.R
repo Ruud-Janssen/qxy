@@ -6,13 +6,15 @@ library(PlayerRatings)
 allGames <- getAllGamesWithoutRating()
 allGames <- getXThisSurface(allGames, "Hard")
 allGames <- allGames[!is.na(allGames$Date), ]
-allGames$Date <- as.numeric(as.Date(allGames$Date, format = "%m/%d/%Y"))
+allGames$Date <- as.Date(allGames$Date, format = "%m/%d/%Y")
 allGames <- arrange(allGames, Date)
 allGames <- RemoveWalkOvers(allGames)
+allGames$Date <- format(as.Date(allGames$Date, format = "%m/%d/%Y"), "%Y/%m")
+allGames$Date <- group_indices_(allGames, .dots = c("Date"))
 
-splitDate <- 16279
-allGamesTrain <- allGames[allGames$Date <= splitDate,  ]
-allGamesValidation <- allGames[allGames$Date > splitDate, ]
+splitDate <- 20887
+allGamesTrain <- allGames[1 : 20887,  ]
+allGamesValidation <- allGames[(20887 + 1): nrow(allGames), ]
 
 xTotal <- data.frame(cbind(allGames$Date), allGames$idWinner, allGames$idLoser, rep(1, nrow(allGames)))
 xTrain <- data.frame(cbind(allGamesTrain$Date), allGamesTrain$idWinner, allGamesTrain$idLoser, 
@@ -24,9 +26,9 @@ xTotal <- data.frame(apply(xTotal, 2, as.numeric))
 xTrain <- data.frame(apply(xTrain, 2, as.numeric))
 xVal <- data.frame(apply(xVal, 2, as.numeric))
 
-K <- 25
-c <- 3.2
-h <- 3.2
+K <- 16.8
+c <- 2.5
+h <- 2.5
 l <- 0
 
 elo <- elo(xTrain, init = 1500, kfac = K, history = TRUE, gamma = 0)
@@ -45,6 +47,8 @@ for (i in uniqueDates) {
   pvals_elo <- c(pvals_elo, predict(elo, batch, tng = minGames, gamma = 0))
   pvals_glicko <- c(pvals_glicko, predict(glicko, batch, tng = minGames, gamma = 0))
   pvals_steph <- c(pvals_steph, predict(steph, batch, tng = minGames, gamma = 0))
+  
+  print(table(table(c(batch$allGamesValidation.idWinner, batch$allGamesValidation.idLoser))))
 
   
   elo <- elo(batch, init = 1500, kfac = K, history = TRUE, gamma = 0, status = elo$ratings)
@@ -71,7 +75,7 @@ pvals_elo <- pvals_elo[j]
 pvals_glicko <- pvals_glicko[j]
 pvals_steph <- pvals_steph[j]
 
-LogLoss(pvals_elo, rep(1, length(pvals_elo)))
-LogLoss(pvals_glicko, rep(1, length(pvals_elo)))
-LogLoss(pvals_steph, rep(1, length(pvals_elo)))
-LogLoss(impOdds, rep(1, length(pvals_elo)))
+LogLoss(rep(1, length(pvals_elo)), pvals_elo)
+LogLoss(rep(1, length(pvals_elo)), pvals_glicko)
+LogLoss(rep(1, length(pvals_elo)), pvals_steph)
+LogLoss(rep(1, length(pvals_elo)), impOdds)

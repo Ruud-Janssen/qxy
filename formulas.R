@@ -323,6 +323,7 @@ calculateGames <- function(row) {
   Games <- wonGames + lostGames
 }
 
+<<<<<<< HEAD
 
 
 saveDatasets <- function(df, dir, filename, lvl = "", ext = ".csv") {
@@ -439,3 +440,22 @@ saveDatasetsWithRating = function(allGames, rating = NULL){
   }
 }
 
+=======
+calculateFractionGamesWinnerWon <- function(row) {
+  wonGames  <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
+  lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
+  percentWonGames <- wonGames / (wonGames + lostGames)
+}
+
+calculateFractionNetBreakGamesWinnerWon <- function(row) {
+  wonGames  <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
+  lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
+  percentWonBreakGames <- 0.5 + (wonGames - lostGames) / (wonGames + lostGames)
+}
+
+changeGameWon <- function(pServer) {
+  pS <- pServer
+  pR <- 1 - pServer
+  pS^4 * (1 + 4 * pR + 10 * pR^2) + 20 * (pS * pR) ^ 3 * pS ^ 2 / (1 - 2 * pS * pR) 
+}
+>>>>>>> 98ad3bf32eeb8fa0281fe36b158b45532e34b891
