@@ -2,7 +2,7 @@ parse_score_column_Sackmann <- function(allMatches) {
 
   require(tidyr)
   # copy for testing purposes
-  #allMatches$score2 <- allMatches$score
+  allMatches$score2 <- allMatches$score
   
   # remove tie break points between "( )"
   allMatches <- mutate(allMatches, score = gsub( "*\\(.*?\\) *", "", score))
@@ -44,7 +44,8 @@ parse_score_column_Sackmann <- function(allMatches) {
   #Wsets
   #Lsets
   allMatches <- allMatches %>% 
-    rowwise() %>% mutate(
+    rowwise() %>% 
+    mutate(
       W1set = getSets(W1, L1, W2, L2, W3, L3, W4, L4, W5, L5)[1],
       L1set = getSets(W1, L1, W2, L2, W3, L3, W4, L4, W5, L5)[2]
     ) 

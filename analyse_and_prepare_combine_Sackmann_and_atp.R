@@ -114,25 +114,24 @@ all_Sackmann_matches <- rename(all_Sackmann_matches,
                                       
 )
 
-#distinct(select(all_Sackmann_matches, c("tourney_level", "atp_match")))
-
-#distinct(select(all_atp_matches, c("ï..ATP", "ATP")))
-
-#distinct(select(all_atp_matches, c("Round")))
-#summary(as.factor(all_atp_matches$Round))
-#distinct(select(all_Sackmann_matches, c("Round")))
-#br <- filter(all_Sackmann_matches, Round == "BR") # Olympics
-#olympics <- filter(all_Sackmann_matches, tourney_name == "Olympics") # Olympics
-
-#distinct(select(all_Sackmann_matches, c("tourney_name", "Round")))
-#distinct(select(all_atp_matches, c("Tournament", "Round")))
-
-#Sackman -> Round == RR -> davis cup
-#Sackman -> Round == BR -> Olympics 3/4 place match
-
-#date_sackmann <- distinct(select(all_Sackmann_matches, c("Date")))
-#date_atp <- distinct(select(all_atp_matches, c("Date")))
-# date is everywhere available
+# distinct(select(all_Sackmann_matches, c("tourney_level", "atp_match")))
+# 
+# distinct(select(all_atp_matches, c("ï..ATP", "ATP")))
+# 
+# distinct(select(all_atp_matches, c("Round")))
+# summary(as.factor(all_atp_matches$Round))
+# distinct(select(all_Sackmann_matches, c("Round")))
+# br <- filter(all_Sackmann_matches, Round == "BR") # Olympics
+# olympics <- filter(all_Sackmann_matches, tourney_name == "Olympics") # Olympics
+# 
+# distinct(select(all_Sackmann_matches, c("tourney_name", "Round")))
+# distinct(select(all_atp_matches, c("Tournament", "Round")))
+# 
+# Sackman -> Round == RR -> davis cup
+# Sackman -> Round == BR -> Olympics 3/4 place match
+# 
+# date_sackmann <- distinct(select(all_Sackmann_matches, c("Date")))
+# date_atp <- distinct(select(all_atp_matches, c("Date")))
 
 all_atp_matches <- all_atp_matches %>%
   mutate(
