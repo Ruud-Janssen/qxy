@@ -20,7 +20,7 @@
 # The output files will be saved
 
 library(dplyr)
-#library(stringr)
+library(stringr)
 
 rm(list = ls())
 source("formulas.r")
