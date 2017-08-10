@@ -12,6 +12,7 @@ data2003 <- read.table(paste(dataTrainRatingDir, "2003.csv", sep = ""), header =
 data2004 <- read.table(paste(dataTrainRatingDir, "2004.csv", sep = ""), header = T, sep = ",", quote = "",colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
 
 train_rating = dplyr::bind_rows(data2000, data2001, data2002, data2003, data2004)
+train_rating = train_rating[!is.na(train_rating$Winner), ]
 write.csv(file = paste(saveDatasetsDir, "train_rating.csv", sep = ""), train_rating, row.names=FALSE)
 
 #Data from 2005 up to 2012
@@ -28,6 +29,7 @@ data2012 <- read.table(paste(dataTrainModelDir, "2012.csv", sep = ""), header = 
 
 train_model <- dplyr::bind_rows(data2005, data2006, data2007, data2008, data2009, 
                                 data2010, data2011, data2012)
+train_model = train_model[!is.na(train_model$Winner), ]
 write.csv(file = paste(saveDatasetsDir, "train_model.csv", sep = ""), train_model, row.names=FALSE)
 
 #Data from 2013 up to 2014
@@ -37,6 +39,7 @@ data2013 <- read.table(paste(dataCvDir, "2013.csv", sep = ""), header = T, sep =
 data2014 <- read.table(paste(dataCvDir, "2014.csv", sep = ""), header = T, sep = ",", quote = "",colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
 
 cv <- dplyr::bind_rows(data2013, data2014)
+cv <- cv[!is.na(cv$Winner), ]
 cv <- cv[cv$Loser != "", ]
 write.csv(file = paste(saveDatasetsDir, "cv.csv", sep = ""), cv, row.names=FALSE)
 
@@ -47,6 +50,7 @@ data2015 <- read.table(paste(dataTestDir, "2015.csv", sep = ""), header = T, sep
 data2016 <- read.table(paste(dataTestDir, "2016.csv", sep = ""), header = T, sep = ",", quote = "",colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
 
 test <- dplyr::bind_rows(data2015, data2016)
+test <- test[!is.na(test$Winner), ]
 write.csv(file = paste(saveDatasetsDir, "test.csv", sep = ""), test, row.names=FALSE)
 
 #allData
