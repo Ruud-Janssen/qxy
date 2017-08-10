@@ -94,7 +94,6 @@ matched_player_list <- matched_player_list %>% rowwise() %>%
     matched = ifelse(is.null(matched), list(NA), list(matched))
   )
 
-# attach manual names
 matched_player_list <- matched_player_list %>% rowwise() %>%
   mutate(
     matched = ifelse(is.na(playerSackmann), list(matched), list(playerSackmann))
@@ -128,21 +127,7 @@ all_atp_matches <- all_atp_matches %>%
   ) %>%
   select(-playerSackmann, -matchedNr)
 
-# For tournaments we need to get the first Date
-if (is.character(all_atp_matches$Date)) { 
-  all_atp_matches <- all_atp_matches %>%
-    mutate(
-      Date = as.Date(Date, format="%Y-%m-%d")
-    )
-}
 
-# For tournaments we need to get the first Date
-if (is.character(all_Sackmann_matches$Date)) { 
-  all_Sackmann_matches <- all_Sackmann_matches %>%
-    mutate(
-      Date = as.Date(Date, format="%Y-%m-%d")
-    )
-}
 
 all_Sackmann_matches <- adapt_start_date_tournaments(all_Sackmann_matches)
 tournament_date_Sackmann <- distinct(select(all_Sackmann_matches, c("tourney_name", "Date")))
@@ -352,5 +337,4 @@ saveDatasets(all_Sackmann_matches, dir_result_datasets, "all_Sackmann_matches", 
 saveDatasets(ALL_MATCHES, dir_result_datasets, "all_matches", lvl = "lvl1")
 #the player file can be aggregated based on this function
 saveDatasets(player_matches, dir_result_datasets, "player_matches", lvl = "lvl1") 
-
 
