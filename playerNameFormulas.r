@@ -8,7 +8,7 @@ create_matching_player_names <- function(allGames) {
   return (allGames)
 }
 
-update_misspelled_player_names <- function(allGames) {
+update_misspelled_player_names_atp <- function(allGames) {
   allGames[allGames$Winner2 == "chela j i", "Winner2"] <- "chela j"
   allGames[allGames$Loser2 == "chela j i", "Loser2"] <- "chela j"
   
@@ -54,8 +54,23 @@ update_misspelled_player_names <- function(allGames) {
   allGames[allGames$Winner2 == "mathieu p h", "Winner2"] <- "mathieu p"
   allGames[allGames$Loser2 == "mathieu p h", "Loser2"] <- "mathieu p"
   
+  allGames[allGames$Winner2 == "wang y t", "Winner2"] <- "wang j"
+  allGames[allGames$Loser2 == "wang y t", "Loser2"]  <- "wang j"
+  
   allGames[allGames$Winner2 == "sanchez de luna j a", "Winner2"] <- "sanchez de luna j"
   allGames[allGames$Loser2 == "sanchez de luna j a", "Loser2"] <- "sanchez de luna j"
+  
+  allGames[allGames$Winner2 == "al ghareeb m", "Winner2"] <- "ghareeb m"
+  allGames[allGames$Loser2 == "al ghareeb m", "Loser2"] <- "ghareeb m"
+  
+  allGames[allGames$Winner2 == "querry s", "Winner2"] <- "querrey s"
+  allGames[allGames$Loser2 == "querry s", "Loser2"] <- "querrey s"
+  
+  allGames[allGames$Winner2 == "bahrouzyan o", "Winner2"] <- "awadhy o"
+  allGames[allGames$Loser2 == "bahrouzyan o", "Loser2"] <- "awadhy o"
+  
+  allGames[allGames$Winner2 == "schuettler p", "Winner2"] <- "schuettler r"
+  allGames[allGames$Loser2 == "schuettler p", "Loser2"] <- "schuettler r" 
   
   #madrid??!!??!!
   allGames[allGames$Winner2 == "riba madrid p", "Winner2"] <- "riba p"
@@ -67,6 +82,19 @@ update_misspelled_player_names <- function(allGames) {
   allGames[allGames$Winner2 == "granollers pujol m", "Winner2"] <- "granollers m"
   allGames[allGames$Loser2 == "granollers pujol m", "Loser2"] <- "granollers m"
   
+  return (allGames)
+}
+
+update_misspelled_player_names_sackmann <- function(allGames) {
+  allGames[allGames$Winner2 == "albert ramos", "Winner2"] <- "albert ramos vinolas"
+  allGames[allGames$Loser2 == "albert ramos", "Loser2"]  <- "albert ramos vinolas"
+  
+  allGames[allGames$Winner2 == "ivan navarro", "Winner2"] <- "ivan navarro pastor"
+  allGames[allGames$Loser2 == "ivan navarro", "Loser2"]  <- "ivan navarro pastor"
+  
+  
+  
+
   return (allGames)
 }
 

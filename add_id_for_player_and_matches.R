@@ -32,10 +32,10 @@ all_atp_matches <- getDatasets(dir_result_datasets, "all_atp_matches", lvl = "lv
 all_Sackmann_matches <- getDatasets(dir_result_datasets, "all_Sackmann_matches", lvl = "lvl2")
 
 all_atp_matches <- create_matching_player_names(all_atp_matches)
-all_atp_matches <- update_misspelled_player_names(all_atp_matches)
+all_atp_matches <- update_misspelled_player_names_atp(all_atp_matches)
 
 all_Sackmann_matches <- create_matching_player_names(all_Sackmann_matches)
-all_Sackmann_matches <- update_misspelled_player_names(all_Sackmann_matches)
+all_Sackmann_matches <- update_misspelled_player_names_sackmann(all_Sackmann_matches)
 
 # if("idWinner" %in% colnames(allGames)) {
 #   allGames <- subset(allGames, select = -c(idWinner) )
