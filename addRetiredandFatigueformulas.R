@@ -1,8 +1,10 @@
+library(plyr)
+
 CreateRetiredWalkoverAndFatigue = function(dataset, maxdays, base, gamesBarier){
   #Create Retired and Walkover
   dataset <- SetRetired(dataset)
   dataset <- SetWalkover(dataset)
-  dataset <- SetLastGamePercentWon(dataset)
+  #dataset <- SetLastGamePercentWon(dataset)
   
   #Create variable NrGames for all matches
   dataset <- adply(dataset, 1, SetNrGamesRow)
@@ -54,9 +56,9 @@ SetRetired = function(dataset) {
   Nt <- length(dataset$Winner)
   
   for(currentIndex in retiredIndexes){
-    retiredPlayer <- dataset$Loser[currentIndex]
-    nextGame      <- FindNextGame(retiredPlayer, dataset$Winner[currentIndex + 1 : Nt], 
-                            dataset$Loser[currentIndex + 1 : Nt], currentIndex)
+    retiredPlayerIndex <- dataset$idLoser[currentIndex]
+    nextGame      <- FindNextGame(retiredPlayerIndex, dataset$idWinner[currentIndex + 1 : Nt], 
+                            dataset$idLoser[currentIndex + 1 : Nt], currentIndex)
     
     if(nextGame$player == 1) {
       dataset$Winner_retired_last_game[nextGame$number] <- 1
@@ -76,9 +78,9 @@ SetWalkover = function(dataset){
   Nt <- length(dataset$Winner)
   
   for(currentIndex in walkoverIndexes){
-    walkoverPlayer <- dataset$Loser[currentIndex]
-    nextGame       <- FindNextGame(walkoverPlayer, dataset$Winner[currentIndex + 1 : Nt], 
-                            dataset$Loser[currentIndex + 1 : Nt], currentIndex)
+    walkoverPlayerIndex <- dataset$idLoser[currentIndex]
+    nextGame       <- FindNextGame(walkoverPlayerIndex, dataset$idWinner[currentIndex + 1 : Nt], 
+                            dataset$idLoser[currentIndex + 1 : Nt], currentIndex)
     
     if(nextGame$player == 1) {
       dataset$Winner_walkover_last_game[nextGame$number] <- 1
@@ -126,8 +128,8 @@ CreateFatigueAndRecentGames = function(dataset, maxdays, base, gamesBarier){
   dataset$Loser_recentGames  <- rep(0 , Nt)
   
   for(i in 1 : (Nt - 1)){
-    dataset <- setFatigueMatchPlayer(dataset$Winner[i], dataset, i, maxdays, base, gamesBarier)
-    dataset <- setFatigueMatchPlayer(dataset$Loser[i], dataset, i, maxdays, base, gamesBarier)
+    dataset <- setFatigueMatchPlayer(dataset$idWinner[i], dataset, i, maxdays, base, gamesBarier)
+    dataset <- setFatigueMatchPlayer(dataset$idLoser[i], dataset, i, maxdays, base, gamesBarier)
   }
   return(dataset)
 }
@@ -154,19 +156,19 @@ setFatigueMatchPlayerPartWinsOrLosses = function(dataset, NextGamesIndexes, Matc
   return(dataset)
 }
 
-setFatigueMatchPlayer = function(name, dataset, matchnumber, maxdays, base, gamesBarier) {
-  df    <- "%m/%d/%Y"
+setFatigueMatchPlayer = function(idPlayer, dataset, matchnumber, maxdays, base, gamesBarier) {
+  df    <- "%Y-%m-%d"
   Ndata <- nrow(dataset)
-  MatchDate <- as.Date(as.character(dataset$Date[matchnumber]), format = df )
+  MatchDate <- as.Date(as.character(dataset$Date[matchnumber]), format = df)
   GamesOverBarier <- max(dataset$NrGames[matchnumber] - gamesBarier, 0)
   
-  WinningGamesIndex <- which(dataset$Winner[(matchnumber + 1) : Ndata] %in% name) + matchnumber
+  WinningGamesIndex <- which(dataset$idWinner[(matchnumber + 1) : Ndata] %in% idPlayer) + matchnumber
   if(length(WinningGamesIndex) > 0) {
     dataset <- setFatigueMatchPlayerPartWinsOrLosses(dataset, WinningGamesIndex, MatchDate, maxdays, base, 
                                                     GamesOverBarier, df, 1)
   }
   
-  LosingGamesIndex <- which(dataset$Loser[(matchnumber + 1) : Ndata] %in% name) + matchnumber
+  LosingGamesIndex <- which(dataset$idLoser[(matchnumber + 1) : Ndata] %in% idPlayer) + matchnumber
   if(length(LosingGamesIndex) > 0) {
     dataset <- setFatigueMatchPlayerPartWinsOrLosses(dataset, LosingGamesIndex, MatchDate, maxdays, base, 
                                                     GamesOverBarier, df, 0)

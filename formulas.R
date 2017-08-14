@@ -13,17 +13,17 @@ LogLoss = function(actual, predicted, eps = 1e-15) {
 
 
 RemoveWalkOvers = function(Data){
-  Data = Data[Data$Comment != "Walkover", ]
-  Data = Data[Data$Comment != "Walover", ]
+  i <- which(Data$Comment %in% c("Walkover", "Walover"))
+  Data = Data[-i, ]
 }
 
 
 #returns a vector containing the next game if available and 
 #an index indicating whether it's the winner (1), loser (2)
 #or no next game (0)
-FindNextGame = function(name, winners, losers, nrPreviousGames){
-  nextWin = match(name, winners)
-  nextLoss = match(name, losers)
+FindNextGame = function(idPlayer, idWinners, idLosers, nrPreviousGames){
+  nextWin = match(idPlayer, idWinners)
+  nextLoss = match(idPlayer, idLosers)
   
   nextGame = list()
   
@@ -169,8 +169,9 @@ getAllGamesWithRating = function() {
 
 
 getPlayers = function() {
-  player <- read.table("Data/datasets/players.csv", header = T, sep = ",", quote = "\"",
+  player <- read.table("Data/source_data_Sackmann/atp_players.csv", header = F, sep = ",", quote = "\"",
                        colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
+  names(player) <- c("id", "firstName", "secondName", "Handed", "birthDate", "Nationality")
   
   if ("id" %in% colnames(player)) {
     player <- mutate(player, id = as.numeric(id)) 
@@ -240,31 +241,15 @@ convert_ATP_player_ID <- function (ID) {
 
 
 saveDatasetsWithoutRating = function(allGames){
-  
-  Nt_r = nrow(read.table("Data/datasets/train_rating.csv",  header = T, sep = ",", quote = "\"",
-                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
-  Nt_m = nrow(read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
-                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
-  Ncv = nrow(read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
-                        colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
-  Ntest = nrow(read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
-                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE))
-  
-  firstindextrain_rating = 1
-  lastindextrain_rating = Nt_r
-  train_rating = allGames[firstindextrain_rating : lastindextrain_rating, ]
-  
-  firstindextrain_model = lastindextrain_rating + 1
-  lastindextrain_model = lastindextrain_rating + Nt_m
-  train_model = allGames[firstindextrain_model : lastindextrain_model, ]
-  
-  firstindexcv = lastindextrain_model + 1
-  lastindexcv = lastindextrain_model + Ncv
-  cv = allGames[firstindexcv : lastindexcv, ]
-  
-  firstindextest = lastindexcv + 1
-  lastindextest = lastindexcv + Ntest
-  test = allGames[firstindextest: lastindextest, ]
+  df <- "%Y-%m-%d"
+  allGames$Date <- as.Date(allGames$Date, df)
+  train_rating <- allGames[allGames$Date <= as.Date("2004-12-31", df), ]
+  train_model  <- allGames[allGames$Date > as.Date("2004-12-31", df) & 
+                            allGames$Date <= as.Date("2012-12-31", df), ]
+  cv           <- allGames[allGames$Date > as.Date("2012-12-31", df) & 
+                   allGames$Date <= as.Date("2014-12-31", df), ]
+  test         <- allGames[allGames$Date > as.Date("2014-12-31", df) & 
+                     allGames$Date <= as.Date("2016-12-31", df), ]
   
   write.csv(file = "Data/datasets/train_rating.csv", train_rating, row.names=FALSE)
   write.csv(file = "Data/datasets/train_model.csv", train_model, row.names=FALSE)
@@ -276,30 +261,15 @@ saveDatasetsWithoutRating = function(allGames){
 #Note that we assume here that the walkovers are removed
 saveDatasetsWithRating = function(allGames, rating = NULL){
   
-  Nt_r = nrow(RemoveWalkOvers(read.table("Data/datasets/train_rating.csv",  header = T, sep = ",", quote = "\"",
-                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
-  Nt_m = nrow(RemoveWalkOvers(read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
-                                         colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
-  Ncv = nrow(RemoveWalkOvers(read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
-                                        colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
-  Ntest = nrow(RemoveWalkOvers(read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
-                                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)))
-  
-  firstindextrain_rating = 1
-  lastindextrain_rating = Nt_r
-  train_rating = allGames[firstindextrain_rating : lastindextrain_rating, ]
-  
-  firstindextrain_model = lastindextrain_rating + 1
-  lastindextrain_model = lastindextrain_rating + Nt_m
-  train_model = allGames[firstindextrain_model : lastindextrain_model, ]
-  
-  firstindexcv = lastindextrain_model + 1
-  lastindexcv = lastindextrain_model + Ncv
-  cv = allGames[firstindexcv : lastindexcv, ]
-  
-  firstindextest = lastindexcv + 1
-  lastindextest = lastindexcv + Ntest
-  test = allGames[firstindextest: lastindextest, ]
+  df <- "%Y-%m-%d"
+  allGames$Date <- as.Date(allGames$Date, df)
+  train_rating <- allGames[allGames$Date <= as.Date("2004-12-31", df), ]
+  train_model  <- allGames[allGames$Date > as.Date("2004-12-31", df) & 
+                             allGames$Date <= as.Date("2012-12-31", df), ]
+  cv           <- allGames[allGames$Date > as.Date("2012-12-31", df) & 
+                             allGames$Date <= as.Date("2014-12-31", df), ]
+  test         <- allGames[allGames$Date > as.Date("2014-12-31", df) & 
+                             allGames$Date <= as.Date("2016-12-31", df), ]
   
   write.csv(file = "Data/datasets/train_ratingWithRatings.csv", train_rating, row.names=FALSE)
   write.csv(file = "Data/datasets/train_modelWithRatings.csv", train_model, row.names=FALSE)

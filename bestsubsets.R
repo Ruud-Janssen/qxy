@@ -16,6 +16,9 @@ train_modelwithRatings <- read.table("Data/datasets/train_modelWithRatings.csv"
 cv_withRatings         <- read.table("Data/datasets/cvWithRatings.csv"
                             , header = T, sep = ",", quote = "\"", fill = TRUE)
 
+train_modelwithRatings <- train_modelwithRatings[!is.na(train_modelwithRatings$matched), ]
+cv_withRatings <- cv_withRatings[!is.na(cv_withRatings$matched), ]
+
 Nt <- nrow(train_modelwithRatings)
 #apparantly there is one NA in BestOF, temporarily removal needs to be data cleansed
 cv_withRatings <- cv_withRatings[!is.na(cv_withRatings$Best.of), ]

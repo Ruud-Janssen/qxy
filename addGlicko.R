@@ -11,7 +11,6 @@ player   <- getPlayers()
 # Create Ratings for all players, ratings are adapted after each match
 glicko <- InitializeGlicko(player)
 
-allGames <- RemoveWalkOvers(allGames)
 allGames <- InitializeGlickoVariablesForGames(allGames)
 
 Nall <- nrow(allGames)

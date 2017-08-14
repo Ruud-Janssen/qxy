@@ -43,6 +43,24 @@ InitializeRatingVariables = function(rating){
   return(rating)
 }
 
+SetContinentsAndCountries <- function(rating) {
+  numberOfPlayers = nrow(rating)
+  
+  countrycodes = read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
+                            quote = "\"", fill = TRUE)
+  
+  rating$Country = rep(NA, numberOfPlayers)
+  rating$Continent = rep(NA, numberOfPlayers)
+  
+  for (i in 1 : length(rating$playername)) {
+    country = rating$Nationality[i]
+    countryCodePlayer = match(country, countrycodes$IOC)
+    rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
+    rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
+  }
+  return(rating)
+}
+
 SetContinentsAndNationalities = function(rating) {
    numberOfPlayers = nrow(rating)
    

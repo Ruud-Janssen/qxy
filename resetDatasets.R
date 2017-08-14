@@ -14,14 +14,13 @@ source("enhance_games_data.R")
 # source("player_Sackmann_atp_connection.R")
 
 
-
 source("addHeadtoHeadAndPrevMatches.R")
 
 source("addRetiredandFatigue.R")
 
 source("addratings.R")
-source("addGlicko.R")
-source("addGlicko2.R")
+#source("addGlicko.R")
+#source("addGlicko2.R")
 
 source("split_train_CV_test.R")
 

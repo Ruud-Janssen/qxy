@@ -132,7 +132,7 @@ match_tournament_games_atp_sackmann2 <- function (atp_matches, Sackmann_matches,
   theDate <- start
   
   #initialize result dataframe
-  matched_results <- data.frame(id_atp = integer(0), id_Sackmann = integer(0))
+  matched_results <- data.frame(id_atp = integer(0), id_Sackmann = integer(0), idWinner = integer(0), idLoser = integer(0))
   
   # small_all_atp_matches2 <- match_tournament_games_atp_sackmann2 (
   #   all_atp_matches[all_atp_matches$StartDate == theDate-1, ], 
@@ -147,11 +147,12 @@ match_tournament_games_atp_sackmann2 <- function (atp_matches, Sackmann_matches,
     if(nrow(atp_matches_day) > 0) {
       one_day_atp_matches <- match_tournament_games_atp_sackmann_one_day2 (
         atp_matches_day, 
-        Sackmann_matches[Sackmann_matches$Date >= theDate - 3 & Sackmann_matches$Date <= theDate + 3, c("id","Winner2","Loser2","Date")]
+        Sackmann_matches[Sackmann_matches$Date >= theDate - 3 & Sackmann_matches$Date <= theDate + 3, c("id","Winner2","Loser2","Date", "idWinner", "idLoser")]
       )
       
       matched_results <- bind_rows(matched_results, one_day_atp_matches)
     }
+    
     theDate <- theDate + 1
   }
   return (matched_results)
@@ -161,7 +162,7 @@ match_tournament_games_atp_sackmann2 <- function (atp_matches, Sackmann_matches,
 
 match_tournament_games_atp_sackmann_one_day2 <- function (atp_matches, Sackmann_matches) {
   #initialize result dataframe
-  matched_results <- data.frame(id_atp = integer(0), id_Sackmann = integer(0))
+  matched_results <- data.frame(id_atp = integer(0), id_Sackmann = integer(0), idWinner = integer(0), idLoser = integer(0))
 
   for (i in 1 : nrow(atp_matches)) {
     #now look into matches to find the matching winner and loser
@@ -178,7 +179,7 @@ match_tournament_games_atp_sackmann_one_day2 <- function (atp_matches, Sackmann_
           if (nrow(sss) > 0) {
             for (z in 1 : nrow(sss)) {
               #print (sss)
-              matched_results <- bind_rows(matched_results, c(id_atp = atp_matches$id_atp[i], id_Sackmann = sss$id[z]))
+              matched_results <- bind_rows(matched_results, c(id_atp = atp_matches$id_atp[i], id_Sackmann = sss$id[z], idWinner = sss$idWinner[z], idLoser = sss$idLoser[z]))
             }
           }
         }

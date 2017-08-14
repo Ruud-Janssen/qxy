@@ -5,9 +5,10 @@ library(stringr)
 
 rm(list = ls())
 source("formulas.r")
+source("constants.r")
 
-allGames <- getAllGamesWithoutRating()
-# not relevant, player <- getPlayers()
+
+allGames <- getDatasets(dir_result_datasets, "all_Sackmann_matches", lvl = "lvl3")
 
 Nall = nrow(allGames)
 

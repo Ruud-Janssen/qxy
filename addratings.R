@@ -10,7 +10,7 @@ cityToCountry <- read.table("Data/datasets/citycountry.csv", header = T, sep = "
 
 # Create Ratings for all players, ratings are adapted after each match
 rating <- InitializeRating(player)
-rating <- SetContinentsAndNationalities(rating)
+rating <- SetContinentsAndCountries(rating)
 
 allGames <- RemoveWalkOvers(allGames)
 allGames <- InitializeRatingVariablesForGames(allGames)
@@ -55,24 +55,24 @@ for (i in 1: Nall) {
 #   allGames$Loser_skillBo3PlusScores[i]                 <-  - Games$Loser_skillBo5PlusScores[i]
     
     #Add Country and Dummy Home
-    allGames$Country[i]        <- as.character(cityToCountry$country[match(allGames$Location[i], 
-                                                                           cityToCountry$city)])
-    allGames$Winner_country[i] <- rating$Country[row_nr_winner]
-    allGames$Loser_country[i]  <- rating$Country[row_nr_loser]
-    allGames$WinnerisHome[i]   <- as.numeric(allGames$Country[i] == allGames$Winner_country[i])
-    allGames$LoserisHome[i]    <- as.numeric(allGames$Country[i] == allGames$Loser_country[i])
+    #allGames$Country[i]        <- as.character(cityToCountry$country[match(allGames$Location[i], 
+    #                                                                       cityToCountry$city)])
+    #allGames$Winner_country[i] <- rating$Country[row_nr_winner]
+    #allGames$Loser_country[i]  <- rating$Country[row_nr_loser]
+    #allGames$WinnerisHome[i]   <- as.numeric(allGames$Country[i] == allGames$Winner_country[i])
+    #allGames$LoserisHome[i]    <- as.numeric(allGames$Country[i] == allGames$Loser_country[i])
     
     #Handed
-    allGames$Winner_hand[i] <- rating$Handed[row_nr_winner]
-    allGames$Loser_hand[i]  <- rating$Handed[row_nr_loser] 
+    #allGames$Winner_hand[i] <- rating$Handed[row_nr_winner]
+    #allGames$Loser_hand[i]  <- rating$Handed[row_nr_loser] 
     
     #Unfortunately some NAs, because of 4 players whose country is not identified
-    if(is.na(allGames$WinnerisHome[i])) {
-      allGames$WinnerisHome[i] = 0
-    }
-    if(is.na(allGames$LoserisHome[i])) {
-      allGames$LoserisHome[i] = 0
-    }
+    #if(is.na(allGames$WinnerisHome[i])) {
+    #  allGames$WinnerisHome[i] = 0
+    #}
+    #if(is.na(allGames$LoserisHome[i])) {
+    #  allGames$LoserisHome[i] = 0
+    #}
     
 
     

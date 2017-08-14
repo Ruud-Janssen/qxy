@@ -64,14 +64,14 @@ setPointOfViewVariables = function(x, row) {
   #x$ratingBo3diff    <- mp * (row$Winner_ratingBo3 - row$Loser_ratingBo3)
   #x$ratingBo5diff    <- mp * (row$Winner_ratingBo5 - row$Loser_ratingBo5)
   
-  x$glickodiff        <- mp * (row$Winner_glicko - row$Loser_glicko)
-  x$glickoClaydiff    <- mp * (row$Winner_glickoClay - row$Loser_glickoClay)
-  x$glickoHarddiff    <- mp * (row$Winner_glickoHard - row$Loser_glickoHard)
-  x$glickoGrassdiff   <- mp * (row$Winner_glickoGrass - row$Loser_glickoGrass)
-  x$glickoNotHarddiff <- mp * (row$Winner_glickoNotHard - row$Loser_glickoNotHard)
+  #x$glickodiff        <- mp * (row$Winner_glicko - row$Loser_glicko)
+  #x$glickoClaydiff    <- mp * (row$Winner_glickoClay - row$Loser_glickoClay)
+  #x$glickoHarddiff    <- mp * (row$Winner_glickoHard - row$Loser_glickoHard)
+  #x$glickoGrassdiff   <- mp * (row$Winner_glickoGrass - row$Loser_glickoGrass)
+  #x$glickoNotHarddiff <- mp * (row$Winner_glickoNotHard - row$Loser_glickoNotHard)
   
-  x$glickoGamesdiff       <- mp * (row$Winner_glickoGames - row$Loser_glickoGames)
-  x$glickoHardGamesdiff   <- mp * (row$Winner_glickoHardGames - row$Loser_glickoHardGames)
+  #x$glickoGamesdiff       <- mp * (row$Winner_glickoGames - row$Loser_glickoGames)
+  #x$glickoHardGamesdiff   <- mp * (row$Winner_glickoHardGames - row$Loser_glickoHardGames)
   
   x$RetiredDiff            <- mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
   x$WalkoverDiff           <- mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)
@@ -79,25 +79,25 @@ setPointOfViewVariables = function(x, row) {
   x$FatigueDiff            <- mp * (row$Winner_fatigue - row$Loser_fatigue)
   x$HeadtoHeaddiff         <- mp * (row$HeadtoHead)
   #x$LastHeadtoHead        <- mp * row$LastHeadtoHead
-  x$HomeDiff               <- mp * (row$WinnerisHome - row$LoserisHome)
-  x$LastGamePercentDiff    <- mp * (row$Winner_LastGamePercentGamesWon - row$Loser_LastGamePercentGamesWon)
+  #x$HomeDiff               <- mp * (row$WinnerisHome - row$LoserisHome)
+  #x$LastGamePercentDiff    <- mp * (row$Winner_LastGamePercentGamesWon - row$Loser_LastGamePercentGamesWon)
   
-  if(is.na(row$Winner_hand)) {
-    row$Winner_hand <- "U"
-  }
+  #if(is.na(row$Winner_hand)) {
+  #  row$Winner_hand <- "U"
+  #}
   
-  if(is.na(row$Loser_hand)) {
-    row$Loser_hand <- "U"
-  }
+  #if(is.na(row$Loser_hand)) {
+  #  row$Loser_hand <- "U"
+  #}
   
-  x$LeftieDiff <- 0
+  #x$LeftieDiff <- 0
   
-  if(row$Winner_hand == "L"){
-    x$LeftieDiff <- x$LeftieDiff + mp
-  } 
-  if (row$Loser_hand == "L") {
-    x$LeftieDiff <- x$LeftieDiff - mp
-  }
+  #if(row$Winner_hand == "L"){
+  #  x$LeftieDiff <- x$LeftieDiff + mp
+  #} 
+  #if (row$Loser_hand == "L") {
+  #  x$LeftieDiff <- x$LeftieDiff - mp
+  #}
   
   #if(row$HeadtoHeadMatches != 0) {
   #  x$HeadtoHeadPercentageWeightedsqN <-  mp * (((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / 
