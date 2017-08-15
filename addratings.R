@@ -15,6 +15,9 @@ rating <- SetContinentsAndCountries(rating)
 allGames <- RemoveWalkOvers(allGames)
 allGames <- InitializeRatingVariablesForGames(allGames)
 
+allGames <- allGames[allGames$atp_match == 1, ]
+allGames <- allGames[order(allGames$Date), ]
+
 Nall <- nrow(allGames)
 
 for (i in 1: Nall) {

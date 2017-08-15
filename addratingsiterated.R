@@ -19,7 +19,7 @@ cityToCountry <- read.table("Data/datasets/citycountry.csv", header = T, sep = "
 # Create Ratings for all players, ratings are adapted after each match
 rating <- InitializeRating(player)
 
-allGames <- RemoveWalkOvers(allGames)
+#allGames <- RemoveWalkOvers(allGames)
 
 Nall <- nrow(allGames)
 

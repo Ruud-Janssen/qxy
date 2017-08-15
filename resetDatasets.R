@@ -19,6 +19,7 @@ source("addHeadtoHeadAndPrevMatches.R")
 source("addRetiredandFatigue.R")
 
 source("addratings.R")
+source("addratingsservereturn.R")
 #source("addGlicko.R")
 #source("addGlicko2.R")
 

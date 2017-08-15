@@ -17,7 +17,6 @@ InitializeRatingVariables = function(rating){
   #Create Speciality Ratings
   rating$Hard_Ratings = rating$Ratings
   rating$Hard_games = rating$games
-  rating$Hard_games = rating$games
   rating$Hard_games_won = rating$games
   
   rating$Grass_Ratings = rating$Ratings
@@ -40,6 +39,24 @@ InitializeRatingVariables = function(rating){
   rating$Bo5_games = rating$games
   rating$Bo5_games_won = rating$games
 
+  return(rating)
+}
+
+InitializeRatingServeReturn = function(rating){
+  numberOfPlayers = nrow(rating)
+  
+  #Add start rating and number of games
+  rating$ServeRatings  <- rep(1550, numberOfPlayers)
+  rating$ReturnRatings <- rep(1450, numberOfPlayers)
+  rating$games         <- rep(0, numberOfPlayers)
+  rating$games_won     <- rep(0, numberOfPlayers)
+  
+  #Create Speciality Ratings
+  rating$Hard_ServeRatings  <- rating$ServeRatings
+  rating$Hard_ReturnRatings <- rating$ReturnRatings
+  rating$Hard_games         <- rating$games
+  rating$Hard_games_won     <- rating$games
+  
   return(rating)
 }
 
