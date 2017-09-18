@@ -1,7 +1,7 @@
 source("formulas.r")
 source("addratingsformulas.r")
 
-GetRatings = function(offset, power, constant, winBonus = 0) {
+GetServeReturnRatings = function(offset, power, constant, winBonus = 0) {
   powerHard    <- power
   constantHard <- constant
   
@@ -49,8 +49,6 @@ GetRatings = function(offset, power, constant, winBonus = 0) {
       allGames$Winner_skillBo3[i]                          <-  - allGames$Winner_skillBo5[i]
       #    allGames$Winner_skillBo5PlusScores[i]                <- getBo5SkillBasedOnRating(rating$Bo5PlusScore[row_nr_winner], rating$Bo3PlusScore[row_nr_winner], rating$Bo5_games[row_nr_winner], rating$Bo3_games[row_nr_winner])
       #    allGames$Winner_skillBo3PlusScores[i]                <-  - Games$Winner_skillBo5PlusScores[i]
-      allGames$Winner_ratingNewHard[i]                    <- rating$NewHard_Ratings[row_nr_winner]
-      
       
       allGames$Loser_rating[i]                             <- rating$Ratings[row_nr_loser]
       allGames$Loser_ratingClay[i]                         <- rating$Clay_Ratings[row_nr_loser]
@@ -63,18 +61,17 @@ GetRatings = function(offset, power, constant, winBonus = 0) {
       allGames$Loser_skillBo3[i]                           <-  - allGames$Loser_skillBo5[i]
       #   allGames$Loser_skillBo5PlusScores[i]                 <- getBo5SkillBasedOnRating(rating$Bo5PlusScore[row_nr_loser], rating$Bo3PlusScore[row_nr_loser], rating$Bo5_games[row_nr_loser], rating$Bo3_games[row_nr_loser])
       #   allGames$Loser_skillBo3PlusScores[i]                 <-  - Games$Loser_skillBo5PlusScores[i]
-      allGames$Loser_ratingNewHard[i]                    <- rating$NewHard_Ratings[row_nr_loser]
       
       
-      # numberOfGames      <- calculateGames(allGames[i, ])
-      # if(numberOfGames <= 10) {
-      #   next()
-      # }
-      # 
-      # FractionNetBreakGamesWinner  <- calculateFractionNetBreakGamesWinnerWon(allGames[i, ])
-      # 
-      ResultWinner  <- 1
-      ResultLoser   <- 0
+      numberOfGames      <- calculateGames(allGames[i, ])
+      if(numberOfGames <= 10) {
+        next()
+      }
+      
+      FractionNetBreakGamesWinner  <- calculateFractionNetBreakGamesWinnerWon(allGames[i, ])
+      
+      ResultWinner  <- FractionNetBreakGamesWinner
+      ResultLoser   <- 1 - ResultWinner
     
       
       
@@ -91,32 +88,6 @@ GetRatings = function(offset, power, constant, winBonus = 0) {
       rating$games[row_nr_loser]                           <- rating$games[row_nr_loser]  + 1
       rating$games_won[row_nr_winner]                      <- rating$games_won[row_nr_winner] + 1
       
-      ##
-      expW                                                 <- getWinExpectationBasedOnRating(rating$NewHard_Ratings[row_nr_winner], rating$NewHard_Ratings[row_nr_loser])
-      expL                                                 <- getWinExpectationBasedOnRating(rating$NewHard_Ratings[row_nr_winner], rating$NewHard_Ratings[row_nr_loser], perspective = "loser")
-      if (allGames$Surface[i] == "Hard") {
-        
-        
-        rating$NewHard_Ratings[row_nr_winner]                        <- calculateNewRating(rating$NewHard_Ratings[row_nr_winner], rating$NewHard_games[row_nr_winner], expW, ResultWinner, offset, power, constant)
-        rating$NewHard_Ratings[row_nr_loser]                         <- calculateNewRating(rating$NewHard_Ratings[row_nr_loser] , rating$NewHard_games[row_nr_loser] , expL, ResultLoser, offset, power, constant)
-        
-        # Update games         
-        rating$NewHard_games[row_nr_winner]                          <- rating$NewHard_games[row_nr_winner] + 1
-        rating$NewHard_games[row_nr_loser]                           <- rating$NewHard_games[row_nr_loser]  + 1
-      } else {
-        otherSurfaceConstant <- power * constant
-        
-        rating$NewHard_Ratings[row_nr_winner]                        <- calculateNewRating(rating$NewHard_Ratings[row_nr_winner], rating$NewHard_games[row_nr_winner], expW, ResultWinner, offset, power, otherSurfaceConstant)
-        rating$NewHard_Ratings[row_nr_loser]                         <- calculateNewRating(rating$NewHard_Ratings[row_nr_loser] , rating$NewHard_games[row_nr_loser] , expL, ResultLoser, offset, power, otherSurfaceConstant)
-        
-        # Update games         
-        rating$NewHard_games[row_nr_winner]                          <- rating$NewHard_games[row_nr_winner] + 1
-        rating$NewHard_games[row_nr_loser]                           <- rating$NewHard_games[row_nr_loser]  + 1
-        
-      }
-        
-        
-        
       # bo3 and bo5 ratings  
       if (allGames$Best.of[i] == 3) {  
         allGames$UncertaintyBestOf[i]                      <- getUncertainty(rating$Bo3_games[row_nr_winner], rating$Bo3_games[row_nr_loser])
@@ -225,6 +196,7 @@ InitializeRatingVariables = function(rating){
   #Create Speciality Ratings
   rating$Hard_Ratings = rating$Ratings
   rating$Hard_games = rating$games
+  rating$Hard_games = rating$games
   rating$Hard_games_won = rating$games
   
   rating$Grass_Ratings = rating$Ratings
@@ -247,9 +219,6 @@ InitializeRatingVariables = function(rating){
   rating$Bo5_games = rating$games
   rating$Bo5_games_won = rating$games
   
-  rating$NewHard_Ratings = rating$Ratings
-  rating$NewHard_games = rating$games
-  
   return(rating)
 }
 
@@ -260,6 +229,44 @@ calculateNewRating <- function(current_rating, total_matches, expectation_based_
   new_rating <- current_rating + Kfactor * (result - expectation_based_on_rating)
 }
 
+
+
+CalculateExpectation <- function(rating, surface, winner, loser) {
+  
+  indexWinner = match(winner, rating$Players)
+  indexLoser = match(loser, rating$Players)
+  
+  ratingWinner = rating$Ratings[indexWinner]
+  ratingLoser = rating$Ratings[indexLoser]
+  
+  weight_rating = 0.71
+  weight_surfacerating = 0.29
+  
+  ##All surfaces if more than 10 games
+  #if(rating$ [indexWinner] > 10 & ratingSurface$games[indexLoser]){
+  
+  if(surface == "Clay" & rating$Clay_games[indexWinner] > 10 & rating$Clay_games[indexLoser]){
+    avgRatingWinner = weight_rating * ratingWinner + weight_surfacerating * rating$Clay_Ratings[indexWinner]
+    avgRatingLoser = weight_rating * ratingLoser + weight_surfacerating * rating$Clay_Ratings[indexLoser]
+    return (Expectation(avgRatingWinner - avgRatingLoser))
+  } else if(surface == "Hard"& rating$Hard_games[indexWinner] > 10 & rating$Hard_games[indexLoser]){
+    avgRatingWinner = weight_rating * ratingWinner + weight_surfacerating * rating$Hard_Ratings[indexWinner]
+    avgRatingLoser = weight_rating * ratingLoser + weight_surfacerating * rating$Hard_Ratings[indexLoser]
+    return (Expectation(avgRatingWinner - avgRatingLoser))
+  } else if(surface == "Grass"& rating$Grass_games[indexWinner] > 10 & rating$Grass_games[indexLoser]){
+    avgRatingWinner = weight_rating * ratingWinner + weight_surfacerating * rating$Grass_Ratings[indexWinner]
+    avgRatingLoser = weight_rating * ratingLoser + weight_surfacerating * rating$Grass_Ratings[indexLoser]
+    return (Expectation(avgRatingWinner - avgRatingLoser))
+  }
+  #} else {
+  #  avgRatingWinner = ratingWinner
+  #  avgRatingLoser = ratingLoser
+  #}
+  
+  
+  
+  return (Expectation(ratingWinner - ratingLoser))
+}
 
 UpdateRating <- function(rating, winner, loser, surface, offset, power, constant) {
   

@@ -9,6 +9,8 @@ library(plotmo)
 library(glmulti)
 library(caret)
 library(ggplot2)
+library(dplyr)
+library(readr)
 
 threshold <- 1e-9
 
@@ -17,8 +19,8 @@ train_modelwithRatings <- read.table("Data/datasets/train_modelWithRatings.csv"
 cv_withRatings         <- read.table("Data/datasets/cvWithRatings.csv"
                             , header = T, sep = ",", quote = "\"", fill = TRUE)
 
-train_modelwithRatings <- train_modelwithRatings[!is.na(train_modelwithRatings$matched), ]
-cv_withRatings <- cv_withRatings[!is.na(cv_withRatings$matched), ]
+train_modelwithRatings <- train_modelwithRatings %>% filter(!is.na(matched)) 
+cv_withRatings <- cv_withRatings %>% filter(!is.na(matched))
 
 Nt <- nrow(train_modelwithRatings)
 #apparantly there is one NA in BestOF, temporarily removal needs to be data cleansed
@@ -34,15 +36,15 @@ xcv  <- regressorvariables(ycv, cv_withRatings)
 
 q <- 27
 
-xt_mHard  <- getXThisSurface(xt_m, "Hard")
-xt_mGrass <- getXThisSurface(xt_m, "Grass")
-xt_mClay  <- getXThisSurface(xt_m, "Clay")
+xtmHard  <- getXThisSurface(xt_m, "Hard")
+xtmGrass <- getXThisSurface(xt_m, "Grass")
+xtmClay  <- getXThisSurface(xt_m, "Clay")
 
 #quantileHard = quantile(xt_mHard$UncertaintyCOSurface, q / 100)
-quantileHard <- quantile(xt_mHard$UncertaintySurface, q / 100)
+quantileHard <- quantile(xtmHard$UncertaintySurface, q / 100)
 
 #xt_mHard = removeUncertainMatches(xt_mHard, quantileHard, "COSurface")
-xt_mHard <- removeUncertainMatches(xt_mHard, quantileHard, "Surface")
+xtmHard <- removeUncertainMatches(xtmHard, quantileHard, "Surface")
 
 #quantile = quantile(xcv$Uncertainty, q / 100)
 
@@ -53,8 +55,11 @@ xcvClay  <- getXThisSurface(xcv, "Clay")
 #xcvHard = removeUncertainMatches(xcvHard, quantileHard, "COSurface")
 xcvHard <- removeUncertainMatches(xcvHard, quantileHard, "Surface")
 
-xtmHardRel <- relevantVariables(xt_mHard)
-xcvHardRel <- relevantVariables(xcvHard)
+#xtmHardRel <- relevantVariables(xtmHard)
+#xcvHardRel <- relevantVariables(xcvHard)
+
+xtmHardRel <- xtmHard
+xcvHardRel <- xcvHard
 
 #Normalization of variance
 sdtrain <- apply(xtmHardRel[, 1:(length(xtmHardRel) - 1)] , 2, sd) 
@@ -65,7 +70,7 @@ xcvHardRel[, 1:(length(xcvHardRel) - 1)] <-
   as.data.frame(scale(xcvHardRel[, 1:(length(xcvHardRel) - 1)], center = FALSE,scale = sdtrain))
 
 #Rating results 
-regLamRating <- glm(y ~ 0 + ratingdiff + ratingHarddiff 
+regLamRating <- glm(y ~ 0 + ratingdiff + ratingHarddiff
                    , data = xtmHardRel, family = binomial)
 
 summary(regLamRating)
@@ -76,6 +81,24 @@ LogLoss( xcvHardRel$y, cvpredRating)
 testProbs <- data.frame(Class = as.factor(xcvHardRel$y),
                         LogReg = 1 - cvpredRating)
 plot(calibration(Class ~ LogReg, data = testProbs), type = "l")
+
+###ServeReturnRating
+regServeReturnRating <- glm(y ~ 0 + ratingservereturndiff + ratingservereturnHarddiff 
+                    , data = xtmHardRel, family = binomial)
+
+summary(regServeReturnRating)
+
+cvpredServeReturnRating <- predict(regServeReturnRating, xcvHardRel, type = "response")
+LogLoss( xcvHardRel$y, cvpredServeReturnRating)
+
+##Improvement
+regMixRating <- glm(y ~ 0 + ratingHarddiff + ratingservereturndiff 
+                            , data = xtmHardRel, family = binomial)
+
+summary(regMixRating)
+
+cvpredMixRating <- predict(regMixRating, xcvHardRel, type = "response")
+LogLoss( xcvHardRel$y, cvpredMixRating)
 
 #Rating Glicko Break Games Result
 regGlicko <- glm(y ~ 0 + glickodiff + glickoHarddiff 
@@ -96,22 +119,23 @@ summary(regLamMin)
 cvpredLamMin <- predict(regLamMin, xcvHardRel, type = "response")
 LogLoss(cvpredLamMin, xcvHardRel$y)
 
-regLamPoints <- glm(y ~ 0 + COPercentPointsThisSurfaceDiff + COPercentPointsDiff : DummyBo5
-                   , data = xtmHardRel, family = binomial)
+#Common opponents
+regLamPoints <- glm(y ~ 0 + COPercentPointsThisSurfaceDiff + COPercentPointsDiff 
+                   , data = xtmHard, family = binomial)
 
 summary(regLamPoints)
 
-cvpredPoints <- predict(regLamPoints, xcvHardRel, type = "response")
-LogLoss(cvpredPoints, xcvHardRel$y)
+cvpredPoints <- predict(regLamPoints, xcvHard, type = "response")
+LogLoss(xcvHardRel$y, cvpredPoints)
 
-#I don't even use a foking dummy for Bo5
-regLamPointsProbFake <- glm(y ~ 0 + ratingdiff + COPercentGamesDiff + COPercentPointsDiff + COPercentCompletenessDiff + COPercentPointsThisSurfaceDiff + COPercentCompletenessThisSurfaceDiff
-                           , data = xtmHardRel, family = binomial)
+##SEEMS LIKE A STRONG COMBI, but this probably means a boosted tree is better
+regLamPointsProb <- glm(y ~ 0 + ratingdiff + COPercentPointsThisSurfaceDiff
+                           , data = xtmHard, family = binomial)
 
-summary(regLamPointsProbFake)
+summary(regLamPointsProb)
 
-cvpredPointsProbFake <- predict(regLamPointsProbFake, xcvHardRel, type = "response")
-LogLoss(cvpredPointsProbFake, xcvHardRel$y)
+cvpredPointsProb <- predict(regLamPointsProb, xcvHard, type = "response")
+LogLoss(xcvHardRel$y, cvpredPointsProb)
 
 grid = 10 ^ seq(0, -10, length = 100)
 #####RIDGE
@@ -265,22 +289,22 @@ LogLoss(cvpredLamMin, xcvHardRel$y)
 #LogLoss(cvpredLamMin3, ycvHard)
 
 #lamda 1se
-regLam1se = glm(xt_mHard$y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff, 
+regLam1se = glm(xtmHard$y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff, 
                 data = xtmHardRel, family = binomial)
 
 cvpredLam1se = predict(regLam1se, xcvHard, type = "response")
 LogLoss(cvpredLam1se, ycvHard)
 
 
-reg = glm(xt_mHard$y ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff + 
+reg = glm(xtmHard$y ~ 0 + ratingClaydiff + ratingHarddiff + ratingGrassdiff + 
             DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
           +FatigueDiff, data = xtmHardRel, family = binomial)
 
-xtmHardRel$y = xt_mHard$y
+xtmHardRel$y = xtmHard$y
 reg = bestglm(Xy = xtmHardRel, family = binomial, IC = "AIC", intercept = FALSE)
 
 #Best GLM with intercept removed for this tho
-reg = glm(xt_mHard$y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff, data = xtmHardRel,
+reg = glm(xtmHard$y ~ 0 + ratingdiff + ratingHarddiff + DummyBo5TimesAvgRatingdiff, data = xtmHardRel,
           family = binomial)
 
 summary(reg)
@@ -290,7 +314,7 @@ LogLoss(cvpred, ycvHard)
 
 
 #Grass
-BestSubsetGrasst_m = relevantVariables(xt_mGrass)
+BestSubsetGrasst_m = relevantVariables(xtmGrass)
 xcvGrassRel = relevantVariables(xcvGrass)
 
 lasso.mod = glmnet(as.matrix(BestSubsetGrasst_m), yt_mGrass, family = "binomial", alpha = 1, lambda = grid
@@ -363,7 +387,7 @@ cvpred = predict(reg, xcvGrass, type = "response")
 LogLoss(cvpred, ycvGrass)
 
 #################CLAY$##############
-BestSubsetClayt_m = relevantVariables(xt_mClay)
+BestSubsetClayt_m = relevantVariables(xtmClay)
 xcvClayRel = relevantVariables(xcvClay)
 
 #interaction

@@ -1,6 +1,5 @@
 rm(list = ls())
 source("hyperparametersfunctions.r")
-source("hyperratingfunctions2.r")
 library(leaps)
 library(bestglm)
 library(tictoc)
@@ -12,22 +11,20 @@ library(doParallel)
 cl <- makeCluster(detectCores() - 3)
 registerDoParallel(cl, cores = (detectCores() - 3))
 
-FinalResultsLogLossHard =  matrix(0,20, 20)
-
 Nt = nrow(read.table("Data/datasets/train_modelWithRatings.csv"
                      , header = T, sep = ",", quote = "\"", fill = TRUE))
 set.seed(42)
 yt_m = as.numeric(runif(Nt, 0, 1) > 0.5)
 
 tic()
-total = foreach (c = 1 : 15, .combine = rbind) %do% {
-  rdIncrease = 2.05 + 0.05 * c
-  return(foreach(rd = 1 : 15, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
+total = foreach (c = 1 : 1, .combine = rbind) %do% {
+  rdIncrease = 2.5
+  return(foreach(rd = 1 : 1, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
     source("hyperparametersfunctions.r")
-    source("hyperglickofunctions.r")
-    initialRatingDeviance = 135 + 5 * rd
+    source("HyperParameters/hyperglickofunctions.r")
+    initialRatingDeviance = 110
     
-    train_modelwithRatings = getGlickos(rdInt = initialRatingDeviance, c = rdIncrease)
+    train_modelwithRatings = getGlickos(initialRatingDeviance, rdIncrease)
 
     xt_m = regressorvariables(yt_m, train_modelwithRatings)
     lastGame2011 = 19319
@@ -51,7 +48,7 @@ total = foreach (c = 1 : 15, .combine = rbind) %do% {
       RegHard = glm(y ~ 0 + glickodiff + glickoHarddiff, data = xTraincurrentHard, family = binomial)
       
       validationPredHard = predict(RegHard, xValidationCurrentHard, type = "response")
-      results$LogLossOutOfSampleHard[q] = LogLoss(validationPredHard, xValidationCurrentHard$y)    
+      results$LogLossOutOfSampleHard[q] = LogLoss(xValidationCurrentHard$y, validationPredHard)    
       }
     return(mean(results$LogLossOutOfSampleHard))
   })

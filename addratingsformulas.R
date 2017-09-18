@@ -1,95 +1,82 @@
 library(stringr)
+library(dplyr)
 
 InitializeRating = function(player){
-  #player = SetContinentsAndNationalities(player)
-  rating <- InitializeRatingVariables(player)
- 
-}
 
-InitializeRatingVariables = function(rating){
-  numberOfPlayers = nrow(rating)
-  
-  #Add start rating and number of games
-  rating$Ratings = rep(1500, numberOfPlayers)
-  rating$games = rep(0, numberOfPlayers)
-  rating$games_won = rep(0, numberOfPlayers)
-  
-  #Create Speciality Ratings
-  rating$Hard_Ratings = rating$Ratings
-  rating$Hard_games = rating$games
-  rating$Hard_games_won = rating$games
-  
-  rating$Grass_Ratings = rating$Ratings
-  rating$Grass_games = rating$games
-  rating$Grass_games_won = rating$games
-  
-  rating$Clay_Ratings = rating$Ratings
-  rating$Clay_games = rating$games
-  rating$Clay_games_won = rating$games
-  
-  rating$NotHard_Ratings = rating$Ratings
-  rating$NotHard_games =  rating$games
-  rating$NotHard_games_won =  rating$games
-  
-  rating$Bo3_Ratings =  rating$Ratings
-  rating$Bo3_games = rating$games
-  rating$Bo3_games_won = rating$games
-  
-  rating$Bo5_Ratings = rating$Ratings
-  rating$Bo5_games = rating$games
-  rating$Bo5_games_won = rating$games
-
-  return(rating)
+  numberOfPlayers <- nrow(player)
+  rating <- player %>% mutate(Ratings = 1500,
+                              games = 0,
+                              games_won = 0,
+                              
+                              Hard_Ratings = Ratings,
+                              Hard_games = 0,
+                              Hard_games_won = 0,
+                              
+                              Grass_Ratings = Ratings,
+                              Grass_games = 0,
+                              Grass_games_won = 0,
+                              
+                              Clay_Ratings = Ratings,
+                              Clay_games = 0,
+                              Clay_games_won = 0,
+                              
+                              NotHard_Ratings = Ratings,
+                              NotHard_games = 0,
+                              NotHard_games_won = 0,
+                              
+                              Bo3_Ratings = Ratings,
+                              Bo3_games = 0,
+                              Bo3_games_won = 0,
+                              
+                              Bo5_Ratings = Ratings,
+                              Bo5_games = 0,
+                              Bo5_games_won = 0)
 }
 
 InitializeRatingServeReturn = function(rating){
   numberOfPlayers = nrow(rating)
-  
-  #Add start rating and number of games
-  rating$ServeRatings  <- rep(1550, numberOfPlayers)
-  rating$ReturnRatings <- rep(1450, numberOfPlayers)
-  rating$games         <- rep(0, numberOfPlayers)
-  rating$games_won     <- rep(0, numberOfPlayers)
-  
-  #Create Speciality Ratings
-  rating$Hard_ServeRatings  <- rating$ServeRatings
-  rating$Hard_ReturnRatings <- rating$ReturnRatings
-  rating$Hard_games         <- rating$games
-  rating$Hard_games_won     <- rating$games
-  
-  return(rating)
+  rating <- rating %>% mutate(ServeRatings = 1550,
+                              ReturnRatings = 1450,
+                              games = 0,
+                              games_won = 0,
+                              
+                              Hard_ServeRatings = ServeRatings,
+                              Hard_ReturnRatings = ReturnRatings,
+                              Hard_games = 0,
+                              Hard_games_won = 0
+                              )
 }
 
 SetContinentsAndCountries <- function(rating) {
-  numberOfPlayers = nrow(rating)
+  numberOfPlayers <- nrow(rating)
   
-  countrycodes = read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
+  countrycodes <- read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
                             quote = "\"", fill = TRUE)
   
-  rating$Country = rep(NA, numberOfPlayers)
-  rating$Continent = rep(NA, numberOfPlayers)
+  rating <- rating %>% mutate(Country = NA,
+                              Continent = NA)
   
   for (i in 1 : length(rating$playername)) {
-    country = rating$Nationality[i]
-    countryCodePlayer = match(country, countrycodes$IOC)
-    rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
-    rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
+    country             <- rating$Nationality[i]
+    countryCodePlayer   <- match(country, countrycodes$IOC)
+    rating$Country[i]   <- as.character(countrycodes$name[countryCodePlayer])
+    rating$Continent[i] <- as.character(countrycodes$Continent[countryCodePlayer])
   }
   return(rating)
 }
 
 SetContinentsAndNationalities = function(rating) {
-   numberOfPlayers = nrow(rating)
+  numberOfPlayers <- nrow(rating)
    
-   atp_players = read.table("Data/datasets/atp_players2.csv", header = T, sep = ",", 
+  atp_players <- read.table("Data/datasets/atp_players2.csv", header = T, sep = ",", 
                             quote = "\"", fill = TRUE)
    
-   atp_players  <- mutate(atp_players , firstName = str_replace_all(trimws(tolower(str_replace_all(firstName, "[^[:alnum:]]", " "))), "  ", " "))
-   atp_players  <- mutate(atp_players , lastName = str_replace_all(trimws(tolower(str_replace_all(lastName, "[^[:alnum:]]", " "))), "  ", " "))
-   
-  
-  rating$Nationality <- rep(NA, numberOfPlayers)
-  rating$Handed      <- rep(NA, numberOfPlayers)
+  atp_players  <- atp_players %>% mutate(
+    firstName = str_replace_all(trimws(tolower(str_replace_all(firstName, "[^[:alnum:]]", " "))), "  ", " "), 
+    lastName = str_replace_all(trimws(tolower(str_replace_all(lastName, "[^[:alnum:]]", " "))), "  ", " "),
+    Nationality = NA,
+    Handed = NA
+  )
    
    for (i in 1 : length(rating$playername)) {
      name <- rating$playername[i]
@@ -100,7 +87,7 @@ SetContinentsAndNationalities = function(rating) {
      
      name <- unlist(strsplit(as.character(name), ' (?=[^ ]+$)', perl = TRUE))
 #     name = unlist(strsplit(as.character(name), ' (?=[^ ]+$)', perl=TRUE))
-     lastName <- name[1]
+     lastName  <- name[1]
      firstName <- name[2]
      
     
@@ -108,34 +95,34 @@ SetContinentsAndNationalities = function(rating) {
     if (sum(!is.na(indexLastName)) > 0) {
        for (playerNumberAtp in indexLastName) {
          if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
-           rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
-           rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
+           rating$Nationality[i] <- as.character(atp_players$Nationality[playerNumberAtp])
+           rating$Handed[i]      <- as.character(atp_players$Handed[playerNumberAtp])
          }
        }
      } else {
        if (lastName == "Nadal Parera"){
-         lastName = "Nadal"
+         lastName <- "Nadal"
        }
        if (lastName == "Hantschek") {
-         lastName = "Hantschk"
+         lastName <- "Hantschk"
        }
        if (lastName =="Roger-Vasselin"){
-         lastName = "Vasselin"
+         lastName <- "Vasselin"
        }
        if (lastName ==" Hajek"){
-         lastName = "Hajek"
+         lastName <- "Hajek"
        }
        
-       lastName = gsub("-", " ", lastName)
-       lastName = gsub("\'", "", lastName)
+       lastName <- gsub("-", " ", lastName)
+       lastName <- gsub("\'", "", lastName)
       
-       indexLastName = grep(lastName, atp_players$lastName ,ignore.case=TRUE)
+       indexLastName <- grep(lastName, atp_players$lastName ,ignore.case=TRUE)
        if (sum(!is.na(indexLastName)) > 0) {
          for (j in 1:length(indexLastName)) {
-           playerNumberAtp = indexLastName[j]
+           playerNumberAtp <- indexLastName[j]
            if (startsWith(as.character(atp_players$firstName[playerNumberAtp]), substring(firstName, 1, 1))) {
-             rating$Nationality[i] = as.character(atp_players$Nationality[playerNumberAtp])
-             rating$Handed[i] = as.character(atp_players$Handed[playerNumberAtp])
+             rating$Nationality[i] <- as.character(atp_players$Nationality[playerNumberAtp])
+             rating$Handed[i]      <- as.character(atp_players$Handed[playerNumberAtp])
            }
          }
        }
@@ -143,17 +130,17 @@ SetContinentsAndNationalities = function(rating) {
    }
    
    #Add country codes and continent, apparantly the files uses IOC
-   countrycodes = read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
+   countrycodes <- read.table("Data/datasets/countrycodes.csv", header = T, sep = ",", 
                              quote = "\"", fill = TRUE)
    
-   rating$Country = rep(NA, numberOfPlayers)
-   rating$Continent = rep(NA, numberOfPlayers)
+   rating$Country   <- NA
+   rating$Continent <- NA
    
    for (i in 1 : length(rating$playername)) {
-     country = rating$Nationality[i]
-     countryCodePlayer = match(country, countrycodes$IOC)
-     rating$Country[i] = as.character(countrycodes$name[countryCodePlayer])
-     rating$Continent[i] = as.character(countrycodes$Continent[countryCodePlayer])
+     country             <- rating$Nationality[i]
+     countryCodePlayer   <- match(country, countrycodes$IOC)
+     rating$Country[i]   <- as.character(countrycodes$name[countryCodePlayer])
+     rating$Continent[i] <- as.character(countrycodes$Continent[countryCodePlayer])
    }
    return(rating)
 }
@@ -161,56 +148,53 @@ SetContinentsAndNationalities = function(rating) {
 #This functions creates empty lists for locations, ratings and uncertainty
 InitializeRatingVariablesForGames = function(dataset){
   
-  rows = nrow(dataset)
+  rows <- nrow(dataset)
   
-   dataset$Country = rep(NA, rows)
-   dataset$Winner_home = rep(NA, rows)
-   dataset$Loser_home = rep(NA, rows)
-   dataset$WinnerisHome = rep(NA, rows)
-   dataset$LoserisHome = rep(NA, rows)
-  
-  # dataset$Winner_games       = rep(NA, rows)
-  # dataset$Loser_games        = rep(NA, rows)
-  dataset$Uncertainty        = rep(NA, rows)
-  dataset$Uncertainty2       = rep(NA, rows)
-  dataset$UncertaintySurface = rep(NA, rows)
-  dataset$UncertaintyBestOf  = rep(NA, rows)
-  
-  dataset$Winner_rating      = rep(NA, rows)
-  dataset$Winner_ratingClay  = rep(NA, rows)
-  dataset$Winner_ratingHard  = rep(NA, rows)
-  dataset$Winner_ratingNotHard  = rep(NA, rows)
-  dataset$Winner_ratingGrass = rep(NA, rows)
-  dataset$Winner_ratingBo3   = rep(NA, rows)
-  dataset$Winner_ratingBo5   = rep(NA, rows)
-  
-  dataset$Loser_rating      = rep(NA, rows)
-  dataset$Loser_ratingClay  = rep(NA, rows)
-  dataset$Loser_ratingHard  = rep(NA, rows)
-  dataset$Loser_ratingNotHard  = rep(NA, rows)
-  dataset$Loser_ratingGrass = rep(NA, rows)
-  dataset$Loser_ratingBo3   = rep(NA, rows)
-  dataset$Loser_ratingBo5   = rep(NA, rows)
-  
-  dataset$Winner_expectationBasedOnRating = rep(NA, rows)
-  dataset$Loser_expectationBasedOnRating  = rep(NA, rows)
-  dataset$Winner_expectationSurfaceBasedOnRating = rep(NA, rows)
-  dataset$Loser_expectationSurfaceBasedOnRating  = rep(NA, rows)
-  dataset$Winner_expectationBestOfBasedOnRating = rep(NA, rows)
-  dataset$Loser_expectationBestOfBasedOnRating  = rep(NA, rows)
-  
-  dataset$Winner_skillBo3  = rep(NA, rows)
-  dataset$Winner_skillBo5  = rep(NA, rows)
-  dataset$Loser_skillBo3  = rep(NA, rows)
-  dataset$Loser_skillBo5  = rep(NA, rows)
-  
-  return(dataset)
+  dataset <- dataset %>% mutate(Country      = NA,
+                                Winner_home  = NA,
+                                Loser_home   = NA,
+                                WinnerisHome = NA,
+                                LoserisHome  = NA,
+                                
+                                Uncertainty        = NA,
+                                Uncertainty2       = NA,
+                                UncertaintySurface = NA,
+                                UncertaintyBestOf  = NA,
+                                
+                                Winner_rating        = NA,
+                                Winner_ratingClay    = NA,
+                                Winner_ratingHard    = NA,
+                                Winner_ratingNotHard = NA,
+                                Winner_ratingGrass   = NA,
+                                Winner_ratingBo3     = NA,
+                                Winner_ratingBo5     = NA,
+                                
+                                Loser_rating        = NA, 
+                                Loser_ratingClay    = NA,
+                                Loser_ratingHard    = NA,
+                                Loser_ratingNotHard = NA,
+                                Loser_ratingGrass   = NA,
+                                Loser_ratingBo3     = NA,
+                                Loser_ratingBo5     = NA,
+                                
+                                Winner_expectationBasedOnRating        = NA,
+                                Loser_expectationBasedOnRating         = NA,
+                                Winner_expectationSurfaceBasedOnRating = NA,
+                                Loser_expectationSurfaceBasedOnRating  = NA,
+                                Winner_expectationBestOfBasedOnRating  = NA,
+                                Loser_expectationBestOfBasedOnRating   = NA,
+                                
+                                Winner_skillBo3 = NA,
+                                Winner_skillBo5 = NA,
+                                Loser_skillBo3  = NA,
+                                Loser_skillBo5  = NA
+                                )
 }
 
 
 
 getWinExpectationBasedOnRating = function(rating_winner, rating_loser, perspective = "winner"){
-  Winner_expectationBasedOnRating = 1 - 1 / (1 + 10 ^ ((rating_winner - rating_loser) / 400))
+  Winner_expectationBasedOnRating <- 1 - 1 / (1 + 10 ^ ((rating_winner - rating_loser) / 400))
   if (perspective == "loser") { 1 - Winner_expectationBasedOnRating } else { Winner_expectationBasedOnRating }
 }
 
@@ -229,25 +213,6 @@ getUncertainty <- function (total_matches_winner, total_matches_loser, type_unce
   return (uncertainty)
 }
 
-# addHomePlayers = function(Games, rating, i, matchDetails){
-#   Games$Country[i]        = matchDetails$Country
-#   Games$Winner_country[i] = matchDetails$Winner_country
-#   Games$Loser_country[i]  = matchDetails$Loser_country
-#   Games$WinnerisHome[i]   = as.numeric(matchDetails$Winner_country == matchDetails$Country)
-#   Games$LoserisHome[i]    = as.numeric(matchDetails$Loser_country == matchDetails$Country)
-#   
-#   if (is.na(Games$WinnerisHome[i])) {
-#     Games$WinnerisHome[i] = 0
-#   }
-#   
-#   if (is.na(Games$LoserisHome[i])) {
-#     Games$LoserisHome[i] = 0
-#   }
-#   return(Games)
-# }
-
-
-
 getBo5vsBo3Skill <- function(total_won_matches_Bo5, total_won_matches_Bo3, total_matches_Bo5, total_matches_Bo3, min_games_required = 10) {
   if (total_matches_Bo5 <= min_games_required | total_matches_Bo3 <= min_games_required) {
     #if no games in bo5 or bo3 the skill will be 0
@@ -255,7 +220,7 @@ getBo5vsBo3Skill <- function(total_won_matches_Bo5, total_won_matches_Bo3, total
   } else {
     perc_won_matches_Bo5 <- total_won_matches_Bo5 / total_matches_Bo5
     perc_won_matches_Bo3 <- total_won_matches_Bo3 / total_matches_Bo3
-    Bo5vsBo3_skill <- perc_won_matches_Bo5 - perc_won_matches_Bo3
+    Bo5vsBo3_skill       <- perc_won_matches_Bo5 - perc_won_matches_Bo3
   }
   return (Bo5vsBo3_skill)
 }
@@ -281,22 +246,19 @@ calculateNewRating <- function(current_rating, total_matches, expectation_based_
 }
 
 K <- function(total_matches) {
-  #Got changed after found out that constant 20.6 is better when you remove a lot of the games
-  #return (32 / (total_matches + 0.1) ^ 0.1)
-  #return (70 / (total_matches + 0.1) ^ 0.25)
-  16.8
+  15
 }
 
 
 calculateFractionNetBreakGamesWinnerWon <- function(row) {
-  wonGames  <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
-  lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
+  wonGames             <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
+  lostGames            <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
   percentWonBreakGames <- 0.5 + (wonGames - lostGames) / (wonGames + lostGames)
 }
 
 calculateFractionGamesWinnerWon <- function(row) {
-  wonGames  <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
-  lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
+  wonGames        <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
+  lostGames       <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
   percentWonGames <- wonGames / (wonGames + lostGames)
 }
 
@@ -304,5 +266,5 @@ calculateFractionGamesWinnerWon <- function(row) {
 calculateGames <- function(row) {
   wonGames  <- sum(as.numeric(c(row$W1, row$W2, row$W3, row$W4, row$W5)), na.rm = TRUE)
   lostGames <- sum(as.numeric(c(row$L1, row$L2, row$L3, row$L4, row$L5)), na.rm = TRUE)
-  Games <- wonGames + lostGames
+  Games     <- wonGames + lostGames
 }

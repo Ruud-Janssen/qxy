@@ -13,12 +13,10 @@ removeUncertainMatches <- function(x, edge, uncertaintyParameter){
 }
 
 getXThisSurface <- function(x, surface){
-  indexSurface <- (x$Surface == surface)
-  x <- x[indexSurface, ]
-  return(x)
+  x <- x %>% filter(Surface == surface)
 }
 
-regressorvariables <- function(y, data) {
+regressorvariables2 <- function(y, data) {
   
   data$y     <- y
   returnData <- adply(data, 1, addRegressorVariableRow)
@@ -32,6 +30,55 @@ regressorvariables <- function(y, data) {
   returnData$y <- y
   
   return(returnData)
+}
+
+regressorvariables <- function(y, data) {
+  
+  data <- data %>% mutate(mp = ifelse(y == 1, 1, -1),
+                          y = y, 
+                          Bo5 = as.numeric(Best.of == 5), 
+                          ratingdiff = mp * (Winner_rating - Loser_rating),
+                          ratingClaydiff = mp * (Winner_ratingClay - Loser_ratingClay),
+                          ratingHarddiff = mp * (Winner_ratingHard - Loser_ratingHard),
+                          ratingGrassdiff = mp * (Winner_ratingGrass - Loser_ratingGrass),
+                          ratingNotHarddiff = mp * (Winner_ratingNotHard - Loser_ratingNotHard),
+                          
+                          ratingservereturndiff = mp * (Winner_serverating + Winner_returnrating -
+                                                          Loser_serverating - Loser_returnrating) / 2, 
+                          ratingservereturnHarddiff = mp * (Winner_serveratingHard + Winner_returnratingHard -
+                                                              Loser_serveratingHard - Loser_returnratingHard) / 2,
+                          
+                          RetiredDiff            = mp * (Winner_retired_last_game - Loser_retired_last_game),
+                          WalkoverDiff           = mp * (Winner_walkover_last_game - Loser_walkover_last_game),
+                          FatigueDiff            = mp * (Winner_fatigue - Loser_fatigue),
+                          HeadtoHeaddiff         = mp * (HeadtoHead),
+                          
+                          COPercentMatchesWonDiff   = mp * (Winner_COPercentMatchesWon -  Loser_COPercentMatchesWon ),
+                          COPercentSetsDiff         = mp * (Winner_COPercentSetsWon - Loser_COPercentSetsWon),
+                          COPercentGamesDiff        = mp * (Winner_COPercentGamesWon - Loser_COPercentGamesWon), 
+                          COPercentPointsDiff       = mp * (Winner_COPercentPointsWon - Loser_COPercentPointsWon),
+                          COPercentCompletenessDiff =
+                            mp * (Winner_COPercentPointsWon * Winner_COPercentGamesWon - 
+                                    Loser_COPercentPointsWon * Loser_COPercentGamesWon),
+                          
+                          COPercentMatchesWonThisSurfaceDiff = 
+                            mp * (Winner_COPercentMatchesThisSurfaceWon -  Loser_COPercentMatchesThisSurfaceWon ),
+                          COPercentSetsThisSurfaceDiff       = 
+                            mp * (Winner_COPercentSetsThisSurfaceWon - Loser_COPercentSetsThisSurfaceWon),
+                          COPercentGamesThisSurfaceDiff      = 
+                            mp * (Winner_COPercentGamesThisSurfaceWon - Loser_COPercentGamesThisSurfaceWon), 
+                          COPercentPointsThisSurfaceDiff     = 
+                            mp * (Winner_COPercentPointsThisSurfaceWon - Loser_COPercentPointsThisSurfaceWon),
+                          COPercentCompletenessThisSurfaceDiff = 
+                            mp * (Winner_COPercentPointsThisSurfaceWon * Winner_COPercentGamesThisSurfaceWon - 
+                                    Loser_COPercentPointsThisSurfaceWon * Loser_COPercentGamesThisSurfaceWon)
+                          )
+  data %>% select(y, Surface, Bo5, ratingdiff, ratingClaydiff, ratingHarddiff, ratingGrassdiff, ratingNotHarddiff, 
+                  ratingservereturndiff, ratingservereturnHarddiff, RetiredDiff, WalkoverDiff, FatigueDiff, 
+                  HeadtoHeaddiff, COPercentMatchesWonDiff, COPercentSetsDiff, COPercentGamesDiff, COPercentPointsDiff, 
+                  COPercentCompletenessDiff, COPercentMatchesWonThisSurfaceDiff, COPercentSetsThisSurfaceDiff, 
+                  COPercentGamesThisSurfaceDiff, COPercentPointsThisSurfaceDiff, COPercentCompletenessThisSurfaceDiff,
+                  Uncertainty, Uncertainty2, UncertaintyBestOf, UncertaintySurface)
 }
 
 addRegressorVariableRow = function(row){
@@ -61,8 +108,11 @@ setPointOfViewVariables = function(x, row) {
   x$ratingHarddiff    <- mp * (row$Winner_ratingHard - row$Loser_ratingHard)
   x$ratingGrassdiff   <- mp * (row$Winner_ratingGrass - row$Loser_ratingGrass)
   x$ratingNotHarddiff <- mp * (row$Winner_ratingNotHard - row$Loser_ratingNotHard)
-  #x$ratingBo3diff    <- mp * (row$Winner_ratingBo3 - row$Loser_ratingBo3)
-  #x$ratingBo5diff    <- mp * (row$Winner_ratingBo5 - row$Loser_ratingBo5)
+  
+  x$ratingservereturndiff <- 0.5 * mp * (row$Winner_serverating + row$Winner_returnrating - 
+                                           row$Loser_serverating - row$Loser_returnrating) 
+  x$ratingservereturnHarddiff <- 0.5 * mp * (row$Winner_serveratingHard + row$Winner_returnratingHard - 
+                                           row$Loser_serveratingHard - row$Loser_returnratingHard) 
   
   #x$glickodiff        <- mp * (row$Winner_glicko - row$Loser_glicko)
   #x$glickoClaydiff    <- mp * (row$Winner_glickoClay - row$Loser_glickoClay)
@@ -82,23 +132,6 @@ setPointOfViewVariables = function(x, row) {
   #x$HomeDiff               <- mp * (row$WinnerisHome - row$LoserisHome)
   #x$LastGamePercentDiff    <- mp * (row$Winner_LastGamePercentGamesWon - row$Loser_LastGamePercentGamesWon)
   
-  #if(is.na(row$Winner_hand)) {
-  #  row$Winner_hand <- "U"
-  #}
-  
-  #if(is.na(row$Loser_hand)) {
-  #  row$Loser_hand <- "U"
-  #}
-  
-  #x$LeftieDiff <- 0
-  
-  #if(row$Winner_hand == "L"){
-  #  x$LeftieDiff <- x$LeftieDiff + mp
-  #} 
-  #if (row$Loser_hand == "L") {
-  #  x$LeftieDiff <- x$LeftieDiff - mp
-  #}
-  
   #if(row$HeadtoHeadMatches != 0) {
   #  x$HeadtoHeadPercentageWeightedsqN <-  mp * (((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / 
   #                                                (row$HeadtoHeadMatches) - 0.5) * row$HeadtoHeadMatches ^ 0.5) 
@@ -109,25 +142,25 @@ setPointOfViewVariables = function(x, row) {
 
   #x$recentGamesDiff <- mp * (row$Winner_recentGames - row$Loser_recentGames)
   
-  #x$COPercentMatchesWonDiff   <- mp * (row$Winner_COPercentMatchesWon -  row$Loser_COPercentMatchesWon )
-  #x$COPercentSetsDiff         <- mp * (row$Winner_COPercentSetsWon - row$Loser_COPercentSetsWon)
-  #x$COPercentGamesDiff        <- mp * (row$Winner_COPercentGamesWon - row$Loser_COPercentGamesWon) 
-  #x$COPercentPointsDiff       <- mp * (row$Winner_COPercentPointsWon - row$Loser_COPercentPointsWon)
-  #x$COPercentCompletenessDiff <-
-  #  mp * (row$Winner_COPercentPointsWon * row$Winner_COPercentGamesWon - 
-  #          row$Loser_COPercentPointsWon * row$Loser_COPercentGamesWon)
+  x$COPercentMatchesWonDiff   <- mp * (row$Winner_COPercentMatchesWon -  row$Loser_COPercentMatchesWon )
+  x$COPercentSetsDiff         <- mp * (row$Winner_COPercentSetsWon - row$Loser_COPercentSetsWon)
+  x$COPercentGamesDiff        <- mp * (row$Winner_COPercentGamesWon - row$Loser_COPercentGamesWon) 
+  x$COPercentPointsDiff       <- mp * (row$Winner_COPercentPointsWon - row$Loser_COPercentPointsWon)
+  x$COPercentCompletenessDiff <-
+    mp * (row$Winner_COPercentPointsWon * row$Winner_COPercentGamesWon - 
+            row$Loser_COPercentPointsWon * row$Loser_COPercentGamesWon)
   
-  #x$COPercentMatchesWonThisSurfaceDiff <- 
-  #  mp * (row$Winner_COPercentMatchesThisSurfaceWon -  row$Loser_COPercentMatchesThisSurfaceWon )
-  #x$COPercentSetsThisSurfaceDiff       <- 
-  #  mp * (row$Winner_COPercentSetsThisSurfaceWon - row$Loser_COPercentSetsThisSurfaceWon)
-  #x$COPercentGamesThisSurfaceDiff      <- 
-  #  mp * (row$Winner_COPercentGamesThisSurfaceWon - row$Loser_COPercentGamesThisSurfaceWon) 
-  #x$COPercentPointsThisSurfaceDiff     <- 
-  #  mp * (row$Winner_COPercentPointsThisSurfaceWon - row$Loser_COPercentPointsThisSurfaceWon)
-  #x$COPercentCompletenessThisSurfaceDiff <- 
-  #  mp * (row$Winner_COPercentPointsThisSurfaceWon * row$Winner_COPercentGamesThisSurfaceWon - 
-  #          row$Loser_COPercentPointsThisSurfaceWon * row$Loser_COPercentGamesThisSurfaceWon)
+  x$COPercentMatchesWonThisSurfaceDiff <- 
+    mp * (row$Winner_COPercentMatchesThisSurfaceWon -  row$Loser_COPercentMatchesThisSurfaceWon )
+  x$COPercentSetsThisSurfaceDiff       <- 
+    mp * (row$Winner_COPercentSetsThisSurfaceWon - row$Loser_COPercentSetsThisSurfaceWon)
+  x$COPercentGamesThisSurfaceDiff      <- 
+    mp * (row$Winner_COPercentGamesThisSurfaceWon - row$Loser_COPercentGamesThisSurfaceWon) 
+  x$COPercentPointsThisSurfaceDiff     <- 
+    mp * (row$Winner_COPercentPointsThisSurfaceWon - row$Loser_COPercentPointsThisSurfaceWon)
+  x$COPercentCompletenessThisSurfaceDiff <- 
+    mp * (row$Winner_COPercentPointsThisSurfaceWon * row$Winner_COPercentGamesThisSurfaceWon - 
+            row$Loser_COPercentPointsThisSurfaceWon * row$Loser_COPercentGamesThisSurfaceWon)
 
   return(x)
 }

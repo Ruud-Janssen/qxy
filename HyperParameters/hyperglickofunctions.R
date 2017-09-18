@@ -2,10 +2,10 @@ source("formulas.R")
 source("addratingsformulas.R")
 library(dplyr)
 
-getGlickos = function(games, rdIntNow, cNow) {
+getGlickos = function(rdInt, c) {
   
-  cHard <- 2.5
-  rdIntHard <- 110
+  cHard <- c
+  rdIntHard <- rdInt
   
   train_rating <- read.table("Data/datasets/train_ratingWithRatings.csv", 
                             header = T, sep = ",", quote = "\"", fill = TRUE)
@@ -41,21 +41,21 @@ getGlickos = function(games, rdIntNow, cNow) {
     if (row_nr_winner > 0 & row_nr_loser > 0) {
       gameDate <- games$Date[i]
       #update RDs before game
-      glicko$rd[row_nr_winner] <- updateRDBeforeGame(glicko$rd[row_nr_winner], glicko$last_game[row_nr_winner], gameDate, rdIntNow, cNow)
-      glicko$rd[row_nr_loser]  <- updateRDBeforeGame(glicko$rd[row_nr_loser], glicko$last_game[row_nr_loser], gameDate, rdIntNow, cNow)
+      glicko$rd[row_nr_winner] <- updateRDBeforeGame(glicko$rd[row_nr_winner], glicko$last_game[row_nr_winner], gameDate, rdInt, c)
+      glicko$rd[row_nr_loser]  <- updateRDBeforeGame(glicko$rd[row_nr_loser], glicko$last_game[row_nr_loser], gameDate, rdInt, c)
       #Update date last game
       glicko$last_game[row_nr_winner] <- gameDate 
       glicko$last_game[row_nr_loser]  <- gameDate
       
       if (games$Best.of[i] == 3) {   
-        glicko$Bo3_rd[row_nr_winner] <- updateRDBeforeGame(glicko$Bo3_rd[row_nr_winner], glicko$Bo3_last_game[row_nr_winner], gameDate, rdIntNow, cNow)
-        glicko$Bo3_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$Bo3_rd[row_nr_loser], glicko$Bo3_last_game[row_nr_loser], gameDate, rdIntNow, cNow)
+        glicko$Bo3_rd[row_nr_winner] <- updateRDBeforeGame(glicko$Bo3_rd[row_nr_winner], glicko$Bo3_last_game[row_nr_winner], gameDate, rdInt, c)
+        glicko$Bo3_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$Bo3_rd[row_nr_loser], glicko$Bo3_last_game[row_nr_loser], gameDate, rdInt, c)
         #Update date last game
         glicko$Bo3_last_game[row_nr_winner] <- gameDate 
         glicko$Bo3_last_game[row_nr_loser]  <- gameDate
       } else {
-        glicko$Bo5_rd[row_nr_winner] <- updateRDBeforeGame(glicko$Bo5_rd[row_nr_winner], glicko$Bo5_last_game[row_nr_winner], gameDate, rdIntNow, cNow)
-        glicko$Bo5_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$Bo5_rd[row_nr_loser], glicko$Bo5_last_game[row_nr_loser], gameDate, rdIntNow, cNow)
+        glicko$Bo5_rd[row_nr_winner] <- updateRDBeforeGame(glicko$Bo5_rd[row_nr_winner], glicko$Bo5_last_game[row_nr_winner], gameDate, rdInt, c)
+        glicko$Bo5_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$Bo5_rd[row_nr_loser], glicko$Bo5_last_game[row_nr_loser], gameDate, rdInt, c)
         #Update date last game
         glicko$Bo5_last_game[row_nr_winner] <- gameDate 
         glicko$Bo5_last_game[row_nr_loser]  <- gameDate
@@ -69,21 +69,21 @@ getGlickos = function(games, rdIntNow, cNow) {
         glicko$Hard_last_game[row_nr_winner] <- gameDate 
         glicko$Hard_last_game[row_nr_loser]  <- gameDate
       } else { # Not Hard
-        glicko$NotHard_rd[row_nr_winner] <- updateRDBeforeGame(glicko$NotHard_rd[row_nr_winner], glicko$NotHard_last_game[row_nr_winner], gameDate, rdIntNow, cNow)
-        glicko$NotHard_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$NotHard_rd[row_nr_loser], glicko$NotHard_last_game[row_nr_loser], gameDate, rdIntNow, cNow)
+        glicko$NotHard_rd[row_nr_winner] <- updateRDBeforeGame(glicko$NotHard_rd[row_nr_winner], glicko$NotHard_last_game[row_nr_winner], gameDate, rdInt, c)
+        glicko$NotHard_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$NotHard_rd[row_nr_loser], glicko$NotHard_last_game[row_nr_loser], gameDate, rdInt, c)
         #Update date last game
         glicko$NotHard_last_game[row_nr_winner] <- gameDate 
         glicko$NotHard_last_game[row_nr_loser]  <- gameDate
       }
       if(games$Surface[i] == "Grass") {
-        glicko$Grass_rd[row_nr_winner] <- updateRDBeforeGame(glicko$Grass_rd[row_nr_winner], glicko$Grass_last_game[row_nr_winner], gameDate, rdIntNow, cNow)
-        glicko$Grass_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$Grass_rd[row_nr_loser], glicko$Grass_last_game[row_nr_loser], gameDate, rdIntNow, cNow)
+        glicko$Grass_rd[row_nr_winner] <- updateRDBeforeGame(glicko$Grass_rd[row_nr_winner], glicko$Grass_last_game[row_nr_winner], gameDate, rdInt, c)
+        glicko$Grass_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$Grass_rd[row_nr_loser], glicko$Grass_last_game[row_nr_loser], gameDate, rdInt, c)
         #Update date last game
         glicko$Grass_last_game[row_nr_winner] <- gameDate 
         glicko$Grass_last_game[row_nr_loser]  <- gameDate
       } else if(games$Surface[i] == "Clay") {
-        glicko$Clay_rd[row_nr_winner] <- updateRDBeforeGame(glicko$Clay_rd[row_nr_winner], glicko$Clay_last_game[row_nr_winner], gameDate, rdIntNow, cNow)
-        glicko$Clay_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$Clay_rd[row_nr_loser], glicko$Clay_last_game[row_nr_loser], gameDate, rdIntNow, cNow)
+        glicko$Clay_rd[row_nr_winner] <- updateRDBeforeGame(glicko$Clay_rd[row_nr_winner], glicko$Clay_last_game[row_nr_winner], gameDate, rdInt, c)
+        glicko$Clay_rd[row_nr_loser]  <- updateRDBeforeGame(glicko$Clay_rd[row_nr_loser], glicko$Clay_last_game[row_nr_loser], gameDate, rdInt, c)
         #Update date last game
         glicko$Clay_last_game[row_nr_winner] <- gameDate 
         glicko$Clay_last_game[row_nr_loser]  <- gameDate
@@ -171,7 +171,7 @@ getGlickos = function(games, rdIntNow, cNow) {
 InitializeGlicko <- function(glicko, rdInt = 350) {
   startRating <- 1500
   startRD     <- rdInt
-  startRDHard <- 110
+  startRDHard <- rdInt
   
   numberOfPlayers <- nrow(glicko)
   

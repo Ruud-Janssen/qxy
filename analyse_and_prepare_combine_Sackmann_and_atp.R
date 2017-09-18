@@ -43,37 +43,8 @@ drop_cols <- c(
 all_atp_matches <-
   all_atp_matches %>% select(-one_of(drop_cols)) 
 
-drop_cols <- c(
-  "WRank",
-  "LRank",
-  "WPts",
-  "LPts",
-  "AvgW",
-  "AvgL"
-)
-
-all_atp_matches <-
-  all_atp_matches %>% select(-one_of(drop_cols)) 
-
-
-
-
-# colnames(all_Sackmann_matches)
-
 # clean up unused columns
 drop_cols <- c(
-  "w_ace",
-  "w_df",
-  "w_1stIn",
-  "w_SvGms",
-  "w_bpSaved",
-  "w_bpFaced",
-  "l_ace",
-  "l_df",
-  "l_1stIn",
-  "l_SvGms",
-  "l_bpSaved",
-  "l_bpFaced",
   "match_num"
 )
   
@@ -84,12 +55,10 @@ all_Sackmann_matches <-
 drop_cols <- c(
   "winner_seed",
   "winner_entry",
-  "winner_rank",
   "winner_rank_points",
   
   "loser_seed",
   "loser_entry",
-  "loser_rank",
   "loser_rank_points"
 )
 
@@ -111,7 +80,6 @@ all_Sackmann_matches <- rename(all_Sackmann_matches,
                                       Winner = winner_name,
                                       Loser = loser_name,
                                       Round = round
-                                      
 )
 
 # distinct(select(all_Sackmann_matches, c("tourney_level", "atp_match")))

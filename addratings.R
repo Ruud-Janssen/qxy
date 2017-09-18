@@ -4,8 +4,8 @@ source("addratingsformulas.r")
 
 startTime <- Sys.time ()
 
-allGames <- getAllGamesWithoutRating()
-player   <- getPlayers()
+allGames      <- getAllGamesWithoutRating()
+player        <- getPlayers()
 cityToCountry <- read.table("Data/datasets/citycountry.csv", header = T, sep = ",", quote = "\"", fill = TRUE)
 
 # Create Ratings for all players, ratings are adapted after each match
@@ -15,8 +15,8 @@ rating <- SetContinentsAndCountries(rating)
 allGames <- RemoveWalkOvers(allGames)
 allGames <- InitializeRatingVariablesForGames(allGames)
 
-allGames <- allGames[allGames$atp_match == 1, ]
-allGames <- allGames[order(allGames$Date), ]
+allGames <- allGames %>% filter(atp_match == 1)
+allGames <- allGames %>% arrange(Date)
 
 Nall <- nrow(allGames)
 
@@ -42,8 +42,6 @@ for (i in 1: Nall) {
     allGames$Winner_ratingBo5[i]                         <- rating$Bo5_Ratings[row_nr_winner]
     allGames$Winner_skillBo5[i]                          <- getBo5vsBo3Skill(rating$Bo5_games_won[row_nr_winner], rating$Bo3_games_won[row_nr_winner], rating$Bo5_games[row_nr_winner], rating$Bo3_games[row_nr_winner])
     allGames$Winner_skillBo3[i]                          <-  - allGames$Winner_skillBo5[i]
-#    allGames$Winner_skillBo5PlusScores[i]                <- getBo5SkillBasedOnRating(rating$Bo5PlusScore[row_nr_winner], rating$Bo3PlusScore[row_nr_winner], rating$Bo5_games[row_nr_winner], rating$Bo3_games[row_nr_winner])
-#    allGames$Winner_skillBo3PlusScores[i]                <-  - Games$Winner_skillBo5PlusScores[i]
                    
     allGames$Loser_rating[i]                             <- rating$Ratings[row_nr_loser]
     allGames$Loser_ratingClay[i]                         <- rating$Clay_Ratings[row_nr_loser]
@@ -54,8 +52,6 @@ for (i in 1: Nall) {
     allGames$Loser_ratingBo5[i]                          <- rating$Bo5_Ratings[row_nr_loser]
     allGames$Loser_skillBo5[i]                           <- getBo5vsBo3Skill(rating$Bo5_games_won[row_nr_loser], rating$Bo3_games_won[row_nr_loser], rating$Bo5_games[row_nr_loser], rating$Bo3_games[row_nr_loser])
     allGames$Loser_skillBo3[i]                           <-  - allGames$Loser_skillBo5[i]
-#   allGames$Loser_skillBo5PlusScores[i]                 <- getBo5SkillBasedOnRating(rating$Bo5PlusScore[row_nr_loser], rating$Bo3PlusScore[row_nr_loser], rating$Bo5_games[row_nr_loser], rating$Bo3_games[row_nr_loser])
-#   allGames$Loser_skillBo3PlusScores[i]                 <-  - Games$Loser_skillBo5PlusScores[i]
     
     #Add Country and Dummy Home
     #allGames$Country[i]        <- as.character(cityToCountry$country[match(allGames$Location[i], 

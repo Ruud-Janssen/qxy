@@ -64,7 +64,7 @@ total = foreach(gb = 1 : 10) %do%{
                       + RetiredDiff + FatigueDiff, data = xTrainCurrentHard, family = binomial)
 
         validationPredHard = predict(RegHard, xValidationCurrentHard, type = "response")
-        resultsHard$LogLossOutOfSample[q] = LogLoss(validationPredHard, xValidationCurrentHard$y)
+        resultsHard$LogLossOutOfSample[q] = LogLoss(xValidationCurrentHard$y, validationPredHard)
       }
       
       return(mean(resultsHard$LogLossOutOfSample))

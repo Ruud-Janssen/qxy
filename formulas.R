@@ -100,70 +100,70 @@ FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatch
 
 getAllGamesWithoutRating = function() {
   train_rating = read.table("Data/datasets/train_rating.csv", header = T, sep = ",", quote = "\"",
-                            colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+                            stringsAsFactors = FALSE, fill = TRUE)
   train_model = read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
-                           colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+                           stringsAsFactors = FALSE, fill = TRUE)
   cv = read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
-                  colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+                  stringsAsFactors = FALSE, fill = TRUE)
   test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
-                    colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
+                    stringsAsFactors = FALSE, fill = TRUE)
   
   allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
   
   #everything is now character, however some columns need to be numeric
-  if ("idWinner" %in% colnames(allGames)) {
-    allGames <- mutate(allGames, 
-                       idWinner = as.numeric(idWinner),
-                       idLoser = as.numeric(idLoser)
-    ) 
-  }
-  
-  if ("Result" %in% colnames(allGames)) {
-    allGames <- mutate(allGames, Result = as.numeric(Result)) 
-  }
-  
-  if ("HeadtoHead" %in% colnames(allGames)) {
-    allGames <- mutate(allGames, 
-                       HeadtoHead = as.numeric(HeadtoHead),
-                       HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
-                       LastHeadtoHead = as.numeric(LastHeadtoHead)
-    ) 
-  }
+  # if ("idWinner" %in% colnames(allGames)) {
+  #   allGames <- mutate(allGames, 
+  #                      idWinner = as.numeric(idWinner),
+  #                      idLoser = as.numeric(idLoser)
+  #   ) 
+  # }
+  # 
+  # if ("Result" %in% colnames(allGames)) {
+  #   allGames <- mutate(allGames, Result = as.numeric(Result)) 
+  # }
+  # 
+  # if ("HeadtoHead" %in% colnames(allGames)) {
+  #   allGames <- mutate(allGames, 
+  #                      HeadtoHead = as.numeric(HeadtoHead),
+  #                      HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
+  #                      LastHeadtoHead = as.numeric(LastHeadtoHead)
+  #   ) 
+  # }
   return(allGames)
 }
 
 
 getAllGamesWithRating = function() {
   train_rating = read.table("Data/datasets/train_ratingWithRatings.csv", header = T, sep = ",", quote = "\"",
-                            colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
+                            stringsAsFactors = TRUE, fill = TRUE)
   train_model = read.table("Data/datasets/train_modelWithRatings.csv", header = T, sep = ",", quote = "\"",
-                           colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
+                           stringsAsFactors = TRUE, fill = TRUE)
   cv = read.table("Data/datasets/cvWithRatings.csv", header = T, sep = ",", quote = "\"", 
-                  colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
+                  stringsAsFactors = TRUE, fill = TRUE)
   test = read.table("Data/datasets/testWithRatings.csv", header = T, sep = ",", quote = "\"",
-                    colClasses = "character", stringsAsFactors = TRUE, fill = TRUE)
+                    stringsAsFactors = TRUE, fill = TRUE)
   
   allGames <- dplyr::bind_rows(train_rating, train_model, cv, test)
   
   #everything is now character, however some columns need to be numeric
-  if ("idWinner" %in% colnames(allGames)) {
-    allGames <- mutate(allGames, 
-                       idWinner = as.numeric(idWinner),
-                       idLoser = as.numeric(idLoser)
-    ) 
-  }
-  
-  if ("Result" %in% colnames(allGames)) {
-    allGames <- mutate(allGames, Result = as.numeric(Result)) 
-  }
-  
-  if ("HeadtoHead" %in% colnames(allGames)) {
-    allGames <- mutate(allGames, 
-                       HeadtoHead = as.numeric(HeadtoHead),
-                       HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
-                       LastHeadtoHead = as.numeric(LastHeadtoHead)
-    ) 
-  }
+  # if ("idWinner" %in% colnames(allGames)) {
+  #   allGames <- mutate(allGames, 
+  #                      idWinner = as.numeric(idWinner),
+  #                      idLoser = as.numeric(idLoser)
+  #   ) 
+  # }
+  # 
+  # if ("Result" %in% colnames(allGames)) {
+  #   allGames <- mutate(allGames, Result = as.numeric(Result)) 
+  # }
+  # 
+  # if ("HeadtoHead" %in% colnames(allGames)) {
+  #   allGames <- mutate(allGames, 
+  #                      HeadtoHead = as.numeric(HeadtoHead),
+  #                      HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
+  #                      LastHeadtoHead = as.numeric(LastHeadtoHead)
+  #   ) 
+  # }
   return(allGames)
 }
 
