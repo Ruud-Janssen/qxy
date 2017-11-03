@@ -258,7 +258,7 @@ InitializeRatingVariables = function(rating){
 calculateNewRating <- function(current_rating, total_matches, expectation_based_on_rating, result, offset, power, constant) {
   Kfactor <- K(total_matches, offset, power, constant)
   plusScoreMultiplier  <- ifelse((result - expectation_based_on_rating) > 0, 1, -1) 
-  plusScoreTransformed <- abs(result - expectation_based_on_rating) ^ power
+  plusScoreTransformed <- tanh(abs(result - expectation_based_on_rating) * 25 - 2.3) + 1
   
   new_rating <- current_rating + Kfactor * plusScoreMultiplier * plusScoreTransformed 
 }

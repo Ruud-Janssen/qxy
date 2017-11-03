@@ -18,7 +18,6 @@ source("addHeadtoHeadAndPrevMatches.R")
 source("addRetiredandFatigue.R")
 source("setPercentSetsGamesPointsWon.R")
 
-
 source("CommonOpponents/addCommonOpponents.R")
 source("addratings.R")
 source("addratingsservereturn.R")

@@ -1,5 +1,6 @@
 library(dplyr)
-
+library(stringr)
+library(rebus)
 
 rm(list = ls())
 
@@ -104,7 +105,9 @@ all_Sackmann_matches <- rename(all_Sackmann_matches,
 all_atp_matches <- all_atp_matches %>%
   mutate(
     Location = replace(Location, Location == "s-Hertogenbosch", "'s-Hertogenbosch"),
-    Date = as.Date(Date, format="%m/%d/%Y")
+    Date = as.Date(Date, format="%m/%d/%Y"),
+    PSW = as.numeric(PSW),
+    PSL = as.numeric(PSL)
   )
                 
 all_Sackmann_matches <- all_Sackmann_matches %>%

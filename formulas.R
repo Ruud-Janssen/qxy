@@ -1,5 +1,6 @@
 library(dplyr)
-
+library(readr)
+library(lubridate)
 
 Expectation <- function(diff) {
   1 - 1 / (1 + 10 ^ (diff / 400))
@@ -57,7 +58,7 @@ FindDaysDiff = function(dates){
   date1 = as.Date(as.character(dates[1]), format = "%m/%d/%Y" )
   date2 = as.Date(as.character(dates[2]), format = "%m/%d/%Y" )
   
-  abs(as.numeric(date2-date1))
+  abs(as.numeric(date2 - date1))
 }
 FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatches) {
   winner_innext_winner = previousMatches + which(winners %in% winner) 
@@ -95,7 +96,35 @@ FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatch
   return(nextGame)
 }
 
-
+getAllGamesWithoutRating2 = function() {
+  train_rating = read_csv("Data/datasets/train_rating.csv", col_names = T, quote = "\"")
+  train_model = read_csv("Data/datasets/train_model.csv", col_names = T, quote = "\"")
+  cv = read_csv("Data/datasets/cv.csv", col_names = T, quote = "\"")
+  test = read_csv("Data/datasets/test.csv", col_names = T, quote = "\"")
+  
+  allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
+  
+  #everything is now character, however some columns need to be numeric
+  # if ("idWinner" %in% colnames(allGames)) {
+  #   allGames <- mutate(allGames, 
+  #                      idWinner = as.numeric(idWinner),
+  #                      idLoser = as.numeric(idLoser)
+  #   ) 
+  # }
+  # 
+  # if ("Result" %in% colnames(allGames)) {
+  #   allGames <- mutate(allGames, Result = as.numeric(Result)) 
+  # }
+  # 
+  # if ("HeadtoHead" %in% colnames(allGames)) {
+  #   allGames <- mutate(allGames, 
+  #                      HeadtoHead = as.numeric(HeadtoHead),
+  #                      HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
+  #                      LastHeadtoHead = as.numeric(LastHeadtoHead)
+  #   ) 
+  # }
+  return(allGames)
+}
 
 
 getAllGamesWithoutRating = function() {
@@ -108,7 +137,7 @@ getAllGamesWithoutRating = function() {
   test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
                     stringsAsFactors = FALSE, fill = TRUE)
   
-  allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
+  allGames = bind_rows(train_rating, train_model, cv, test)
   
   #everything is now character, however some columns need to be numeric
   # if ("idWinner" %in% colnames(allGames)) {
@@ -293,13 +322,52 @@ calculateGames <- function(row) {
   Games <- wonGames + lostGames
 }
 
+saveDatasets2 <- function(df, dir, filename, lvl = "", ext = ".csv") {
+  if(!lvl == "") { lvl <- paste("_", lvl, sep = "") }
+  write.table(file = paste(dir, filename, lvl, ext, sep = ""), df, row.names=FALSE)
+}
 
 saveDatasets <- function(df, dir, filename, lvl = "", ext = ".csv") {
    if(!lvl == "") { lvl <- paste("_", lvl, sep = "") }
    write.csv(file = paste(dir, filename, lvl, ext, sep = ""), df, row.names=FALSE)
 }
 
-getDatasets <- function(dir, filename, ext=".csv", lvl = "", last = F, change_datatype=TRUE) {
+getDatasets2 <- function(dir, filename, ext= ".csv", lvl = "", last = F, change_datatype=TRUE) {
+  if (lvl == "") {
+    dir_filename = paste(dir, filename, ext, sep = "")
+  } else {
+    dir_filename = paste(dir, filename, "_", lvl, ext, sep = "")
+  }
+  
+  df <- read_csv(dir_filename, col_names = T)
+  
+  # if (change_datatype) {
+  #   if ("StartDate" %in% colnames(df)) {
+  #     df <- df %>% mutate(
+  #       StartDate = ymd(StartDate)
+  #     )
+  #   }
+  #   if ("Date" %in% colnames(df)) {
+  #     df <- df %>% mutate(
+  #       Date = ymd(Date)
+  #     )
+  #   }
+  #   if ("Date.x" %in% colnames(df)) {
+  #     df <- df %>% mutate(
+  #       Date.x = ymd(Date.x)
+  #     )
+  #   }
+  #   if ("Date.y" %in% colnames(df)) {
+  #     df <- df %>% mutate(
+  #       Date.y = ymd(Date.y)
+  #     )
+  #   }
+  # }
+  
+  return(df)
+} 
+
+getDatasets <- function(dir, filename, ext=".csv", lvl = "", last = F, change_datatype = TRUE) {
   if (lvl == "") {
     dir_filename = paste(dir, filename, ext, sep = "")
   } 
@@ -313,53 +381,62 @@ getDatasets <- function(dir, filename, ext=".csv", lvl = "", last = F, change_da
   df <- read.table(dir_filename, header = T, sep = ",", quote = "\"",
                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
   
+  
   #everything is now character, however some columns need to be numeric
   if (change_datatype) {
     if ("id" %in% colnames(df)) {
-      df <- mutate(df, id = as.integer(id)) 
+      df <- df %>% mutate(id = as.integer(id)) 
+    }
+    
+    if ("PSW" %in% colnames(df)) {
+      df <- df %>% mutate(PSW = as.numeric(PSW))
+    }
+    
+    if ("PSL" %in% colnames(df)) {
+      df <- df %>% mutate(PSL = as.numeric(PSL))
     }
 
     if ("StartDate" %in% colnames(df)) {
-      df <- mutate(df,
+      df <- df %>% mutate(
                    StartDate = as.Date(StartDate, format="%Y-%m-%d")
       )
     }
     if ("Date" %in% colnames(df)) {
-      df <- mutate(df,
+      df <- df %>% mutate(
                           Date = as.Date(Date, format="%Y-%m-%d")
       )
     }
     if ("Date.x" %in% colnames(df)) {
-      df <- mutate(df,
+      df <- df %>% mutate(
                    Date.x = as.Date(Date.x, format="%Y-%m-%d")
       )
     }
     if ("Date.y" %in% colnames(df)) {
-      df <- mutate(df,
+      df <- df %>% mutate(
                    Date.y = as.Date(Date.y, format="%Y-%m-%d")
       )
     }
     if ("idWinner" %in% colnames(df)) {
-      df <- mutate(df, 
+      df <- df %>% mutate( 
                          idWinner = as.integer(idWinner),
                          idLoser = as.integer(idLoser)
       ) 
     }
     if ("id_atp" %in% colnames(df)) {
-      df <- mutate(df, 
+      df <- df %>% mutate( 
                    id_atp = as.integer(id_atp)
       ) 
     }
     if ("id_Sackmann" %in% colnames(df)) {
-      df <- mutate(df, 
+      df <- df %>% mutate(
                    id_Sackmann = as.integer(id_Sackmann)
       ) 
     }
     if ("Result" %in% colnames(df)) {
-      df <- mutate(df, Result = as.numeric(Result)) 
+      df <- df %>% mutate(Result = as.numeric(Result)) 
     }
     if ("HeadtoHead" %in% colnames(df)) {
-      df <- mutate(df, 
+      df <- df %>% mutate( 
                          HeadtoHead = as.numeric(HeadtoHead),
                          HeadtoHeadMatches = as.numeric(HeadtoHeadMatches),
                          LastHeadtoHead = as.numeric(LastHeadtoHead)

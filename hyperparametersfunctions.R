@@ -1,4 +1,4 @@
-library(plyr)
+library(tidyverse)
 
 removeUncertainMatches <- function(x, edge, uncertaintyParameter){
   if(uncertaintyParameter == "COSurface") {
@@ -16,22 +16,6 @@ getXThisSurface <- function(x, surface){
   x <- x %>% filter(Surface == surface)
 }
 
-regressorvariables2 <- function(y, data) {
-  
-  data$y     <- y
-  returnData <- adply(data, 1, addRegressorVariableRow)
-  
-  returnData$Uncertainty  <- data$Uncertainty
-  returnData$Uncertainty2 <- data$Uncertainty2
-  returnData$Surface      <- data$Surface
-  returnData$Court        <- data$Court
-  returnData$Bo5          <- as.numeric(data$Best.of == 5)
-  
-  returnData$y <- y
-  
-  return(returnData)
-}
-
 regressorvariables <- function(y, data) {
   
   data <- data %>% mutate(mp = ifelse(y == 1, 1, -1),
@@ -47,6 +31,11 @@ regressorvariables <- function(y, data) {
                                                           Loser_serverating - Loser_returnrating) / 2, 
                           ratingservereturnHarddiff = mp * (Winner_serveratingHard + Winner_returnratingHard -
                                                               Loser_serveratingHard - Loser_returnratingHard) / 2,
+                          
+                          bartoservereturndiff = mp * (Winner_servebarto + Winner_returnbarto - 
+                                                         Loser_servebarto - Loser_returnbarto) / 2,
+                          bartoservereturnHarddiff = mp * (Winner_servebartoHard + Winner_returnbartoHard - 
+                                                         Loser_servebartoHard - Loser_returnbartoHard) / 2,
                           
                           RetiredDiff            = mp * (Winner_retired_last_game - Loser_retired_last_game),
                           WalkoverDiff           = mp * (Winner_walkover_last_game - Loser_walkover_last_game),
@@ -73,130 +62,13 @@ regressorvariables <- function(y, data) {
                             mp * (Winner_COPercentPointsThisSurfaceWon * Winner_COPercentGamesThisSurfaceWon - 
                                     Loser_COPercentPointsThisSurfaceWon * Loser_COPercentGamesThisSurfaceWon)
                           )
-  data %>% select(y, Surface, Bo5, ratingdiff, ratingClaydiff, ratingHarddiff, ratingGrassdiff, ratingNotHarddiff, 
-                  ratingservereturndiff, ratingservereturnHarddiff, RetiredDiff, WalkoverDiff, FatigueDiff, 
-                  HeadtoHeaddiff, COPercentMatchesWonDiff, COPercentSetsDiff, COPercentGamesDiff, COPercentPointsDiff, 
-                  COPercentCompletenessDiff, COPercentMatchesWonThisSurfaceDiff, COPercentSetsThisSurfaceDiff, 
+  
+  data %>% select(y, Surface, Bo5, Date, ratingdiff, ratingClaydiff, ratingHarddiff, ratingGrassdiff, ratingNotHarddiff, 
+                  ratingservereturndiff, ratingservereturnHarddiff, bartoservereturndiff, bartoservereturnHarddiff, RetiredDiff, 
+                  WalkoverDiff, FatigueDiff, HeadtoHeaddiff, COPercentMatchesWonDiff, COPercentSetsDiff, COPercentGamesDiff, 
+                  COPercentPointsDiff, COPercentCompletenessDiff, COPercentMatchesWonThisSurfaceDiff, COPercentSetsThisSurfaceDiff, 
                   COPercentGamesThisSurfaceDiff, COPercentPointsThisSurfaceDiff, COPercentCompletenessThisSurfaceDiff,
-                  Uncertainty, Uncertainty2, UncertaintyBestOf, UncertaintySurface)
-}
-
-addRegressorVariableRow = function(row){
-  x <- data.frame(matrix(nrow = 1))
-  x <- setPointOfViewVariables(x, row)
-  
-  #x = setOtherVariables(x, row)
-  return(x)
-} 
-
-
-
-setPointOfViewVariables = function(x, row) {
-  if(row$y == 1){
-    mp <- 1
-  } else {
-    mp <- -1
-  }
-  
-  #x$PSW   = row$y * row$PSW + (1 - row$y) * row$PSL
-  #x$PSL   = row$y * row$PSL + (1 - row$y) * row$PSW
-  #x$B365W = row$y * row$B365W + (1 - row$y) * row$B365L
-  #x$B365L = row$y * row$B365L + (1 - row$y) * row$B365W
-  
-  x$ratingdiff        <- mp * (row$Winner_rating - row$Loser_rating)
-  x$ratingClaydiff    <- mp * (row$Winner_ratingClay - row$Loser_ratingClay)
-  x$ratingHarddiff    <- mp * (row$Winner_ratingHard - row$Loser_ratingHard)
-  x$ratingGrassdiff   <- mp * (row$Winner_ratingGrass - row$Loser_ratingGrass)
-  x$ratingNotHarddiff <- mp * (row$Winner_ratingNotHard - row$Loser_ratingNotHard)
-  
-  x$ratingservereturndiff <- 0.5 * mp * (row$Winner_serverating + row$Winner_returnrating - 
-                                           row$Loser_serverating - row$Loser_returnrating) 
-  x$ratingservereturnHarddiff <- 0.5 * mp * (row$Winner_serveratingHard + row$Winner_returnratingHard - 
-                                           row$Loser_serveratingHard - row$Loser_returnratingHard) 
-  
-  #x$glickodiff        <- mp * (row$Winner_glicko - row$Loser_glicko)
-  #x$glickoClaydiff    <- mp * (row$Winner_glickoClay - row$Loser_glickoClay)
-  #x$glickoHarddiff    <- mp * (row$Winner_glickoHard - row$Loser_glickoHard)
-  #x$glickoGrassdiff   <- mp * (row$Winner_glickoGrass - row$Loser_glickoGrass)
-  #x$glickoNotHarddiff <- mp * (row$Winner_glickoNotHard - row$Loser_glickoNotHard)
-  
-  #x$glickoGamesdiff       <- mp * (row$Winner_glickoGames - row$Loser_glickoGames)
-  #x$glickoHardGamesdiff   <- mp * (row$Winner_glickoHardGames - row$Loser_glickoHardGames)
-  
-  x$RetiredDiff            <- mp * (row$Winner_retired_last_game - row$Loser_retired_last_game)
-  x$WalkoverDiff           <- mp * (row$Winner_walkover_last_game - row$Loser_walkover_last_game)
-  #x$RetiredOrWalkoverDiff <- x$RetiredDiff + x$WalkoverDiff
-  x$FatigueDiff            <- mp * (row$Winner_fatigue - row$Loser_fatigue)
-  x$HeadtoHeaddiff         <- mp * (row$HeadtoHead)
-  #x$LastHeadtoHead        <- mp * row$LastHeadtoHead
-  #x$HomeDiff               <- mp * (row$WinnerisHome - row$LoserisHome)
-  #x$LastGamePercentDiff    <- mp * (row$Winner_LastGamePercentGamesWon - row$Loser_LastGamePercentGamesWon)
-  
-  #if(row$HeadtoHeadMatches != 0) {
-  #  x$HeadtoHeadPercentageWeightedsqN <-  mp * (((row$HeadtoHead + 0.5 * row$HeadtoHeadMatches) / 
-  #                                                (row$HeadtoHeadMatches) - 0.5) * row$HeadtoHeadMatches ^ 0.5) 
-  #} else {
-  #  x$HeadtoHeadPercentageWeightedsqN <- 0  
-  #}
-  
-
-  #x$recentGamesDiff <- mp * (row$Winner_recentGames - row$Loser_recentGames)
-  
-  x$COPercentMatchesWonDiff   <- mp * (row$Winner_COPercentMatchesWon -  row$Loser_COPercentMatchesWon )
-  x$COPercentSetsDiff         <- mp * (row$Winner_COPercentSetsWon - row$Loser_COPercentSetsWon)
-  x$COPercentGamesDiff        <- mp * (row$Winner_COPercentGamesWon - row$Loser_COPercentGamesWon) 
-  x$COPercentPointsDiff       <- mp * (row$Winner_COPercentPointsWon - row$Loser_COPercentPointsWon)
-  x$COPercentCompletenessDiff <-
-    mp * (row$Winner_COPercentPointsWon * row$Winner_COPercentGamesWon - 
-            row$Loser_COPercentPointsWon * row$Loser_COPercentGamesWon)
-  
-  x$COPercentMatchesWonThisSurfaceDiff <- 
-    mp * (row$Winner_COPercentMatchesThisSurfaceWon -  row$Loser_COPercentMatchesThisSurfaceWon )
-  x$COPercentSetsThisSurfaceDiff       <- 
-    mp * (row$Winner_COPercentSetsThisSurfaceWon - row$Loser_COPercentSetsThisSurfaceWon)
-  x$COPercentGamesThisSurfaceDiff      <- 
-    mp * (row$Winner_COPercentGamesThisSurfaceWon - row$Loser_COPercentGamesThisSurfaceWon) 
-  x$COPercentPointsThisSurfaceDiff     <- 
-    mp * (row$Winner_COPercentPointsThisSurfaceWon - row$Loser_COPercentPointsThisSurfaceWon)
-  x$COPercentCompletenessThisSurfaceDiff <- 
-    mp * (row$Winner_COPercentPointsThisSurfaceWon * row$Winner_COPercentGamesThisSurfaceWon - 
-            row$Loser_COPercentPointsThisSurfaceWon * row$Loser_COPercentGamesThisSurfaceWon)
-
-  return(x)
-}
-
-setOtherVariables = function(x, row){
-  x$DummyClay                <- as.numeric(row$Surface == "Clay")
-  x$DummyGrass               <- as.numeric(row$Surface == "Grass")
-  x$DummyHard                <- as.numeric(row$Surface == "Hard")
-  x$ratingdiffCurrentSurface <- x$DummyClay * x$ratingClaydiff + x$DummyGrass * x$ratingGrassdiff + 
-    x$DummyHard * x$ratingHarddiff
-  
-  if(row$Best.of == 5){
-    x$DummyBo5                   <- 1
-    x$DummyBo5TimesRatingdiff    <- x$DummyBo5 * x$ratingdiff
-    x$DummyBo5TimesAvgRatingdiff <- 0.5 * (x$ratingdiff + x$ratingdiffCurrentSurface)
-  } else {
-    x$DummyBo5                   <- 0
-    x$DummyBo5TimesRatingdiff    <- 0
-    x$DummyBo5TimesAvgRatingdiff <- 0
-  }
-  
-  if(x$DummyBo5TimesRatingdiff > 0) {
-    x$DummyBo5TimesRatingdiff_5SameSign      <- x$DummyBo5TimesRatingdiff ^ 0.5
-    x$DummyBo5TimesRatingdiffSquaredSameSign <- x$DummyBo5TimesRatingdiff ^ 2
-    x$DummyBo5TimesRatingdiff1_5SameSign     <- x$DummyBo5TimesRatingdiff ^ 1.5
-    x$DummyBo5TimesRatingdiffthirdSameSign   <- x$DummyBo5TimesRatingdiff ^ 3
-  } else {
-    x$DummyBo5TimesRatingdiffSquaredSameSign <- - (x$DummyBo5TimesRatingdiff) ^ 2
-    x$DummyBo5TimesRatingdiff_5SameSign      <- -(abs(x$DummyBo5TimesRatingdiff)) ^ 0.5
-    x$DummyBo5TimesRatingdiff1_5SameSign     <- -(abs(x$DummyBo5TimesRatingdiff)) ^ 1.5
-    x$DummyBo5TimesRatingdiffthirdSameSign   <- -(abs(x$DummyBo5TimesRatingdiff)) ^ 3
-  }
-  
-  x$FatigueDiffTimesBo5 <- x$DummyBo5 * x$FatigueDiff
-  
-  return(x)
+                  Uncertainty, Uncertainty2, UncertaintySurface)
 }
 
 cvpredictions = function(results, Reg, xcv, ycv, q) {
@@ -272,5 +144,3 @@ cvpredictions = function(results, Reg, xcv, ycv, q) {
   
   return(results)
 }
-
-

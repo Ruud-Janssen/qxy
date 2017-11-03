@@ -34,7 +34,7 @@ InitializeRating = function(player){
 }
 
 InitializeRatingServeReturn = function(rating){
-  numberOfPlayers = nrow(rating)
+  numberOfPlayers <- nrow(rating)
   rating <- rating %>% mutate(ServeRatings = 1550,
                               ReturnRatings = 1450,
                               games = 0,

@@ -38,20 +38,13 @@ for (i in 1: Nall) {
     allGames$Winner_ratingHard[i]                        <- rating$Hard_Ratings[row_nr_winner]
     allGames$Winner_ratingGrass[i]                       <- rating$Grass_Ratings[row_nr_winner]
     allGames$Winner_ratingNotHard[i]                     <- rating$NotHard_Ratings[row_nr_winner]
-    allGames$Winner_ratingBo3[i]                         <- rating$Bo3_Ratings[row_nr_winner]
-    allGames$Winner_ratingBo5[i]                         <- rating$Bo5_Ratings[row_nr_winner]
-    allGames$Winner_skillBo5[i]                          <- getBo5vsBo3Skill(rating$Bo5_games_won[row_nr_winner], rating$Bo3_games_won[row_nr_winner], rating$Bo5_games[row_nr_winner], rating$Bo3_games[row_nr_winner])
-    allGames$Winner_skillBo3[i]                          <-  - allGames$Winner_skillBo5[i]
                    
     allGames$Loser_rating[i]                             <- rating$Ratings[row_nr_loser]
     allGames$Loser_ratingClay[i]                         <- rating$Clay_Ratings[row_nr_loser]
     allGames$Loser_ratingHard[i]                         <- rating$Hard_Ratings[row_nr_loser]
     allGames$Loser_ratingGrass[i]                        <- rating$Grass_Ratings[row_nr_loser]
     allGames$Loser_ratingNotHard[i]                      <- rating$NotHard_Ratings[row_nr_loser]
-    allGames$Loser_ratingBo3[i]                          <- rating$Bo3_Ratings[row_nr_loser]
-    allGames$Loser_ratingBo5[i]                          <- rating$Bo5_Ratings[row_nr_loser]
-    allGames$Loser_skillBo5[i]                           <- getBo5vsBo3Skill(rating$Bo5_games_won[row_nr_loser], rating$Bo3_games_won[row_nr_loser], rating$Bo5_games[row_nr_loser], rating$Bo3_games[row_nr_loser])
-    allGames$Loser_skillBo3[i]                           <-  - allGames$Loser_skillBo5[i]
+
     
     #Add Country and Dummy Home
     #allGames$Country[i]        <- as.character(cityToCountry$country[match(allGames$Location[i], 
@@ -73,17 +66,6 @@ for (i in 1: Nall) {
     #  allGames$LoserisHome[i] = 0
     #}
     
-
-    
-    #UncertaintyParameters: 
-    if (allGames$Best.of[i] == 3) {  
-      allGames$UncertaintyBestOf[i]                      <- getUncertainty(rating$Bo3_games[row_nr_winner], rating$Bo3_games[row_nr_loser])
-      
-      } else {        
-      allGames$UncertaintyBestOf[i]                      <- getUncertainty(rating$Bo5_games[row_nr_winner], rating$Bo5_games[row_nr_loser])
-      
-      }  
-    
     # surface dependent variables
     if (allGames$Surface[i] == "Hard") {
       allGames$UncertaintySurface[i]                     <- getUncertainty(rating$Hard_games[row_nr_winner], rating$Hard_games[row_nr_loser])
@@ -101,8 +83,6 @@ for (i in 1: Nall) {
     #  next()
     #}
     
-    FractionNetBreakGamesWinner  <- calculateFractionNetBreakGamesWinnerWon(allGames[i, ])
-    
     ResultWinner  <- 1
     ResultLoser   <- 1 - ResultWinner
     
@@ -117,33 +97,6 @@ for (i in 1: Nall) {
     rating$games[row_nr_winner]                          <- rating$games[row_nr_winner] + 1
     rating$games[row_nr_loser]                           <- rating$games[row_nr_loser]  + 1
     rating$games_won[row_nr_winner]                      <- rating$games_won[row_nr_winner] + 1
-    
-    # bo3 and bo5 ratings  
-    if (allGames$Best.of[i] == 3) {  
-      allGames$UncertaintyBestOf[i]                      <- getUncertainty(rating$Bo3_games[row_nr_winner], rating$Bo3_games[row_nr_loser])
-        
-      allGames$Winner_expectationBestOfBasedOnRating[i]  <- getWinExpectationBasedOnRating(rating$Bo3_Ratings[row_nr_winner], rating$Bo3_Ratings[row_nr_loser])
-      allGames$Loser_expectationBestOfBasedOnRating[i]   <- getWinExpectationBasedOnRating(rating$Bo3_Ratings[row_nr_winner], rating$Bo3_Ratings[row_nr_loser], perspective = "loser")
-        
-      rating$Bo3_Ratings[row_nr_winner]                  <- calculateNewRating(rating$Bo3_Ratings[row_nr_winner], rating$Bo3_games[row_nr_winner], allGames$Winner_expectationBestOfBasedOnRating[i], 1)
-      rating$Bo3_Ratings[row_nr_loser]                   <- calculateNewRating(rating$Bo3_Ratings[row_nr_loser] , rating$Bo3_games[row_nr_loser] , allGames$Loser_expectationBestOfBasedOnRating[i] , 0)
-      
-      rating$Bo3_games[row_nr_winner]                    <- rating$Bo3_games[row_nr_winner] + 1
-      rating$Bo3_games[row_nr_loser]                     <- rating$Bo3_games[row_nr_loser]  + 1
-      rating$Bo3_games_won[row_nr_winner]                <- rating$Bo3_games_won[row_nr_winner] + 1
-    } else {        
-      allGames$UncertaintyBestOf[i]                      <- getUncertainty(rating$Bo5_games[row_nr_winner], rating$Bo5_games[row_nr_loser])
-        
-      allGames$Winner_expectationBestOfBasedOnRating[i]  <- getWinExpectationBasedOnRating(rating$Bo5_Ratings[row_nr_winner], rating$Bo5_Ratings[row_nr_loser])
-      allGames$Loser_expectationBestOfBasedOnRating[i]   <- getWinExpectationBasedOnRating(rating$Bo5_Ratings[row_nr_winner], rating$Bo5_Ratings[row_nr_loser], perspective = "loser")
-        
-      rating$Bo5_Ratings[row_nr_winner]                  <- calculateNewRating(rating$Bo5_Ratings[row_nr_winner], rating$Bo5_games[row_nr_winner], allGames$Winner_expectationBestOfBasedOnRating[i], 1)
-      rating$Bo5_Ratings[row_nr_loser]                   <- calculateNewRating(rating$Bo5_Ratings[row_nr_loser] , rating$Bo5_games[row_nr_loser] , allGames$Loser_expectationBestOfBasedOnRating[i] , 0)
-        
-      rating$Bo5_games[row_nr_winner]                    <- rating$Bo5_games[row_nr_winner] + 1
-      rating$Bo5_games[row_nr_loser]                     <- rating$Bo5_games[row_nr_loser]  + 1
-      rating$Bo5_games_won[row_nr_winner]                <- rating$Bo5_games_won[row_nr_winner] + 1
-    }  
 
     # surface dependent variables
     if (allGames$Surface[i] == "Hard") {
