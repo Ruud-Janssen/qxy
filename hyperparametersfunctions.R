@@ -32,11 +32,11 @@ regressorvariables <- function(y, data) {
                           ratingservereturnHarddiff = mp * (Winner_serveratingHard + Winner_returnratingHard -
                                                               Loser_serveratingHard - Loser_returnratingHard) / 2,
                           
-                          bartoservereturndiff = mp * (Winner_servebarto + Winner_returnbarto - 
-                                                         Loser_servebarto - Loser_returnbarto) / 2,
-                          bartoservereturnHarddiff = mp * (Winner_servebartoHard + Winner_returnbartoHard - 
-                                                         Loser_servebartoHard - Loser_returnbartoHard) / 2,
-                          
+                          bartoservereturndiff = mp * (Winner_servebarto + Winner_returnbarto -
+                                                        Loser_servebarto - Loser_returnbarto) / 2,
+                          bartoservereturnHarddiff = mp * (Winner_servebartoHard + Winner_returnbartoHard -
+                                                        Loser_servebartoHard - Loser_returnbartoHard) / 2,
+
                           RetiredDiff            = mp * (Winner_retired_last_game - Loser_retired_last_game),
                           WalkoverDiff           = mp * (Winner_walkover_last_game - Loser_walkover_last_game),
                           FatigueDiff            = mp * (Winner_fatigue - Loser_fatigue),

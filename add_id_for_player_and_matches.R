@@ -19,7 +19,6 @@
 # 
 # The output files will be saved
 
-library(plyr)
 library(dplyr)
 library(stringr)
 
@@ -214,8 +213,8 @@ s1 <- set1 %>% inner_join(all_atp_matches_matched, by = c("id_Sackmann" = "id_Sa
   inner_join(all_atp_matches, by = c("id_atp" = "id_atp"))
 s1$matched <- 1
 
-all_Sackmann_matches_wOdds <- all_Sackmann_matches%>% left_join(s1[, c("id_Sackmann", "PSW", "PSL", "Comment", 
-                                                                       "matched")], by = c("id" = "id_Sackmann"))
+all_Sackmann_matches_wOdds <- all_Sackmann_matches %>% left_join(s1 %>% select(id_Sackmann, PSW, PSL, Comment, matched), 
+                                                                by = c("id" = "id_Sackmann"))
 
 
 # Old code to analyse the list result
@@ -277,7 +276,7 @@ all_Sackmann_matches_wOdds <- all_Sackmann_matches%>% left_join(s1[, c("id_Sackm
 
 # Not everything is matched, but lets first check whether the found games are indeed the same, based on the sets
 ALL_MATCHES_correct <- ALL_MATCHES %>%
-  filter((W1.x == W1.y & L1.x == L1.y & W2.x == W2.y & L2.x == L2.y & W3.x == W3.y & L3.x == L3.y & W4.x == W4.y & L4.x == L4.y & W5.x == W5.y & L5.x == L5.y))
+  filter(W1.x == W1.y & L1.x == L1.y & W2.x == W2.y & L2.x == L2.y & W3.x == W3.y & L3.x == L3.y & W4.x == W4.y & L4.x == L4.y & W5.x == W5.y & L5.x == L5.y)
 
 # old code
 # m0 <- 0
@@ -302,14 +301,14 @@ ALL_MATCHES_correct <- ALL_MATCHES %>%
 # colnames(ALL_MATCHES)
 
 # now we match de playernames based on the found matches between these sets
-player_matches_winner <- ALL_MATCHES[ , c("Winner.x", "Winner2.x", "Winner.y", "idWinner.x")] 
+player_matches_winner        <- ALL_MATCHES %>% select(Winner.x, Winner2.x, Winner.y, idWinner.x) 
 names(player_matches_winner) <- c("playername", "playername2", "Sackmann_playername", "Sackmann_id")
 
-player_matches_loser <- ALL_MATCHES[ , c("Loser.x", "Loser2.x", "Loser.y", "idLoser.x")] 
-names(player_matches_loser) <- c("playername", "playername2", "Sackmann_playername", "Sackmann_id")
+player_matches_loser         <- ALL_MATCHES %>% select(Loser.x, Loser2.x, Loser.y, idLoser.x)
+names(player_matches_loser)  <- c("playername", "playername2", "Sackmann_playername", "Sackmann_id")
 
-player_matches <- distinct(rbind(player_matches_winner, player_matches_loser))
-player_matches <- arrange(player_matches, playername)
+player_matches               <- distinct(rbind(player_matches_winner, player_matches_loser))
+player_matches               <- player_matches %>% arrange(playername)
 
 # old code
 # all_Sackmann_players_and_matches <- allMatches[ , c("Winner", "idWinner", "Loser", "idLoser", "id")]
@@ -337,9 +336,9 @@ player_matches <- arrange(player_matches, playername)
 # remove some columns before saving (lists cannot be saved)
 # colnames(all_atp_matches)
 all_atp_matches <- all_atp_matches %>%
-  select(c(-playernameSplit.x, -playernameSplit.y)) %>%
-  select(c(-id.x, -id.y)) %>%
-  select(c(-Winner_player_matched, -Loser_player_matched))
+  select(-playernameSplit.x, -playernameSplit.y) %>%
+  select(-id.x, -id.y) %>%
+  select(-Winner_player_matched, -Loser_player_matched)
 
 ALL_MATCHES <- ALL_MATCHES %>%
   rename(
@@ -352,15 +351,13 @@ ALL_MATCHES <- ALL_MATCHES %>%
 
 # colnames(ALL_MATCHES)
 ALL_MATCHES <- ALL_MATCHES %>%
-  select(c(-playernameSplit.x, -playernameSplit.y)) %>%
-  select(c(-id.x, -id.y)) %>%
-  select(c(-Winner_player_matched, -Loser_player_matched)) %>%
-  select(c(-idWinner.y, -idLoser.y)) %>%
+  select(-playernameSplit.x, -playernameSplit.y) %>%
+  select(-id.x, -id.y) %>%
+  select(-Winner_player_matched, -Loser_player_matched) %>%
+  select(-idWinner.y, -idLoser.y) %>%
   select(-Date.x, -Best.of.y, -Surface.y)
 
 ### Matching the odds to Sackmann games when there is only one match
-
-
 
 saveDatasets(ALL_MATCHES, dir_result_datasets, "all_atp_matches", lvl = "lvl3")
 saveDatasets(all_Sackmann_matches_wOdds, dir_result_datasets, "all_Sackmann_matches", lvl = "lvl3")
