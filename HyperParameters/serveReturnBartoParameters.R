@@ -1,5 +1,6 @@
 rm(list = ls())
 source("hyperparametersfunctions.r")
+source("HyperParameters/servereturnbartofunctions.r")
 library(leaps)
 library(bestglm)
 library(tictoc)
@@ -18,7 +19,8 @@ set.seed(42)
 yt_m <- as.numeric(runif(Nt, 0, 1) > 0.5)
 
 tic()
-variablesStepA = seq(14, 50, 3)
+gamesWithApproximateScores <- setEstimatedScores()
+variablesStepA = seq(20, 40, 2)
 totalSteps = length(variablesStepA)
 total <- foreach (Bf = variablesStepA, .combine = rbind, .packages = c("leaps","bestglm", "plyr")) %do% {
   Bp     <- 1 / 400
@@ -30,13 +32,13 @@ total <- foreach (Bf = variablesStepA, .combine = rbind, .packages = c("leaps","
   message("at")
   message(Sys.time())
   
-  return(foreach(s = seq(14.5, 20.2, 0.3), .packages = c("leaps","bestglm", "lubridate"), .combine = rbind) %dopar% {
+  return(foreach(s = seq(16.5, 18.3, 0.2), .packages = c("leaps","bestglm", "lubridate"), .combine = rbind) %dopar% {
     source("hyperparametersfunctions.r")
     source("HyperParameters/servereturnbartofunctions.r")
     s    <- s
     ratingGainForWin <- 0
   
-    train_model <- GetServeReturnBarto(Bp, Bf, s, ratingGainForWin)
+    train_model <- GetServeReturnBarto(gamesWithApproximateScores, Bp, Bf, s, ratingGainForWin)
     xTrain      <- regressorvariables(yt_m, train_model)
     xTrain$Date <- ymd(xTrain$Date)
 
