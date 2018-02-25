@@ -14,24 +14,22 @@ calculatePercentPointsWonWinner <- function(row) {
 }
 
 allGames <- getAllGamesWithoutRating()
-Nall <- nrow(allGames)
-
-allGames$Winner_percentsetswon   <- NA
-allGames$Winner_percentgameswon  <- NA
-allGames$Winner_percentpointswon <- NA
+allGames <- allGames %>% mutate(Winner_percentsetswon   = NA,
+                                Winner_percentgameswon  = NA, 
+                                Winner_percentpointswon = NA)
 
 for(i in 1 : nrow(allGames)) {
-  if(calculateGames(allGames[i, ]) <= 10) {
+  if(calculateGames(allGames %>% slice(i)) <= 10) {
     next()
   }
   
   allGames$Winner_percentsetswon[i]  <- allGames$W1set[i] / (allGames$W1set[i] + allGames$L1set[i])
-  allGames$Winner_percentgameswon[i] <- calculatePercentGamesWonWinner(allGames[i, ])
+  allGames$Winner_percentgameswon[i] <- calculatePercentGamesWonWinner(allGames %>% slice(i))
   
   if(is.na(allGames$w_svpt[i]) | is.na(allGames$l_svpt[i])) {
     next()
   }
-  allGames$Winner_percentpointswon[i] <- calculatePercentPointsWonWinner(allGames[i, ])
+  allGames$Winner_percentpointswon[i] <- calculatePercentPointsWonWinner(allGames %>% slice(i))
 }
 
 saveDatasetsWithoutRating(allGames)

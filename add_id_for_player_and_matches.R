@@ -213,7 +213,7 @@ s1 <- set1 %>% inner_join(all_atp_matches_matched, by = c("id_Sackmann" = "id_Sa
   inner_join(all_atp_matches, by = c("id_atp" = "id_atp"))
 s1$matched <- 1
 
-all_Sackmann_matches_wOdds <- all_Sackmann_matches %>% left_join(s1 %>% select(id_Sackmann, PSW, PSL, Comment, matched), 
+all_Sackmann_matches_wOdds <- all_Sackmann_matches %>% left_join(s1 %>% select(id_Sackmann, PSW, PSL, Comment, matched, Location), 
                                                                 by = c("id" = "id_Sackmann"))
 
 

@@ -1,25 +1,16 @@
-# Enhance data all ATP Games
+# Enhance data of the Sackmann dataset
 # - add country
-
-# Enhance data all Challenger Games (convert to format of ATP Games)
-# - convert sets field to set standings
-# - rename fields
 
 rm(list = ls())
 
 source("formulas.R")
 source("constants.R")
 
-all_matches <- getDatasets(dir_result_datasets, "all_matches", lvl = "lvl1")
+all_Sackmann_matches <- getDatasets(dir_result_datasets, "all_Sackmann_matches", lvl = "lvl3")
 
 citycountry = read.table("Data/datasets/citycountry.csv",  header = T, sep = ",", quote = "\"",
                          colClasses = "character", stringsAsFactors = FALSE, fill = TRUE)
 
-all_matches$Country = citycountry$country[match(all_matches$Location, citycountry$city)]
+all_Sackmann_matches$Country = citycountry$country[match(all_Sackmann_matches$Location, citycountry$city)]
 
-
-
-
-
-
-saveDatasets(all_matches, dir_result_datasets, "all_matches", lvl = "lvl2")
+saveDatasets(all_Sackmann_matches, dir_result_datasets, "all_Sackmann_matches", lvl = "lvl4")

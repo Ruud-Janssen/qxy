@@ -1,6 +1,7 @@
 library(dplyr)
 library(readr)
 library(lubridate)
+source("constants.r")
 
 Expectation <- function(diff) {
   1 - 1 / (1 + 10 ^ (diff / 400))
@@ -99,10 +100,10 @@ FindnextGameSamePlayers = function(winner, loser, winners, losers, previousMatch
 getAllGamesWithoutRating2 = function() {
   train_rating = read_csv("Data/datasets/train_rating.csv", col_names = T, quote = "\"")
   train_model = read_csv("Data/datasets/train_model.csv", col_names = T, quote = "\"")
-  cv = read_csv("Data/datasets/cv.csv", col_names = T, quote = "\"")
+  val = read_csv("Data/datasets/val.csv", col_names = T, quote = "\"")
   test = read_csv("Data/datasets/test.csv", col_names = T, quote = "\"")
   
-  allGames = dplyr::bind_rows(train_rating, train_model, cv, test)
+  allGames = dplyr::bind_rows(train_rating, train_model, val, test)
   
   #everything is now character, however some columns need to be numeric
   # if ("idWinner" %in% colnames(allGames)) {
@@ -132,12 +133,12 @@ getAllGamesWithoutRating = function() {
                             stringsAsFactors = FALSE, fill = TRUE)
   train_model = read.table("Data/datasets/train_model.csv", header = T, sep = ",", quote = "\"",
                            stringsAsFactors = FALSE, fill = TRUE)
-  cv = read.table("Data/datasets/cv.csv", header = T, sep = ",", quote = "\"", 
+  val = read.table("Data/datasets/val.csv", header = T, sep = ",", quote = "\"", 
                   stringsAsFactors = FALSE, fill = TRUE)
   test = read.table("Data/datasets/test.csv", header = T, sep = ",", quote = "\"",
                     stringsAsFactors = FALSE, fill = TRUE)
   
-  allGames = bind_rows(train_rating, train_model, cv, test)
+  allGames = bind_rows(train_rating, train_model, val, test)
   
   #everything is now character, however some columns need to be numeric
   # if ("idWinner" %in% colnames(allGames)) {
@@ -167,12 +168,12 @@ getAllGamesWithRating = function() {
                             stringsAsFactors = TRUE, fill = TRUE)
   train_model = read.table("Data/datasets/train_modelWithRatings.csv", header = T, sep = ",", quote = "\"",
                            stringsAsFactors = TRUE, fill = TRUE)
-  cv = read.table("Data/datasets/cvWithRatings.csv", header = T, sep = ",", quote = "\"", 
+  val = read.table("Data/datasets/valWithRatings.csv", header = T, sep = ",", quote = "\"", 
                   stringsAsFactors = TRUE, fill = TRUE)
   test = read.table("Data/datasets/testWithRatings.csv", header = T, sep = ",", quote = "\"",
                     stringsAsFactors = TRUE, fill = TRUE)
   
-  allGames <- dplyr::bind_rows(train_rating, train_model, cv, test)
+  allGames <- dplyr::bind_rows(train_rating, train_model, val, test)
   
   #everything is now character, however some columns need to be numeric
   # if ("idWinner" %in% colnames(allGames)) {
@@ -272,18 +273,16 @@ convert_ATP_player_ID <- function (ID) {
 saveDatasetsWithoutRating = function(allGames){
   df <- "%Y-%m-%d"
   allGames$Date <- as.Date(allGames$Date, df)
-  train_rating <- allGames[allGames$Date <= as.Date("2004-12-31", df), ]
-  train_model  <- allGames[allGames$Date > as.Date("2004-12-31", df) & 
-                            allGames$Date <= as.Date("2012-12-31", df), ]
-  cv           <- allGames[allGames$Date > as.Date("2012-12-31", df) & 
-                   allGames$Date <= as.Date("2014-12-31", df), ]
-  test         <- allGames[allGames$Date > as.Date("2014-12-31", df) & 
-                     allGames$Date <= as.Date("2016-12-31", df), ]
   
-  write.csv(file = "Data/datasets/train_rating.csv", train_rating, row.names=FALSE)
-  write.csv(file = "Data/datasets/train_model.csv", train_model, row.names=FALSE)
-  write.csv(file = "Data/datasets/cv.csv", cv, row.names=FALSE)
-  write.csv(file = "Data/datasets/test.csv", test, row.names=FALSE)
+  train_rating <- allGames %>% filter(Date <= fdTrain_Rating)   
+  train_model  <- allGames %>% filter(Date >  fdTrain_Rating, Date < fdTrain_Model)   
+  val          <- allGames %>% filter(Date >  fdTrain_Model ,  Date < fdVal) 
+  test         <- allGames %>% filter(Date >  fdVal         , Date < fdTest)
+  
+  write.csv(file = "Data/datasets/train_rating.csv", train_rating, row.names = FALSE)
+  write.csv(file = "Data/datasets/train_model.csv", train_model, row.names = FALSE)
+  write.csv(file = "Data/datasets/val.csv", val, row.names = FALSE)
+  write.csv(file = "Data/datasets/test.csv", test, row.names = FALSE)
 }
 
 
@@ -292,17 +291,15 @@ saveDatasetsWithRating = function(allGames, rating = NULL){
   
   df <- "%Y-%m-%d"
   allGames$Date <- as.Date(allGames$Date, df)
-  train_rating <- allGames[allGames$Date <= as.Date("2004-12-31", df), ]
-  train_model  <- allGames[allGames$Date > as.Date("2004-12-31", df) & 
-                             allGames$Date <= as.Date("2012-12-31", df), ]
-  cv           <- allGames[allGames$Date > as.Date("2012-12-31", df) & 
-                             allGames$Date <= as.Date("2014-12-31", df), ]
-  test         <- allGames[allGames$Date > as.Date("2014-12-31", df) & 
-                             allGames$Date <= as.Date("2016-12-31", df), ]
+  
+  train_rating <- allGames %>% filter(Date <= fdTrain_Rating)   
+  train_model  <- allGames %>% filter(Date >  fdTrain_Rating, Data < fdTrain_Model)   
+  val          <- allGames %>% filter(Date >  fdTrain_Model,  Data < fdVal) 
+  test         <- allGames %>% filter(Date >  fdVal, Data < fdTest)
   
   write.csv(file = "Data/datasets/train_ratingWithRatings.csv", train_rating, row.names=FALSE)
   write.csv(file = "Data/datasets/train_modelWithRatings.csv", train_model, row.names=FALSE)
-  write.csv(file = "Data/datasets/cvWithRatings.csv", cv, row.names=FALSE)
+  write.csv(file = "Data/datasets/valWithRatings.csv", val, row.names=FALSE)
   write.csv(file = "Data/datasets/testWithRatings.csv", test, row.names=FALSE)
   
   if(!is.null(rating)) {

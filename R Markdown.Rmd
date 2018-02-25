@@ -1,0 +1,231 @@
+---
+title: "Thesis Tennis Prediction"
+author: "Bart von Meijenfeldt"
+date: "September 30, 2017"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Barto
+
+$$ 
+\begin{aligned}
+W \sim BIN(n, p_{win}) \approx N(np_{win}, \sqrt{ np_{win}q_{win})}                                             \\
+p_{win} = \frac{1}{1 + e ^{((P_2 - P_1) \cdot \beta_p )}}                                                       \\
+P_i \sim N(S_i, \beta_f)                                                                                          \\  
+S_i \sim N(\mu_i, \sigma)                                                                                       \\
+P_2 - P_1 \sim N(S_2 - S_1, \sqrt{2 \beta_f ^ 2})                                                                 \\
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+Pr(P_2 - P_1 | S_2 - S_1) &= \frac{1}{\sqrt{2 \beta _ f ^ 2}} \phi \left(\frac{(P_2 - P_1) - (S_2 - S_1)}{\sqrt{2 \beta _ f ^ 2}}\right) \\
+&= \frac{1}{\beta _ f \sqrt{2}} \frac{1}{\sqrt{2 \pi}}  e ^ {-\frac{1}{2} \left(\frac{(P_2 - P_1) - (S_2 - S_1)}{\sqrt{2 \beta_f ^ 2}} \right) ^ 2} \\
+&= \frac{1}{2 \beta _ f \sqrt{\pi}} e ^ {-\frac{1}{2} \left(\frac{(P_2 - P_1) - (S_2 - S_1)}{\sqrt{2 \beta_f ^ 2}} \right) ^ 2} \\
+\end{aligned}
+$$
+$$
+\begin{aligned}
+Pr(W | P_2 - P_1) &= b(n,\ \frac{1}{1 + e ^ {((P_2 - P_1)  \beta_p)}}) \\ 
+&= {{n}\choose{w}} \left( \frac{1}{1 + e ^{(P_2 - P_1) \beta_p}} \right) ^ {k} \left( \frac{e ^ {(P_2 - P_1) \beta_p}}{1 + e ^ {(P_2 - P_1) \beta_p}} \right) ^ {n - k} \\
+&= {{n}\choose{w}} \left( \frac{1}{1 + e ^{(P_2 - P_1) \beta_p}} \right) ^ {n} \left( e ^ {(P_2 - P_1) \beta_p} \right) ^ {n - k} \\
+\end{aligned} 
+$$
+$$
+\begin{aligned}
+Pr(S_2 - S_1) &= \frac{1}{\sqrt{2 \sigma ^ 2}} \phi \left(\frac{(S_2 - S_1) - (\mu_2 - \mu_1)}{\sqrt{2 \sigma ^ 2}}\right) \\
+&= \frac{1}{\beta _ f \sqrt{2}} \frac{1}{\sqrt{2 \pi}}  e ^ {-\frac{1}{2} \left(\frac{(S_2 - S_1) - (\mu_2 - \mu_1)}{\sqrt{2 \sigma ^ 2}}\right) ^ 2} \\
+&= \frac{1}{2 \beta _ f \sqrt{\pi}} e ^ {-\frac{1}{2} \left(\frac{(S_2 - S_1) - (\mu_2 - \mu_1)}{\sqrt{2 \sigma ^ 2}}\right) ^ 2} \\
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+Pr(S_2 - S_1 | W) &\propto \int_{-\infty}^{\infty} Pr(W|P_2 - P_1) \cdot Pr(P_2 - P_1 | S_2 - S_1)d(P_2 - P_1) P(S_2 - S_1) \\ 
+&= \int_{-\infty}^{\infty} {{n}\choose{w}} \left( \frac{1}{1 + e ^{P_2 - P_1}} \right) ^ {n} \left( e ^ {(P_2 - P_1) \beta_p} \right) ^ {n - k}
+\frac{1}{2 \beta _ f \sqrt{\pi}} e ^ {-\frac{1}{2} \left(\frac{(P_2 - P_1) - (S_2 - S_1)}{\sqrt{2 \beta_f ^ 2}} \right) ^ 2} d(P_2 - P_1)
+\frac{1}{2 \beta _ f \sqrt{\pi}} e ^ {-\frac{1}{2} \left(\frac{(S_2 - S_1) - (\mu_2 - \mu_1)}{\sqrt{2 \sigma ^ 2}}\right) ^ 2} \\
+&\propto \int_{-\infty}^{\infty}\left( \frac{1}{1 + e ^{(P_2 - P_1) \beta_p}} \right) ^ {n} \left(e ^ {(P_2 - P_1) \beta_p} \right) ^ {n - k}  e ^ {-\frac{1}{2} \left(\frac{(P_2 - P_1) - (S_2 - S_1)}{\sqrt{2 \beta_f ^ 2}} \right) ^ 2} d(P_2 - P_1) e ^ {-\frac{1}{2} \left(\frac{(S_2 - S_1) - (\mu_2 - \mu_1)}{\sqrt{2 \sigma ^ 2}}\right) ^ 2} \\
+\end{aligned}
+$$
+
+
+
+$$
+\begin{aligned}
+Pr(P_2 - P_1 | S_2 - S_1) &= \frac{1}{\sqrt{2 \beta _ f ^ 2}} \phi \left(\frac{(P_2 - P_1) - (S_2 - S_1)}{\sqrt{2 \beta _ f ^ 2}}\right) \\
+&= \frac{1}{\beta _ f \sqrt{2}} \frac{1}{\sqrt{2 \pi}}  e ^ {-\frac{1}{2} \left(\frac{(P_2 - P_1) - (S_2 - S_1)}{\sqrt{2 \beta_f ^ 2}} \right) ^ 2} \\
+&= \frac{1}{2 \beta_f \sqrt{\pi}} e ^ {-\frac{1}{2} \left(\frac{(P_2 - P_1) ^ 2 + (S_2 - S_1) ^ 2 - 2(P_2 - P_1)(S_2 - S_1)}{2 \beta_f ^ 2} \right)} \\
+&= \frac{1}{2 \beta_f \sqrt{\pi}} e ^ {-\left(\frac{(S_2 - S_1) ^ 2 }{4 \beta_f ^ 2} \right)} 
+e ^ {-\left(\frac{(P_2 - P_1) ^ 2 - 2(P_2 - P_1)(S_2 - S_1)}{4 \beta_f ^ 2} \right)} \\
+&= \frac{1}{2 \beta_f \sqrt{\pi}} e ^ {-\left(\frac{(S_2 - S_1) ^ 2 }{4 \beta_f ^ 2} \right)} 
+e ^ {\left(\frac{2(P_2 - P_1)(S_2 - S_1) - (P_2 - P_1) ^ 2}{4 \beta_f ^ 2} \right)}  \\
+&= \frac{1}{2 \beta_f \sqrt{\pi}} e ^ {-\left(\frac{(S_*) ^ 2 }{4 \beta_f ^ 2} \right)} 
+e ^ {\left(\frac{2(P_*)(S_*) - (P_*) ^ 2}{4 \beta_f ^ 2} \right)}  \\
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+Pr(W | P_2 - P_1) &= b(n,\ \frac{1}{1 + e ^ {((P_2 - P_1)  \beta_p)}}) \\ 
+&\approx \frac{1}{\sqrt{\frac{n e ^{((P_2 - P_1) \beta_p)}}{\left( 1 + e ^{((P_2 - P_1) \beta_p)} \right)^ 2}}} \phi \left(\frac{w - \frac{n}{1 + e ^{((P_2 - P_1) \beta_p)}}}{ 
+\sqrt{ \frac{n e ^{((P_2 - P_1) \beta_p)}} { \left( 1 + e ^{((P_2 - P_1) \beta_p)} \right) ^ 2}}} \right) \\
+&= \frac{1}{\sqrt{\frac{n e ^{((P_2 - P_1) \beta_p)}}{\left( 1 + e ^{((P_2 - P_1) \beta_p)} \right)^ 2}}} \frac{1}{\sqrt{2 \pi}} 
+e ^ {- \frac{1}{2} \left( \frac{W - \frac{n}{1 + e ^ {((P_2 - P_1) \beta_p)}}} {\sqrt{ \frac{n e ^{((P_2 - P_1) \beta_p)}} { \left( 1 + e ^{((P_2 - P_1) \beta_p)} \right) ^ 2}}} \right) ^ 2} \\
+&=\frac{1}{\sqrt{2 n \pi}} \frac{1}{\sqrt{\frac{e ^{((P_2 - P_1) \beta_p)}}{\left( 1 + e ^{((P_2 - P_1) \beta_p)} \right)^ 2}}}  
+e ^ {- \frac{1}{2} \left( \frac{\frac{W(1 + e ^ {((P_2 - P_1) \beta_p)}) - n}{1 + e ^ {((P_2 - P_1) \beta_p)}}} {\sqrt{ \frac{n e ^{((P_2 - P_1) \beta_p)}} { \left( 1 + e ^{((P_2 - P_1) \beta_p)} \right) ^ 2}}} \right) ^ 2}  \\    
+&= \frac{1}{\sqrt{2 n \pi}} \frac{1}{\sqrt{\frac{e ^{((P_2 - P_1) \beta_p)}}{\left( 1 + e ^{((P_2 - P_1) \beta_p)} \right)^ 2}}}  
+e ^ {- \frac{1}{2} \left( \frac{ \left( W(1 + e ^ {((P_2 - P_1) \beta_p)}) - n \right) ^ 2} {n e ^{((P_2 - P_1) \beta_p)}} \right)} \\ 
+&= \frac{1}{\sqrt{2 n \pi}} {\frac{1 + e ^{((P_2 - P_1) \beta_p)}}{\sqrt{e ^{((P_2 - P_1) \beta_p)}}}}  
+e ^ {- \left( \frac{n ^ 2 - 2nW(1 + e ^ {((P_2 - P_1) \beta_p)}) + W ^ 2 \left(1 + 2 e ^ {((P_2 - P_1) \beta_p)} + e ^ {(2(P_2 - P_1) \beta_p)} \right)} {2n e ^{((P_2 - P_1) \beta_p)}} \right)} \\
+&= \frac{1}{\sqrt{2 n \pi}} {\frac{1 + e ^{((P_2 - P_1) \beta_p)}}{\sqrt{e ^{((P_2 - P_1) \beta_p)}}}}  
+e ^ { \left( \frac{2nW(1 + e ^ {((P_2 - P_1) \beta_p)}) - W ^ 2 - n ^ 2 - W ^ 2 \left( 2 e ^ {((P_2 - P_1) \beta_p)} + e ^ {(2(P_2 - P_1)\beta_p)} \right)  } {2n e ^{((P_2 - P_1) \beta_p) }} \right)} \\
+&= \frac{1}{\sqrt{2 n \pi}} {\frac{1 + e ^{((P_2 - P_1) \beta_p)}}{\sqrt{e ^{((P_2 - P_1) \beta_p)}}}}  
+e ^ { \left( \frac{2nW - W ^ 2 - n ^ 2 - W ^ 2 \left(e ^ {(2(P_2 - P_1)\beta_p)} \right)  } {2n e ^{((P_2 - P_1) \beta_p) }} + W -\frac{W^2}{n} \right)} \\
+&=  \frac{ e ^ {\left( W -\frac{W^2}{n} \right)}}{\sqrt{2 n \pi}} {\frac{1 + e ^{((P_2 - P_1) \beta_p)}}{\sqrt{e ^{((P_2 - P_1) \beta_p)}}}}  e ^ { \left( \frac{-(W - n) ^ 2 - W ^ 2 \left(e ^ {(2(P_2 - P_1)\beta_p)}\right)  } {2n e ^{((P_2 - P_1) \beta_p) }}  \right)}
+\end{aligned} 
+$$
+<!--
+$$
+\begin{aligned}
+\int_{-\infty}^{\infty} e ^ {-0.5(x\beta_p)} dx = [ -\frac{2}{\beta_p} e ^ {-0.5(x\beta_p)} ]_{-\infty} ^ \infty
+= [ \frac{2}{\beta_p} \frac{- 1}{e ^ {0.5(x\beta_p)}} ]_{-\infty} ^ \infty
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+\int_{-\infty}^{\infty} e ^ {0.5(x\beta_p)} dx = [ \frac{2}{\beta_p} e ^ {0.5(x\beta_p)} ]_{-\infty} ^ \infty
+= [ \frac{2}{\beta_p} \frac{e ^ {(x\beta_p)}}{e ^ {0.5(x\beta_p)}} ]_{-\infty} ^ \infty
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+\int_{-\infty}^{\infty} {\frac{1 + e ^{((P_2 - P_1) \beta_p)}}{\sqrt{e ^{((P_2 - P_1) \beta_p)}}}} d(P_2 - P_1)
+= \int_{-\infty}^{\infty} e ^ {-0.5((P_2 - P_1)\beta_p)} + e ^ {0.5((P_2 - P_1)\beta_p)} d(P_2 - P_1)
+= \left[ \frac{2}{\beta_p} \frac{e ^ {((P_2 - P_1)\beta_p)} - 1}{e ^ {0.5((P_2 - P_1)\beta_p)}} \right]_{-\infty} ^ \infty 
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+\frac{d}{d(P_2 - P_1)} \left[ e ^ {\left(\frac{2(P_2 - P_1)(S_2 - S_1) - (P_2 - P_1) ^ 2}{4 \beta_f ^ 2}  - \frac{(W - n) ^ 2 + W ^ 2 \left(e ^ {(2(P_2 - P_1)\beta_p)}\right)} {2n e ^{((P_2 - P_1) \beta_p)}} \right)} \right] \\
+= \left( \frac{(S_2 - S_1) - (P_2 - P_1)}{2 \beta_f^2} + \frac{\beta_p (W - n) ^ 2}{2n} e ^ {-((P_2 - P_1) \beta_p)} + \frac{\beta_p W^2}{2n} e ^ {(P_2 - P_1) \beta_p} \right) e ^ {\left(\frac{2(P_2 - P_1)(S_2 - S_1) - (P_2 - P_1) ^ 2}{4 \beta_f ^ 2}  - \frac{(W - n) ^ 2 + W ^ 2 \left(e ^ {(2(P_2 - P_1)\beta_p)}\right)} {2n e ^{((P_2 - P_1) \beta_p)}} \right)} \\
+= \left( \frac{(S_2 - S_1) - (P_2 - P_1)}{2 \beta_f^2} + \frac{\beta_p ((W - n) ^ 2 + W ^ 2 e ^{(2(P_2 - P_1) \beta_p)})}{e ^{((P_2 - P_1) \beta_p)}} \right) e ^ {\left(\frac{2(P_2 - P_1)(S_2 - S_1) - (P_2 - P_1) ^ 2}{4 \beta_f ^ 2}  - \frac{(W - n) ^ 2 + W ^ 2 \left(e ^ {(2(P_2 - P_1)\beta_p)}\right)} {2n e ^{((P_2 - P_1) \beta_p)}} \right)}
+\end{aligned}
+$$
+-->
+
+
+
+
+
+
+
+$$
+\begin{aligned}
+Pr(W | S_2 - S_1) = \int_{-\infty}^{\infty} Pr(W|P_2 - P_1) \cdot Pr(P_2 - P_1 | S_2 - S_1)d(P_2 - P_1) \\ 
+\approx \int_{-\infty}^{\infty} \frac{ e ^ {\left( W -\frac{W^2}{n} \right)}}{\sqrt{2 n \pi}} {\frac{1 + e ^{((P_2 - P_1) \beta_p)}}{\sqrt{e ^{((P_2 - P_1) \beta_p)}}}}  e ^ { \left( \frac{-(W - n) ^ 2 - W ^ 2 \left(e ^ {(2(P_2 - P_1)\beta_p)}\right)  } {2n e ^{((P_2 - P_1) \beta_p) }}  \right)} \frac{1}{2 \beta_f \sqrt{\pi}} e ^ {-\left(\frac{(S_2 - S_1) ^ 2 }{4 \beta_f ^ 2} \right)} e ^ {\left(\frac{2(P_2 - P_1)(S_2 - S_1) - (P_2 - P_1) ^ 2}{4 \beta_f ^ 2} \right)}
+d(P_2 - P_1) \\
+= \frac{e ^ {\left( W - \frac{W ^ 2}{n} \right)} e ^{\left( -\frac{(S_2 - S_1) ^ 2 }{4 \beta_f ^ 2} \right)}}{2 \pi \beta_f \sqrt{2 n}}  \int_{-\infty}^{\infty} \frac{1 + e ^{((P_2 - P_1) \beta_p)}}{\sqrt{e ^{((P_2 - P_1) \beta_p)}}} e ^ {\left(\frac{2(P_2 - P_1)(S_2 - S_1) - (P_2 - P_1) ^ 2}{4 \beta_f ^ 2}  - \frac{(W - n) ^ 2 + W ^ 2 \left(e ^ {(2(P_2 - P_1)\beta_p)}\right)} {2n e ^{((P_2 - P_1) \beta_p)}} \right)} d(P_2 - P_1)
+\end{aligned}
+$$
+<!--
+$$
+\begin{aligned}
+Pr(W) = \int_{-\infty}^{\infty} Pr(W|P_2 - P_1) \cdot Pr(P_2 - P_1 | S_2 - S_1)d(P_2 - P_1) 
+= \int_{-\infty}^{\infty} B(W,\ \frac{1}{1 + e ^ {((P_2 - P_1)  \beta_p)}}, \ n) \cdot \frac{1}{2 \beta \sqrt{\pi}} e ^ {-\left(\frac{(P_2 - P_1) ^ 2 - 2(P_2 - P_1)(S_2 - S_1)}{\beta ^ 2} \right)} e ^ {-\left(\frac{(S_2 - S_1) ^ 2 }{\beta ^ 2} \right)} d(P_2 - P_1) \\
+= \frac{1}{2 \beta \sqrt{\pi}} e ^ {-\left(\frac{(S_2 - S_1) ^ 2 }{\beta ^ 2} \right)} \int_{-\infty}^{\infty} {{n}\choose{W}} \left( \frac{1}{1 + e ^ {((P_2 - P_1)  \beta_p)}} \right) ^ W 
+\left( \frac{e ^ {((P_2 - P_1)  \beta_p)}}{1 + e ^ {((P_2 - P_1)  \beta_p)}} \right) ^ {n - W}  e ^ {-\left(\frac{(P_2 - P_1) ^ 2 - 2(P_2 - P_1)(S_2 - S_1)}{\beta ^ 2} \right)}  d(P_2 - P_1)   \\
+= {{n}\choose{W}} \frac{1}{2 \beta \sqrt{\pi}} e ^ {-\left(\frac{(S_2 - S_1) ^ 2 }{\beta ^ 2} \right)} \int_{-\infty}^{\infty}  \left( \frac{1}{1 + e ^ {((P_2 - P_1)  \beta_p)}} \right) ^ n 
+\left( e ^ {((P_2 - P_1)  \beta_p)} \right) ^ {n - W}  e ^ {-\left(\frac{(P_2 - P_1) ^ 2 - 2(P_2 - P_1)(S_2 - S_1)}{\beta ^ 2} \right)}  d(P_2 - P_1)
+\\
+\propto                                                  
+\end{aligned}
+$$
+
+
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+--> 
+
+$$
+\begin{aligned} 
+Pr(W | P_1 - P_2, \\
+  p = \frac{\beta_p (P_1 - P_2)}{2 \sqrt{(\beta_p (P_1 - P_2)) ^ 2 + 1}} + 0.5) 
+&= Pr(W | P_1 - P_2, p = \frac{\beta_p (P_1 - P_2) + \sqrt{1 + (\beta_p (P_1 - P_2)) ^ 2}}{2 \sqrt{(\beta_p (P_1 - P_2)) ^ 2 + 1}}) \\
+&= Pr(W | P_1 - P_2, p = \frac{P_* + \sqrt{1 + P_* ^ 2}}{2 \sqrt{(P_* ^ 2 + 1})}) \\
+&= b(n,\ \frac{P_* + \sqrt{1 + P_* ^ 2}}{2 \sqrt{1 + P_* ^ 2}})  \\
+&\approx \frac{1}{\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} \phi \left( \frac{w - \frac{n \left(P_* + \sqrt{1 + P_* ^ 2 } \right)}{2 \sqrt{1 + (P_*) ^ 2}}}{\sqrt{\frac{n}{4(1 + (P_*) ^ 2)}}} \right)  \\
+&= \frac{1}{\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} \phi \left( \frac{\frac{(2w - n)\sqrt{1 + P_*^2} - n P_*}{2 \sqrt{1 + P_* ^ 2}}}{\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} \right) \\
+&= \frac{1}{\sqrt{(2 \pi)}\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} e ^ {- \frac{1}{2} \left( \frac{\frac{(2w - n)\sqrt{1 + P_*^2} - n P_*}{2 \sqrt{1 + P_* ^ 2}}}{\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} \right) ^ 2} \\
+&= \frac{1}{\sqrt{(2 \pi)}\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} e ^ {- \frac{1}{2} \left( \frac{(2w - n) ^ 2(1 + P_* ^ 2) - 2n P_*(2w - n)\sqrt{1 + P_*^2} + 2n^2P_*^2}{n} \right)} \\
+&= \frac{1}{\sqrt{(2 \pi)}\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} e ^ {- \frac{1}{2} \left( \frac{(4w^2 - 4nw + n^2)(1 + P_*^2) + (-4nwP_* + 2n^2 P_*)\sqrt{1 + P_*^2} + 2n^2 P_*^2}{n} \right)} \\
+&= \frac{1}{\sqrt{(2 \pi)}\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} e ^ {- \frac{1}{2} \left( \frac{4w^2 - 4nw + n^2 + P_*^2 4w^2 - P_*^2 4nw + P_*^2 n^2 - P_*\sqrt{1 + P_*^2} 4nw + P_* \sqrt{1 + P_*^2} 2n^2 + P_*^2 2n^2}{n} \right)} \\
+&= \frac{1}{\sqrt{(2 \pi)}} e ^ {- \frac{1}{2} \left( \frac{4 w^2}{n} - 4w + n \right)} \frac{1}{\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} e ^ {- \frac{1}{2} \left(P_* \left( \frac{P_* 4 w^2}{n} - P_* 4w + P_*n -\sqrt{1 + P_*^2} 4w + \sqrt{1 + P_*^2} 2n + P_* 2n \right) \right)} \\
+&= \frac{1}{\sqrt{(2 \pi)}} e ^ {- \frac{1}{2} \left( \frac{4 w^2}{n} - 4w + n \right)} \frac{1}{\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} e ^ {- \frac{1}{2} \left(P_* ^2 \left(\frac{4 w^2}{n} - 4w + 3n \right) + P_* \sqrt{1 + P_*^2} \left(2n - 4w \right) \right)} \\
+&= \frac{1}{\sqrt{(2 \pi)}} e ^ {\left( 2w - \frac{n}{2} - \frac{2 w^2}{n} \right)} \frac{1}{\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} e ^ {\left(P_* ^2 \left(2w - \frac{2 w^2}{n}  - \frac{3}{2}n \right) + P_* \sqrt{1 + P_*^2} \left(2w - n\right) \right)} \\
+\end{aligned}
+$$
+$$
+\begin{aligned}
+Pr(W | S_2 - S_1) &= \int_{-\infty}^{\infty} Pr(W|P_2 - P_1) \cdot Pr(P_2 - P_1 | S_2 - S_1)d(P_2 - P_1) \\ 
+&\approx \int_{-\infty}^{\infty} \frac{1}{\sqrt{(2 \pi)}} e ^ {\left( 2w - \frac{n}{2} - \frac{2 w^2}{n} \right)} \frac{1}{\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} e ^ {\left(P_* ^2 \left(2w - \frac{2 w^2}{n}  - \frac{3}{2}n \right) + P_* \sqrt{1 + P_*^2} \left(2w - n\right) \right)} \frac{1}{2 \beta_f \sqrt{\pi}} e ^ {-\left(\frac{(S_*) ^ 2 }{4 \beta_f ^ 2} \right)} e ^ {\left(\frac{2(P_*)(S_*) - (P_*) ^ 2}{4 \beta_f ^ 2} \right)}
+\\& \ \ \ \ \ d(P_*) \\
+&=
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+Pr(P_* | S_*) &= \frac{2(P_* - S_* + 50)}{2500}
+\end{aligned}
+$$
+
+
+$$
+\begin{aligned}
+Pr(W | S_2 - S_1) &= \int_{-\infty}^{\infty} Pr(W|P_2 - P_1) \cdot Pr(P_2 - P_1 | S_2 - S_1)d(P_2 - P_1) \\ 
+&\approx \int_{-\infty}^{\infty} \frac{1}{\sqrt{(2 \pi)}} e ^ {\left( 2w - \frac{n}{2} - \frac{2 w^2}{n} \right)} \frac{1}{\sqrt{\frac{n}{4(1 + P_* ^ 2)}}} e ^ {\left(P_* ^2 \left(2w - \frac{2 w^2}{n}  - \frac{3}{2}n \right) + P_* \sqrt{1 + P_*^2} \left(2w - n\right) \right)} \frac{2(P_* - S_* + 50)}{2500} d(P_*) \\
+&\propto
+\end{aligned}
+$$
+
+option 2, different variances in form of serve and return
+
+$$
+\begin{aligned}
+S_i \sim N(\mu_i, \beta_S) \\
+Pr(S_i) = \frac{1}{\beta_S} \phi(\frac{S_i - \mu_i}{\beta_S}) \\
+Prior = Pr(S_1, S_2) &= \frac{1}{\beta_S ^ 2} \phi(\frac{S_1 - \mu_1}{\beta_S}) \phi(\frac{S_2 - \mu_2}{\beta_S}) \\
+      &\propto e ^ {-\frac{1}{2} \left( \frac{S_1 - \mu_1}{\beta_S} \right)^2} e ^ {-\frac{1}{2} \left( \frac{S_2 - \mu_2}{\beta_S} \right)^2}
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+  Likelihood = Pr(W |S_1, S_2) &= \int_{-\infty}^{\infty} \int_{-\infty}^{\infty} \frac{1}{\beta_{Serve} \beta_{Return}} \phi(\frac{P_1 - S_1}{\beta_{Serve}}) \phi(\frac{P_2 - S_2}{\beta_{Return}}) {{n}\choose{w}} \left( \frac{1}{1 + e ^{(P_2 - P_1) \beta_p}} \right) ^ {n} \left( e ^ {(P_2 - P_1) \beta_p} \right) ^ {n - k} d_{P_1}d_{P_2} \\
+  &\propto \int_{-\infty}^{\infty} \int_{-\infty}^{\infty} e ^ {-\frac{1}{2} \left( \frac{P_1 - S_1}{\beta_{Serve}} \right)^2} e ^ {-\frac{1}{2} \left( \frac{P_2 - S_2}{\beta_{Return}} \right)^2} \left( \frac{1}{1 + e ^{(P_2 - P_1) \beta_p}} \right) ^ {n} \left( e ^ {(P_2 - P_1) \beta_p} \right) ^ {n - k} d_{P_1}d_{P_2}
+\end{aligned}
+$$

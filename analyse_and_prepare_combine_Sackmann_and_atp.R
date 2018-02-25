@@ -169,10 +169,6 @@ print("WARNINGS OCCUR HERE AS WE TRY TO PARSE ALSO NON-NUMERIC VALUES, (THIS IS 
 
 # tournament name difficult to match
 
-
-
-
-
 # Export aggregated source files
 saveDatasets(all_atp_matches, dir_result_datasets, "all_atp_matches", lvl = "lvl2")
 saveDatasets(all_Sackmann_matches, dir_result_datasets, "all_Sackmann_matches", lvl = "lvl2")

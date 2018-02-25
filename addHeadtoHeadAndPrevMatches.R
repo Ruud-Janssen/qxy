@@ -1,14 +1,11 @@
-#install.packages("dplyr")
 library(dplyr)
-#install.packages("stringr")
 library(stringr)
 
 rm(list = ls())
 source("formulas.r")
 source("constants.r")
 
-
-allGames <- getDatasets(dir_result_datasets, "all_Sackmann_matches", lvl = "lvl3")
+allGames <- getDatasets(dir_result_datasets, "all_Sackmann_matches", lvl = "lvl4")
 
 Nall = nrow(allGames)
 
@@ -25,17 +22,16 @@ result_head_to_head <- result_head_to_head %>%
     )
 
 for(i in 1: Nall) {
-    
   r <- which(result_head_to_head$Match == allGames$Match[i]) 
   if (length(r) == 1) {
     # set values from previous results
-    allGames$HeadtoHead[i] = result_head_to_head$HeadtoHead[r]
-    allGames$HeadtoHeadMatches[i] = result_head_to_head$HeadtoHeadMatches[r]
-    allGames$LastHeadtoHead[i] = result_head_to_head$LastHeadtoHead[r]
+    allGames$HeadtoHead[i]        <- result_head_to_head$HeadtoHead[r]
+    allGames$HeadtoHeadMatches[i] <- result_head_to_head$HeadtoHeadMatches[r]
+    allGames$LastHeadtoHead[i]    <- result_head_to_head$LastHeadtoHead[r]
          
-    result_head_to_head[r, "HeadtoHead"] <- result_head_to_head[r, "HeadtoHead"] + allGames$Result[i]
+    result_head_to_head[r, "HeadtoHead"]        <- result_head_to_head[r, "HeadtoHead"] + allGames$Result[i]
     result_head_to_head[r, "HeadtoHeadMatches"] <- result_head_to_head[r, "HeadtoHeadMatches"] + 1
-    result_head_to_head[r, "LastHeadtoHead"] <- allGames$Result[i]
+    result_head_to_head[r, "LastHeadtoHead"]    <- allGames$Result[i]
   } else { "error, row cannot be found or more rows exists with same match" }
 }
 
