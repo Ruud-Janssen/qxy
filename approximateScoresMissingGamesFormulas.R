@@ -40,45 +40,52 @@ addMatchesToResultsDatabase <- function(resultsDatabase, games) {
 }
 
 
-approximateScoreMissingGame <- function(orderedScore, resultsDatabase) {
-  if(orderedScore %in% resultsDatabase$Score) {
-    iDB <- match(orderedScore, resultsDatabase$Score)
-    
-    w_svpt     <- resultsDatabase %>% slice(iDB) %>% select(ServePointsWinner) %>% round() %>% as.numeric()
-    w_svpt_won <- 
-      resultsDatabase %>% slice(iDB) %>% mutate(w_1stIn = PercentServePointsWonWinner * ServePointsWinner) %>% 
-      select(w_1stIn) %>% round() %>% as.numeric()
-    
-    l_svpt     <- resultsDatabase %>% slice(iDB) %>% select(ReturnPointsWinner) %>% round() %>% as.numeric()
-    w_rtpt_won <- 
-      resultsDatabase %>% slice(iDB) %>% mutate(w_1stIn = PercentReturnPointsWonWinner * ReturnPointsWinner) %>% 
-      select(w_1stIn) %>% round() %>% as.numeric()
-  } else {
-    iDB <- which(resultsDatabase$GamesWonWinner == allGames$GamesWonWinner[i] & 
-                   resultsDatabase$GamesWonLoser == allGames$GamesWonLoser[i])
-    if(!is_empty(iDB)) {
-      w_svpt     <- 
-        resultsDatabase %>% slice(iDB) %>% 
-        summarise(AvgServePointsWinner = sum(ServePointsWinner * Matches) / sum(Matches)) %>% 
-        round() %>% as.numeric()  
-      w_svpt_won <- 
-        resultsDatabase %>% slice(iDB) %>% 
-        summarise(AvgPercentServePointsWinner = sum(PercentServePointsWonWinner * Matches) / sum(Matches) * allGames$w_svpt[i]) %>% 
-        round() %>% as.numeric()
+approximateScoreMissingGame <- function(games, resultsDatabase) {
+  for(i in 1 : nrow(games)) {
+    if(games$orderedScore[i] %in% resultsDatabase$Score) {
+      iDB <- match(games$orderedScore[i], resultsDatabase$Score)
       
-      l_svpt     <- 
-        resultsDatabase %>% slice(iDB) %>% summarise(AvgReturnPointsWinner = sum(ReturnPointsWinner * Matches) / sum(Matches)) %>% 
-        round() %>% as.numeric()  
-      w_rtpt_won <- 
-        resultsDatabase %>% slice(iDB) %>%  
-        summarise(AvgPercentReturnPointsWinner = sum(PercentReturnPointsWonWinner * Matches) / sum(Matches) * allGames$l_svpt[i]) %>% 
-        round() %>% as.numeric() 
+      games$w_svpt[i]     <- resultsDatabase %>% slice(iDB) %>% select(ServePointsWinner) %>% round() %>% as.numeric()
+      games$w_svpt_won[i] <- 
+        resultsDatabase %>% slice(iDB) %>% mutate(w_1stIn = PercentServePointsWonWinner * ServePointsWinner) %>% 
+        select(w_1stIn) %>% round() %>% as.numeric()
+      
+      games$l_svpt[i]     <- resultsDatabase %>% slice(iDB) %>% select(ReturnPointsWinner) %>% round() %>% as.numeric()
+      games$w_rtpt_won[i] <- 
+        resultsDatabase %>% slice(iDB) %>% mutate(w_1stIn = PercentReturnPointsWonWinner * ReturnPointsWinner) %>% 
+        select(w_1stIn) %>% round() %>% as.numeric()
+      
+      games$pointsMissing[i] <- 0
     } else {
-      w_svpt     <- NA
-      w_svpt_won <- NA
-      l_svpt     <- NA
-      w_rtpt_won <- NA
+      iDB <- which(resultsDatabase$GamesWonWinner == games$GamesWonWinner[i] & 
+                     resultsDatabase$GamesWonLoser == games$GamesWonLoser[i])
+      if(length(iDB) > 0) {
+        games$w_svpt[i]     <- 
+          resultsDatabase %>% slice(iDB) %>% 
+          summarise(AvgServePointsWinner = sum(ServePointsWinner * Matches) / sum(Matches)) %>% 
+          round() %>% as.numeric()  
+        games$w_svpt_won[i] <- 
+          resultsDatabase %>% slice(iDB) %>% 
+          summarise(AvgPercentServePointsWinner = sum(PercentServePointsWonWinner * Matches) / sum(Matches) * allGames$w_svpt[i]) %>% 
+          round() %>% as.numeric()
+        
+        games$l_svpt[i]     <- 
+          resultsDatabase %>% slice(iDB) %>% summarise(AvgReturnPointsWinner = sum(ReturnPointsWinner * Matches) / sum(Matches)) %>% 
+          round() %>% as.numeric()  
+        games$w_rtpt_won[i] <- 
+          resultsDatabase %>% slice(iDB) %>%  
+          summarise(AvgPercentReturnPointsWinner = sum(PercentReturnPointsWonWinner * Matches) / sum(Matches) * allGames$l_svpt[i]) %>% 
+          round() %>% as.numeric()
+        
+        games$pointsMissing[i] <- 0
+      } else {
+        games$w_svpt[i]        <- NA
+        games$w_svpt_won[i]    <- NA
+        games$l_svpt[i]        <- NA
+        games$w_rtpt_won[i]    <- NA
+        games$pointsMissing[i] <- 1
+      }
     }
   }
-  return(c(w_svpt = w_svpt, w_svpt_won = w_svpt_won, l_svpt = l_svpt, w_rtpt_won = w_rtpt_won))
+  games %>% select(w_svpt, w_svpt_won, l_svpt, w_rtpt_won, pointsMissing)
 }
