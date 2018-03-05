@@ -1,15 +1,16 @@
 source("formulas.r")
 source("addratingsformulas.r")
-require(Rmpfr)
+library(Rmpfr)
 library(cubature)
 
-GetServeReturnBarto = function(allGames, Bp, Bf, sigma, ratingGainForWin) {
+
+GetServeReturnBarto = function(allGames, Bp, Bf, s, ratingGainForWin) {
   rg        <- ratingGainForWin 
     
-  BpHard    <- Bp
-  BfHard    <- Bf
-  sigmaHard <- sigma
-  rgHard    <- rg
+  BpHard <- Bp
+  BfHard <- Bf
+  sHard  <- s
+  rgHard <- rg
 
   train_rating <- read.table("Data/datasets/train_ratingWithRatings.csv"
                             , header = T, sep = ",", quote = "\"", fill = TRUE)
@@ -99,31 +100,36 @@ GetServeReturnBarto = function(allGames, Bp, Bf, sigma, ratingGainForWin) {
       ##
       
       #rating_serve_winner_diff         <- barto$ServeBarto[row_nr_winner] - barto$ReturnBarto[row_nr_loser]
-      #rating_change_serve_winner       <- ratingChanceWinner(Bp, Bf, rating_serve_winner_diff, sigma, 
+      #rating_change_serve_winner       <- ratingChanceWinner(Bp, Bf, rating_serve_winner_diff, s, 
       #                                                       allGames$w_svpt[i], allGames$w_svpt_won[i])
       
       #barto$ServeBarto[row_nr_winner]  <- barto$ServeBarto[row_nr_winner] + rating_change_serve_winner
       #barto$ReturnBarto[row_nr_loser]  <- barto$ReturnBarto[row_nr_loser] - rating_change_serve_winner
       
-      rating_chances                   <- ratingChances(Bp, Bf, Bf, barto$ServeBarto[row_nr_winner], 
-                                                        barto$ReturnBarto[row_nr_loser], sigma, n, w) 
+      n1 <- allGames$w_svpt[i]
+      n2 <- allGames$l_svpt[i]
+      w1 <- allGames$w_svpt_won[i]
+      w2 <- allGames$w_rtpt_won[i]
       
-      barto$ServeBarto[row_nr_winner]  <- barto$ServeBarto[row_nr_winner] + rating_chances[1]
-      barto$ReturnBarto[row_nr_loser]  <- barto$ReturnBarto[row_nr_loser] + rating_chances[2]
+      rating_changes                   <- ratingChanges(Bp, Bf, barto$ServeBarto[row_nr_winner], 
+                                                        barto$ReturnBarto[row_nr_loser], s, n1, w1) 
+      
+      barto$ServeBarto[row_nr_winner]  <- barto$ServeBarto[row_nr_winner] + rating_changes[1]
+      barto$ReturnBarto[row_nr_loser]  <- barto$ReturnBarto[row_nr_loser] + rating_changes[2]
       
       #Return
       #rating_return_winner_diff        <- barto$ReturnBarto[row_nr_winner] - barto$ServeBarto[row_nr_loser]
-      #rating_change_return_winner      <- ratingChanceWinner(Bp, Bf, rating_return_winner_diff, sigma, 
+      #rating_change_return_winner      <- ratingChanceWinner(Bp, Bf, rating_return_winner_diff, s, 
       #                                                        allGames$l_svpt[i], allGames$w_rtpt_won[i])
       
       #barto$ReturnBarto[row_nr_winner] <- barto$ReturnBarto[row_nr_winner] + rating_change_return_winner
       #barto$ServeBarto[row_nr_loser]   <- barto$ServeBarto[row_nr_loser] - rating_change_return_winner
       
-      rating_chances                   <- ratingChances(Bp, Bf, Bf, barto$ReturnBarto[row_nr_winner], 
-                                                        barto$ServeBarto[row_nr_loser], sigma, n, w) 
+      rating_changes                   <- ratingChanges(Bp, Bf, barto$ReturnBarto[row_nr_winner], 
+                                                        barto$ServeBarto[row_nr_loser], s, n2, w2) 
       
-      barto$ReturnBarto[row_nr_winner] <- barto$ReturnBarto[row_nr_winner] + rating_chances[1]
-      barto$ServeBarto[row_nr_loser]   <- barto$ServeBarto[row_nr_loser] + rating_chances[2]
+      barto$ReturnBarto[row_nr_winner] <- barto$ReturnBarto[row_nr_winner] + rating_changes[1]
+      barto$ServeBarto[row_nr_loser]   <- barto$ServeBarto[row_nr_loser] + rating_changes[2]
       
       # Update games         
       barto$games[row_nr_winner]       <- barto$games[row_nr_winner] + 1
@@ -134,31 +140,31 @@ GetServeReturnBarto = function(allGames, Bp, Bf, sigma, ratingGainForWin) {
         
         #Serve
         #rating_serve_winner_diff         <- barto$Hard_ServeBarto[row_nr_winner] - barto$Hard_ReturnBarto[row_nr_loser]
-        #rating_change_serve_winner       <- ratingChanceWinner(Bp, Bf, rating_serve_winner_diff, sigma, 
+        #rating_change_serve_winner       <- ratingChanceWinner(Bp, Bf, rating_serve_winner_diff, s, 
         #                                                       allGames$w_svpt[i], allGames$w_svpt_won[i])
             
         #barto$Hard_ServeBarto[row_nr_winner]  <- barto$Hard_ServeBarto[row_nr_winner] + rating_change_serve_winner
         #barto$Hard_ReturnBarto[row_nr_loser]  <- barto$Hard_ReturnBarto[row_nr_loser] - rating_change_serve_winner
         
-        rating_chances                   <- ratingChances(Bp, Bf, Bf, barto$Hard_ServeBarto[row_nr_winner], 
-                                                          barto$Hard_ReturnBarto[row_nr_loser], sigma, n, w) 
+        rating_changes                   <- ratingChanges(Bp, Bf, barto$Hard_ServeBarto[row_nr_winner], 
+                                                          barto$Hard_ReturnBarto[row_nr_loser], s, n1, w1) 
         
-        barto$Hard_ServeBarto[row_nr_winner]  <- barto$Hard_ServeBarto[row_nr_winner] + rating_chances[1]
-        barto$Hard_ReturnBarto[row_nr_loser]  <- barto$Hard_ReturnBarto[row_nr_loser] + rating_chances[2]
+        barto$Hard_ServeBarto[row_nr_winner]  <- barto$Hard_ServeBarto[row_nr_winner] + rating_changes[1]
+        barto$Hard_ReturnBarto[row_nr_loser]  <- barto$Hard_ReturnBarto[row_nr_loser] + rating_changes[2]
         
         #Return
         #rating_return_winner_diff        <- barto$Hard_ReturnBarto[row_nr_winner] - barto$Hard_ServeBarto[row_nr_loser]
-        #rating_change_return_winner      <- ratingChanceWinner(Bp, Bf, rating_return_winner_diff, sigma, 
+        #rating_change_return_winner      <- ratingChanceWinner(Bp, Bf, rating_return_winner_diff, s, 
         #                                                        allGames$l_svpt[i], allGames$w_rtpt_won[i])
             
         #barto$Hard_ReturnBarto[row_nr_winner] <- barto$Hard_ReturnBarto[row_nr_winner] + rating_change_return_winner
         #barto$Hard_ServeBarto[row_nr_loser]   <- barto$Hard_ServeBarto[row_nr_loser] - rating_change_return_winner
         
-        rating_chances                   <- ratingChances(Bp, Bf, Bf, barto$Hard_ServeBarto[row_nr_winner], 
-                                                          barto$Hard_ReturnBarto[row_nr_loser], sigma, n, w)
+        rating_changes                   <- ratingChanges(Bp, Bf, barto$Hard_ServeBarto[row_nr_winner], 
+                                                          barto$Hard_ReturnBarto[row_nr_loser], s, n2, w2)
         
-        barto$Hard_ServeBarto[row_nr_winner]  <- barto$Hard_ServeBarto[row_nr_winner] + rating_chances[1]
-        barto$Hard_ReturnBarto[row_nr_loser]  <- barto$Hard_ReturnBarto[row_nr_loser] + rating_chances[2]
+        barto$Hard_ServeBarto[row_nr_winner]  <- barto$Hard_ServeBarto[row_nr_winner] + rating_changes[1]
+        barto$Hard_ReturnBarto[row_nr_loser]  <- barto$Hard_ReturnBarto[row_nr_loser] + rating_changes[2]
         
         # Update games         
         barto$Hard_games[row_nr_winner]       <- barto$games[row_nr_winner] + 1
@@ -430,48 +436,21 @@ barto_likelihood <- function(Pd, Sd, Bp, Bf, n, w) {
   return(exp(-n * loga + (n - w) * logb + logc))
 }
 
-negProportionalPosterior <- function(Sd, Bp, Bf, Ud, sigma, n, w) {
+negProportionalPosterior <- function(Sd, Bp, Bf, Ud, s, n, w) {
   l     <- integrateR(barto_likelihood, lower = Sd - 300, upper = Sd + 300, 
                       Sd = Sd, Bp = Bp, Bf = Bf, n = n, w = w) 
-  prior <- dnorm(Sd, mean = Ud, sd = sqrt(2 * sigma ^ 2))
+  prior <- dnorm(Sd, mean = Ud, sd = sqrt(2 * s ^ 2))
   -prior * l$value * 10 ^ 12
 }
 
-posteriorRatingDiff <- function(Bp, Bf, Ud, sigma, n, w) {
-  -optim(Ud, negProportionalPosterior, Bp = Bp, Bf = Bf, Ud = Ud, sigma = sigma, n = n, w = w, 
+posteriorRatingDiff <- function(Bp, Bf, Ud, s, n, w) {
+  optim(Ud, negProportionalPosterior, Bp = Bp, Bf = Bf, Ud = Ud, s = s, n = n, w = w, 
         lower = Ud - 50, upper = Ud + 50, method = "Brent")$par
 }
 
-ratingChanceWinner <- function(Bp, Bf, Rd, sigma, n, w) {
-  Ud <- -Rd
-  posteriorRd <- posteriorRatingDiff(Bp, Bf, Ud, sigma, n, w)
-  (posteriorRd - Rd) / 2
-}
-
-####New Try
-ratingChances <- function(Bp, Bserve, Breturn, U1, U2, sigma, n, w) {
-  c(U1, U2) - posteriorRatingDiff2(Bp, Bserve, Breturn, U1, U2, sigma, n, w)
-}
-
-posteriorRatingDiff2 <- function(Bp, Bserve, Breturn, U1, U2, sigma, n, w) {
-  U_12 <- c(U1, U2)
-  optim(U_12, negProportionalPosterior2, Bp = Bp, Bserve = Bserve, Breturn = Breturn, U1 = U1, U2 = U2, sigma = sigma, n = n, w = w, 
-        method = "Nelder-Mead")$par
-}
-
-negProportionalPosterior2 <- function(S_12, Bp, Bserve, Breturn, U1, U2, sigma, n, w) {
-  l <- adaptIntegrate(barto_likelihood2, lowerLimit = S_12 - 300, upperLimit =  S_12 + 300,
-                      S1 = S_12[1], S2 = S_12[2], Bp = Bp, Bserve = Bserve, Breturn = Breturn, n = n, w = w)
-  prior <- dnorm(S_12[1], mean = U1, sd = sigma) * dnorm(S_12[2], mean = U2, sd = sigma)
-  -prior * l$integral * 10 ^ 30
-}
-
-barto_likelihood2 <- function(x, S1, S2, Bp, Bserve, Breturn, n, w) {
-  P1 <- x[1]
-  P2 <- x[2]
-  loga <- log(1 + exp((P2 - P1) * Bp))  
-  logb <- (P2 - P1) * Bp
-  logc <- -1 / 2 * ((P1 - S1) / Bserve) ^ 2
-  logd <- -1 / 2 * ((P2 - S2) / Breturn) ^ 2
-  exp(-n * loga + (n - w) * logb + logc + logd)
+#return a vector with the first element being the rating change for the winner and the second for the loser
+ratingChanges <- function(Bp, Bf, U1, U2, s, n, w) {
+  Ud <- U1 - U2
+  posteriorRd <- posteriorRatingDiff(Bp, Bf, Ud, s, n, w)
+  c((posteriorRd - Ud) / 2, -(posteriorRd - Ud) / 2)
 }

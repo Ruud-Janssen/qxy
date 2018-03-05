@@ -27,4 +27,3 @@ source("addratingsservereturn.R")
 #source("addGlicko.R")
 #source("addGlicko2.R")
 
-source("split_train_CV_test.R")

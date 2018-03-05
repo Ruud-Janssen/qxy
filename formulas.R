@@ -276,7 +276,7 @@ saveDatasetsWithoutRating = function(allGames){
   
   train_rating <- allGames %>% filter(Date <= fdTrain_Rating)   
   train_model  <- allGames %>% filter(Date >  fdTrain_Rating, Date < fdTrain_Model)   
-  val          <- allGames %>% filter(Date >  fdTrain_Model ,  Date < fdVal) 
+  val          <- allGames %>% filter(Date >  fdTrain_Model , Date < fdVal) 
   test         <- allGames %>% filter(Date >  fdVal         , Date < fdTest)
   
   write.csv(file = "Data/datasets/train_rating.csv", train_rating, row.names = FALSE)
@@ -293,9 +293,9 @@ saveDatasetsWithRating = function(allGames, rating = NULL){
   allGames$Date <- as.Date(allGames$Date, df)
   
   train_rating <- allGames %>% filter(Date <= fdTrain_Rating)   
-  train_model  <- allGames %>% filter(Date >  fdTrain_Rating, Data < fdTrain_Model)   
-  val          <- allGames %>% filter(Date >  fdTrain_Model,  Data < fdVal) 
-  test         <- allGames %>% filter(Date >  fdVal, Data < fdTest)
+  train_model  <- allGames %>% filter(Date >  fdTrain_Rating, Date < fdTrain_Model)   
+  val          <- allGames %>% filter(Date >  fdTrain_Model,  Date < fdVal) 
+  test         <- allGames %>% filter(Date >  fdVal,          Date < fdTest)
   
   write.csv(file = "Data/datasets/train_ratingWithRatings.csv", train_rating, row.names=FALSE)
   write.csv(file = "Data/datasets/train_modelWithRatings.csv", train_model, row.names=FALSE)

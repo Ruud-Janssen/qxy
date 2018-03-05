@@ -1,6 +1,15 @@
 library(tidyverse)
 
-removeUncertainMatches <- function(x, edge, uncertaintyParameter){
+getTrainDataSetsWithRating <- function() {
+  train_rating <- read.table("Data/datasets/train_ratingWithRatings.csv"
+                             , header = T, sep = ",", quote = "\"", fill = TRUE)
+  train_model <- read.table("Data/datasets/train_modelWithRatings.csv"
+                            , header = T, sep = ",", quote = "\"", fill = TRUE)
+  
+  allGames <- rbind(train_rating, train_model)
+}
+
+removeUncertainMatches <- function(x, edge, uncertaintyParameter) {
   if(uncertaintyParameter == "COSurface") {
     index_keep <- (x$UncertaintyCOSurface < edge)
   } else if(uncertaintyParameter == "Surface"){
