@@ -1,6 +1,6 @@
 rm(list = ls())
 source("hyperparametersfunctions.r")
-source("HyperParameters/hyperratingfunctions2.r")
+source("HyperParameters/elo/hyperratingfunctions2.r")
 library(leaps)
 library(bestglm)
 library(tictoc)
@@ -25,7 +25,7 @@ total = foreach (p = 1 : 1, .combine = rbind) %do% {
   #  power = 0.2
   return(foreach(k = 1 : 21, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
     source("hyperparametersfunctions.r")
-    source("HyperParameters/hyperratingfunctions2.r")
+    source("HyperParameters/elo/hyperratingfunctions2.r")
     constant = 14 + 0.2 * (k - 1)
 
     #constant = 16.8

@@ -25,7 +25,7 @@ total = foreach (c = 1 : 1, .combine = rbind) %do% {
   return(foreach(rd = 1 : 1, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
   #return(foreach(wb = 1 : 15, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
     source("hyperparametersfunctions.r")
-    source("HyperParameters/hyperglickofunctionsBreakGames.r")
+    source("HyperParameters/glicko/hyperglickofunctionsBreakGames.r")
     initialRatingDeviance = 130
     
     winbonus =  0.18

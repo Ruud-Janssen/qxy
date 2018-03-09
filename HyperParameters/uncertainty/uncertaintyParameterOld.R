@@ -61,8 +61,7 @@ for(q in 1:99) {
   
   results$PercentageRemovedcv[q] = 1 - length(ycvcurrent) / length(ycv)
   
-  Reg = glm(y ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
-            +FatigueDiff + HeadtoHead, data = xt_mcurrent, family = binomial)
+  Reg = glm(y ~ 0 + ratingdiff + ratingdiffCurrentSurface, data = xt_mcurrent, family = binomial)
   
   #RegGrass = glm(y ~ 0 + ratingdiff + ratingdiffCurrentSurface + DummyBo5TimesAvgRatingdiff + RetiredOrWalkoverDiff
   #               +FatigueDiff + HeadtoHead, data = xt_mcurrentGrass, family = binomial)

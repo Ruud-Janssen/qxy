@@ -24,7 +24,7 @@ total = foreach (c = 1 : 15, .combine = rbind) %do% {
   rdIncrease = 0.5 + 0.3 * c
   return(foreach(rd = 1 : 10, .packages = c("leaps","bestglm", "plyr"), .combine = cbind) %dopar% {
     source("hyperparametersfunctions.r")
-    source("hyperglickofunctions2.r")
+    source("HyperParameters/glicko/hyperglickofunctions2.r")
     initialRatingDeviance = 30 + 20 * rd
     
     train_modelwithRatings = getGlickos(rdInt = initialRatingDeviance, c = rdIncrease)

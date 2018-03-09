@@ -4,7 +4,7 @@ library(Rmpfr)
 library(cubature)
 
 
-GetServeReturnBarto = function(allGames, Bp, Bf, s, ratingGainForWin) {
+GetServeReturnBartoTrain_model = function(allGames, Bp, Bf, s, ratingGainForWin) {
   rg        <- ratingGainForWin 
     
   BpHard <- Bp
@@ -12,25 +12,13 @@ GetServeReturnBarto = function(allGames, Bp, Bf, s, ratingGainForWin) {
   sHard  <- s
   rgHard <- rg
 
-  train_rating <- read.table("Data/datasets/train_ratingWithRatings.csv"
-                            , header = T, sep = ",", quote = "\"", fill = TRUE)
-  train_model  <- read.table("Data/datasets/train_modelWithRatings.csv"
-                           , header = T, sep = ",", quote = "\"", fill = TRUE)
-  
-  Nt_r <- nrow(train_rating)
-  Nt_m <- nrow(train_model)
-  
-  Ntot <- Nt_r + Nt_m
-  
   #######Create Ratings for all players and Start initializing them######
   
   player  <- getPlayers()
   barto   <- InitializeBartoServeReturn(player)
   
-  #Update ratings with train_rating
-  Nall <- nrow(allGames)
-  
-  for (i in 1: Nall) {
+  #Create ratings with train_rating
+  for (i in 1: nrow(allGames)) {
     # get matching winner and loserplayer in rating and save the rownr
     # get matching winner and loserplayer in rating and save the rownr
     row_nr_winner <- which(barto$id == allGames$idWinner[i])
@@ -175,7 +163,7 @@ GetServeReturnBarto = function(allGames, Bp, Bf, s, ratingGainForWin) {
       print("ERROR: Player cannot be matched with Rating")
     }
   }
-  return(allGames[(Nt_r + 1):Ntot, ])
+  return( allGames %>% filter(Date > fdTrain_Rating) )
 }
 
 setEstimatedScores <- function() {

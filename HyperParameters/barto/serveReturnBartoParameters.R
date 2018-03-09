@@ -20,8 +20,8 @@ yt_m <- as.numeric(runif(Nt, 0, 1) > 0.5)
 
 tic()
 gamesWithApproximateScores <- getTrainDataSetsWithRating()
-variablesStepA = seq(20, 40, 2)
-totalSteps = length(variablesStepA)
+variablesStepA             <- seq(20, 40, 2)
+totalSteps                 <- length(variablesStepA)
 total <- foreach (Bf = variablesStepA, .combine = rbind, .packages = c("leaps","bestglm", "plyr")) %do% {
   Bp     <- 1 / 400
   Bf     <- Bf
@@ -35,7 +35,9 @@ total <- foreach (Bf = variablesStepA, .combine = rbind, .packages = c("leaps","
     s    <- s
     ratingGainForWin <- 0
   
-    train_model <- GetServeReturnBarto(gamesWithApproximateScores, Bp, Bf, s, ratingGainForWin)
+    gamesWithApproximateScores$Date <- ymd(gamesWithApproximateScores$Date) 
+    
+    train_model <- GetServeReturnBartoTrain_model(gamesWithApproximateScores, Bp, Bf, s, ratingGainForWin)
     xTrain      <- regressorvariables(yt_m, train_model)
     xTrain$Date <- ymd(xTrain$Date)
 

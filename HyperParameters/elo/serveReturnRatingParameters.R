@@ -1,6 +1,6 @@
 rm(list = ls())
 source("hyperparametersfunctions.r")
-source("HyperParameters/hyperratingfunctions2.r")
+source("HyperParameters/elo/hyperratingfunctions2.r")
 library(leaps)
 library(bestglm)
 library(tictoc)
@@ -26,7 +26,7 @@ total <- foreach (k = seq(1.6, 2.2, 0.2), .combine = rbind, .packages = c("leaps
   
   return(foreach(wb = 6 : 10, .packages = c("leaps","bestglm", "lubridate"), .combine = rbind) %dopar% {
     source("hyperparametersfunctions.r")
-    source("HyperParameters/hyperservereturnratingfunctionsTransformed.r")
+    source("HyperParameters/elo/hyperservereturnratingfunctionsTransformed.r")
     winbonus = wb / 100
   
     train_model <- GetServeReturnRatings(offset, power, constant, winbonus)

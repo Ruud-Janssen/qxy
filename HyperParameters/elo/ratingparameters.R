@@ -1,8 +1,9 @@
 rm(list = ls())
 source("hyperparametersfunctions.r")
-source("hyperratingfunctions.r")
+source("Hyperparameters/elo/hyperratingfunctions.r")
 library(leaps)
 library(bestglm)
+library(foreach)
 
 #Parallel
 library(parallel)

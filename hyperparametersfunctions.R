@@ -25,6 +25,19 @@ getXThisSurface <- function(x, surface){
   x <- x %>% filter(Surface == surface)
 }
 
+getratingregressorvariables <- function(y, data) {
+  data <- data %>% mutate(mp = ifelse(y == 1, 1, -1),
+                          y = y, 
+                          Bo5 = as.numeric(Best.of == 5), 
+                          ratingdiff = mp * (Winner_rating - Loser_rating),
+                          ratingClaydiff = mp * (Winner_ratingClay - Loser_ratingClay),
+                          ratingHarddiff = mp * (Winner_ratingHard - Loser_ratingHard),
+                          ratingGrassdiff = mp * (Winner_ratingGrass - Loser_ratingGrass)
+                          )
+  
+  data %>% select(y, Surface, Bo5, Date, ratingdiff, ratingClaydiff, ratingHarddiff, ratingGrassdiff, Uncertainty, Uncertainty2, UncertaintySurface)
+}
+
 regressorvariables <- function(y, data) {
   
   data <- data %>% mutate(mp = ifelse(y == 1, 1, -1),
